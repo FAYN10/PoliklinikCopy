@@ -1,0 +1,42 @@
+stages:
+  - Build and Deploy
+
+variables:
+  TAG_IMAGE: $CI_COMMIT_BRANCH-$CI_COMMIT_SHA
+
+deploy-dev:
+  stage: Build and Deploy
+  before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - echo $'' >> ~/.ssh/id_rsa
+    - chmod 700 ~/.ssh/id_rsa
+    - cat ~/.ssh/id_rsa
+    - eval "$(ssh-agent -s)"
+    - ssh-add ~/.ssh/id_rsa
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - ssh -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_ADDRESS} "export APP_IMAGE_DEV=$CI_REGISTRY_IMAGE && export APP_IMAGE_DEV_TAG=$TAG_IMAGE && docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY && cd ~/Program/Dev/simrs-internal-dashboard && git pull origin development && docker-compose -f docker-compose.dev.yml down && docker-compose -f docker-compose.dev.yml up --build -d"
+  only:
+    - development
+  when: manual
+  allow_failure: false
+
+deploy-prod:
+  stage: Build and Deploy
+  before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 700 ~/.ssh/id_rsa
+    - eval "$(ssh-agent -s)"
+    - ssh-add ~/.ssh/id_rsa
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - ssh -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_ADDRESS} "export APP_IMAGE_PROD=$CI_REGISTRY_IMAGE && export APP_IMAGE_PROD_TAG=$TAG_IMAGE && docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY && cd ~/Program/simrs-internal-dashboard && git pull && docker-compose -f docker-compose.prod.yml down && docker-compose -f docker-compose.prod.yml up --build -d"
+  when: manual
+  allow_failure: false
+  only:
+    - main
+

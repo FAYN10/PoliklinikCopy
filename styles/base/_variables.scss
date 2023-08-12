@@ -1,0 +1,30 @@
+// Colors
+$green-primary: #128a43;
+$new-green-primary: #7ea62c;
+$green-soft: rgba(101, 252, 164, 0.08);
+$grey-text: #0000008a;
+$bg-main: #f9fafb;
+
+// global module clases
+// .roundedNextImage {
+//   img {
+//     border-radius: 50% !important;
+//   }
+// }
+
+.tab-list {
+  > div {
+    &:last-child {
+      border-right: none;
+    }
+    padding: 6px 24px;
+    border-right: 2px solid $green-primary;
+    border-top-right-radius: 100px;
+    border-bottom-right-radius: 100px;
+  }
+  .active {
+    transition: 0.2s ease-in-out;
+    color: $green-primary;
+    background-color: $green-soft;
+  }
+}

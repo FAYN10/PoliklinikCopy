@@ -1,0 +1,17 @@
+version: '3'
+
+networks:
+    dashboard-i-dev:
+
+services:
+    dashboardidev:
+        build: 
+            context: .
+            dockerfile: Dockerfile
+        container_name: ${APP_NAME}_fe_dev
+        ports:
+            - "3000:3000"
+        networks:
+            - dashboard-i-dev
+        volumes:
+            - ~/Program/Dev/simrs-internal-dashboard/.env:/app/.env:rw
