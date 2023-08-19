@@ -124,43 +124,33 @@ const LabelToPrint = forwardRef(function LabelToPrint({ data }, ref) {
       {/* def - w: 189px. h: 75.6px */}
       <div className="flex">
         <div
-          className="flex px-4 pb-6"
+          className="font-10 flex p-4"
           style={{
             width: "189px",
-            height: "75.2px",
+            height: "75.6px",
             flexDirection: "column",
-            fontSize: "9px",
           }}
         >
           <div className="font-w-600">{data.no_rm || "-"}</div>
           <div className="font-w-600">{data.nik || "-"}</div>
-          <div>
-            {data.nama_pasien.length > 28
-              ? data.nama_pasien.substring(0, 28) + "..."
-              : data.nama_pasien}
-          </div>
+          <div>{data.nama_pasien || "-"}</div>
           <div className="mt-auto">
             <span className="font-w-600">TGL LAHIR: </span>
             {formatLabelDate(data.tanggal_lahir) || "-"}
           </div>
         </div>
         <div
-          className="font-10 flex px-4 pb-6"
+          className="font-10 flex p-4"
           style={{
             width: "189px",
-            height: "75.2px",
+            height: "75.6px",
             flexDirection: "column",
-            fontSize: "9px",
             marginLeft: "7.56px",
           }}
         >
           <div className="font-w-600">{data.no_rm || "-"}</div>
           <div className="font-w-600">{data.nik || "-"}</div>
-          <div>
-            {data.nama_pasien.length > 28
-              ? data.nama_pasien.substring(0, 28) + "..."
-              : data.nama_pasien}
-          </div>
+          <div>{data.nama_pasien || "-"}</div>
           <div className="mt-auto">
             <span className="font-w-600">TGL LAHIR: </span>
             {formatLabelDate(data.tanggal_lahir) || "-"}
@@ -420,32 +410,21 @@ const FormRawatJalan = ({
     }
   };
 
-  // useEffect(() => {
-  //   if (createRawatJalanValidation.values.no_rm) {
-  //     getDetailPasienByNoRm(createRawatJalanValidation.values.no_rm);
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [createRawatJalanValidation.values.no_rm]);
+  useEffect(() => {
+    if (createRawatJalanValidation.values.no_rm) {
+      getDetailPasienByNoRm(createRawatJalanValidation.values.no_rm);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [createRawatJalanValidation.values.no_rm]);
 
   useEffect(() => {
-    // initDataPasien();
-    // if (router.query.initial_no_rm) {
-    //   createRawatJalanValidation.setFieldValue(
-    //     "no_rm",
-    //     router.query.initial_no_rm
-    //   );
-    // }
-    if (router.query.no_rm) {
-      createRawatJalanValidation.setFieldValue("no_rm", router.query.no_rm);
-      getDetailPasienByNoRm(router.query.no_rm);
-    } else if (router.query.initial_no_rm) {
+    initDataPasien();
+    console.log(router.query);
+    if (router.query.initial_no_rm) {
       createRawatJalanValidation.setFieldValue(
         "no_rm",
         router.query.initial_no_rm
       );
-      getDetailPasienByNoRm(router.query.initial_no_rm);
-    } else {
-      router.push("/pasien");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -453,8 +432,7 @@ const FormRawatJalan = ({
   return (
     <>
       <Grid container spacing={2}>
-        {/* old table layout */}
-        {/* <Grid item xs={12} md={7}>
+        <Grid item xs={12} md={7}>
           {isLoadingDataPasien ? (
             <div className="full-width flex justify-center">
               <SpinnerMui />
@@ -485,8 +463,8 @@ const FormRawatJalan = ({
               searchData={searchDataPasienHandler}
             />
           )}
-        </Grid> */}
-        <Grid item xs={12} md={12}>
+        </Grid>
+        <Grid item xs={12} md={5}>
           <Paper sx={{ width: "100%", padding: 2, paddingTop: 3 }}>
             <form onSubmit={createRawatJalanValidation.handleSubmit}>
               <FocusError formik={createRawatJalanValidation} />
@@ -679,20 +657,15 @@ const FormRawatJalan = ({
                   variant="outlined"
                   startIcon={<BackIcon />}
                   sx={{ marginRight: 2 }}
-                  onClick={() => {
-                    // router.push(
-                    //   {
-                    //     pathname: "/pasien",
-                    //     query: { active_content: 2 },
-                    //   },
-                    //   "/pasien"
-                    // )
-                    if (router.query.id) {
-                      router.push(`/pasien/${router.query.id}`);
-                    } else {
-                      router.push(`/pasien`);
-                    }
-                  }}
+                  onClick={() =>
+                    router.push(
+                      {
+                        pathname: "/pasien",
+                        query: { active_content: 2 },
+                      },
+                      "/pasien"
+                    )
+                  }
                 >
                   Kembali
                 </Button>

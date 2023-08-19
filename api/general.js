@@ -27,6 +27,12 @@ export function getInsurance() {
     method: "GET",
   });
 }
+export function getOptionInsurance(params) {
+  return request({
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/asuransi/list`,
+    method: "GET",
+  });
+}
 
 export function getVclaim(data) {
   return request({

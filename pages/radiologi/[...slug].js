@@ -19,6 +19,11 @@ import CreditCardIcon from "@mui/icons-material/CreditCard";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import GroupIcon from "@mui/icons-material/Group";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import FormAssessmentPasien from "components/modules/radiologi/formAssessmentPasien";
+import PermintaanRadiologi from "components/modules/radiologi/permintaanRadiologi"; 
+import FormAssessmentPetugas from "components/modules/radiologi/formAssessmentPetugas";
+import FormExpertise from "components/modules/radiologi/formExpertise";
 
 const rawatJalanTableHead = [
   // {
@@ -140,116 +145,6 @@ const Detail = () => {
   const [dataRawatInap, setDataRawatInap] = useState([]);
   const [dialogProfileState, setDialogProfileState] = useState(false);
 
-  const OldLayout = (
-    <>
-      <div className="mb-8">
-        <h2 className="m-0 mb-0 color-grey-text">
-          {detailDataPasien?.nama_pasien}
-        </h2>
-        <p className="m-0 font-12 color-grey-text">{detailDataPasien?.no_rm}</p>
-      </div>
-      <div style={{ color: "#128a43" }}>
-        <Tabs
-          value={activeContent}
-          onChange={(_, newVal) => setActiveContent(newVal)}
-          aria-label="wrapped label tabs example"
-          // textColor="inherit"
-          // TabIndicatorProps={{ style: { background: "#128a43" } }}
-        >
-          <Tab value={1} label="Detail Pasien" />
-          <Tab value={2} label="Riwayat Rawat Jalan" />
-          <Tab value={3} label="Riwayat Rawat Inap" />
-        </Tabs>
-      </div>
-      {activeContent === 1 ? (
-        <FormPasien
-          isEditType
-          prePopulatedDataForm={dataPasien}
-          detailPrePopulatedData={detailDataPasien}
-          updatePrePopulatedData={updateData}
-        />
-      ) : null}
-      {activeContent === 2 ? (
-        <>
-          <TableLayout
-            isCustomHeader
-            customHeader={
-              <>
-                {/* <RawatJalanTableHeader
-              refreshData={(payload) =>
-                updateDataRawatJalanHandler({
-                  ...payload,
-                  per_page: dataRawatJalanPerPage,
-                })
-              }
-            /> */}
-              </>
-            }
-            customCreatePath="/pasien/create/rawat-jalan"
-            baseRoutePath={`${router.asPath}`}
-            title="Pasien Rawat Jalan"
-            customBtnAddTitle="pendaftaran rawat jalan"
-            tableHead={rawatJalanTableHead}
-            data={dataRawatJalan}
-            // meta={dataMetaRawatJalan}
-            // dataPerPage={dataRawatJalanPerPage}
-            // isUpdatingData={isUpdatingDataRawatJalan}
-            // updateDataPerPage={(e) => {
-            //   setDataRawatJalanPerPage(e.target.value);
-            //   updateDataRawatJalanHandler({ per_page: e.target.value });
-            // }}
-            // updateDataNavigate={(payload) =>
-            //   updateDataRawatJalanHandler({
-            //     per_page: dataRawatJalanPerPage,
-            //     cursor: payload,
-            //   })
-            // }
-            // deleteData={deletaDataRawatJalanHandler}
-          />
-        </>
-      ) : null}
-      {activeContent === 3 ? (
-        <>
-          <TableLayout
-            isCustomHeader
-            customHeader={
-              <>
-                {/* <RawatJalanTableHeader
-              refreshData={(payload) =>
-                updateDataRawatJalanHandler({
-                  ...payload,
-                  per_page: dataRawatJalanPerPage,
-                })
-              }
-            /> */}
-              </>
-            }
-            customCreatePath="/pasien/create/rawat-jalan"
-            baseRoutePath={`${router.asPath}`}
-            title="Pasien Rawat Jalan"
-            customBtnAddTitle="pendaftaran rawat jalan"
-            tableHead={rawatInapTableHead}
-            data={dataRawatInap}
-            // meta={dataMetaRawatJalan}
-            // dataPerPage={dataRawatJalanPerPage}
-            // isUpdatingData={isUpdatingDataRawatJalan}
-            // updateDataPerPage={(e) => {
-            //   setDataRawatJalanPerPage(e.target.value);
-            //   updateDataRawatJalanHandler({ per_page: e.target.value });
-            // }}
-            // updateDataNavigate={(payload) =>
-            //   updateDataRawatJalanHandler({
-            //     per_page: dataRawatJalanPerPage,
-            //     cursor: payload,
-            //   })
-            // }
-            // deleteData={deletaDataRawatJalanHandler}
-          />
-        </>
-      ) : null}
-    </>
-  );
-
   const dataFormatter = (data) => {
     let tempData = {
       nama_pasien: data.nama_pasien || "",
@@ -364,36 +259,31 @@ const Detail = () => {
                     />
                     <p className="m-0 ml-8 font-14">Pasien Info</p>
                   </div>
-                  <div className="flex items-center">
-                    <Tooltip title="Edit Profile" arrow>
-                      <IconButton
-                        onClick={() =>
-                          setDialogProfileState(!dialogProfileState)
-                        }
-                      >
-                        <BorderColorIcon fontSize="small" color="warning" />
-                      </IconButton>
-                    </Tooltip>
-                  </div>
                 </div>
                 <div className="flex justify-between items-start">
                   <div className="flex items-start">
                     <Avatar
                       src={detailDataPasien?.picture}
                       variant="rounded"
-                      sx={{ width: 120, height: 120 }}
+                      sx={{ width: 130, height: 130 }}
                     />
                     <div className="ml-8 mt-8">
                       <div className="font-w-700">
                         {dataPasien?.nama_pasien}
                       </div>
-                      <div>
+                      <div className="font-w-700">
+                        {dataPasien?.nik}
+                      </div>
+                      <div className="font-14">
                         {detailDataPasien?.tanggal_lahir
                           ? formatLabelDate(detailDataPasien.tanggal_lahir)
                           : ""}{" "}
                         / {detailDataPasien?.umur} tahun
                       </div>
-                      <div>
+                      <div className="font-14">
+                        {detailDataPasien?.agama.name}
+                      </div>
+                      <div className="font-14">
                         {detailDataPasien?.jenis_kelamin
                           ? "Laki-laki"
                           : "Perempuan"}{" "}
@@ -402,7 +292,7 @@ const Detail = () => {
                     </div>
                   </div>
                   <div className="mt-8">
-                    <div>NO REKAM MEDIS</div>
+                    <div>NO. RM</div>
                     <div
                       className="font-28 font-w-700"
                       style={{ textAlign: "right" }}
@@ -412,75 +302,95 @@ const Detail = () => {
                   </div>
                 </div>
               </Card>
-              <Card className="px-14 py-12 mb-16">
-                <div className="flex justify-between items-center mb-16">
-                  <div className="flex items-center">
-                    <CreditCardIcon
-                      fontSize="small"
-                      style={{ color: "rgb(99, 115, 129)" }}
-                    />
-                    <p className="m-0 ml-8 font-14">Tagihan / Pembayaran</p>
-                  </div>
-                  <div className="flex items-center">
-                    <Tooltip title="Refresh" arrow>
-                      <IconButton>
-                        <RefreshIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  </div>
-                </div>
-              </Card>
+
             </Grid>
-            <Grid item md={6} sm={12}>
-              <Card className="px-14 py-12 mb-16">
-                <div className="flex justify-between items-center mb-16">
-                  <div className="flex items-center">
-                    <PersonAddIcon
-                      fontSize="small"
-                      style={{ color: "rgb(99, 115, 129)" }}
-                    />
-                    <p className="m-0 ml-8 font-14">Pendaftaran Kunjungan</p>
-                  </div>
-                  <div className="flex items-center">
-                    <Tooltip title="Refresh" arrow>
-                      <IconButton>
-                        <RefreshIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  </div>
-                </div>
-              </Card>
-              <Card className="px-14 py-12 mb-16">
-                <div className="flex justify-between items-center mb-16">
-                  <div className="flex items-center">
-                    <GroupIcon
-                      fontSize="small"
-                      style={{ color: "rgb(99, 115, 129)" }}
-                    />
-                    <p className="m-0 ml-8 font-14">Kunjungan</p>
-                  </div>
-                  <div className="flex items-center">
-                    <Tooltip title="Refresh" arrow>
-                      <IconButton>
-                        <RefreshIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  </div>
-                </div>
-              </Card>
-            </Grid>
+            
           </Grid>
+          <div style={{ overflow: "auto", maxHeight: "calc(100vh - 340px)" }}>
+           
+
+            <Card className="px-14 py-12 mb-16">
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}>
+                <PermintaanRadiologi />
+              </div>
+              </Card> <Card className="px-14 py-12 mb-16">
+              <div className="flex justify-between items-center mb-16">
+                <div className="flex items-center">
+                  <CheckCircleIcon
+                    fontSize="small"
+                    style={{ color: "rgb(99, 115, 129)" }}
+                  />
+                  <p className="m-0 ml-8 font-14">Assessment Pasien Radiologi</p>
+                </div>
+                <div>
+                  {/* Add the edit icon here */}
+                  <Tooltip title="Edit Assessment" arrow>
+                    <IconButton
+                      onClick={() => {
+                        // Handle edit assessment logic here
+                        console.log("Edit Assessment clicked");
+                      }}
+                    >
+                      <BorderColorIcon fontSize="small" color="warning" />
+                    </IconButton>
+                  </Tooltip>
+                </div>
+              </div>
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <FormAssessmentPasien />
+              </div>
+            </Card>
+
+            <Card className="px-14 py-12 mb-16">
+              <div className="flex justify-between items-center mb-16">
+                <div className="flex items-center">
+                  <CheckCircleIcon
+                    fontSize="small"
+                    style={{ color: "rgb(99, 115, 129)" }}
+                  />
+                  <p className="m-0 ml-8 font-14">Assessment Petugas Radiologi</p>
+                </div>
+                <div>
+                  {/* Add the edit icon here */}
+                  <Tooltip title="Edit Assessment" arrow>
+                    <IconButton
+                      onClick={() => {
+                        // Handle edit assessment logic here
+                        console.log("Edit Assessment clicked");
+                      }}
+                    >
+                      <BorderColorIcon fontSize="small" color="warning" />
+                    </IconButton>
+                  </Tooltip>
+                </div>
+              </div>
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <FormAssessmentPetugas />
+              </div>
+            </Card>
+
+              <Card className="px-14 py-12 mb-16">
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}>
+                <FormExpertise />
+              </div>
+              
+            </Card>
+
+
+
+
+          </div>
           <Dialog
             fullScreen
             open={dialogProfileState}
             onClose={() => setDialogProfileState(false)}
           >
-            <FormPasien
+            {/* <FormPasienRadiologi
               isEditType
               prePopulatedDataForm={dataPasien}
               detailPrePopulatedData={detailDataPasien}
               updatePrePopulatedData={updateData}
-            />
+            /> */}
           </Dialog>
         </>
       )}

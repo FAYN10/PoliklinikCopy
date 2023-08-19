@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useRouter } from "next/router";
 import {
   TextField,
   FormControl,
@@ -12,9 +11,7 @@ import {
 import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
 import Image from "next/image";
-import login from "api/login";
-import { setItem as setCookie } from "utils/cookies";
-import { setItem as setStorage } from "utils/storage";
+import {login} from "api/login";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import Spinner from "components/SpinnerMui";
@@ -23,7 +20,6 @@ import st from "styles/module/pages/Login.module.scss";
 import DialogOTP from "components/DialogOTP";
 
 const Login = () => {
-  const router = useRouter();
   const [isLoginLoading, setIsLoginLoading] = useState(false);
   const [isLoginError, setIsLoginError] = useState({
     state: false,
@@ -48,13 +44,15 @@ const Login = () => {
       let data = {
         username: values.username,
         password: values.password,
+        token: "",
+        otp: ""
       };
       try {
         setIsLoginLoading(true);
         const response = await login(data);
-        setCookie("client", response.data.data.access_token);
-        setStorage("basic_client", response.data.data);
-        router.push("/dashboard");
+        data.token = response.data.data.token;
+        setDataOTP(data);
+        setDialogOTP(true);
       } catch (error) {
         setIsLoginError({ state: true, message: error.message });
       } finally {
@@ -64,6 +62,7 @@ const Login = () => {
   });
   // temp
   const [dialogOTP, setDialogOTP] = useState(false);
+  const [dataOTP, setDataOTP] = useState({});
 
   return (
     <>
@@ -189,7 +188,7 @@ const Login = () => {
         </form>
       </div>
       {/* temp */}
-      <DialogOTP state={dialogOTP} setState={setDialogOTP} />
+      <DialogOTP state={dialogOTP} setState={setDialogOTP} data={dataOTP} />
       <Snackbar
         message={isLoginError.message}
         state={isLoginError.state}

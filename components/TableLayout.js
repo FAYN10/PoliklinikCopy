@@ -42,7 +42,6 @@ const TableLayout = ({
   baseRoutePath = "/",
   customCreatePath = null,
   title = "Default title",
-  isBtnAdd = true,
   customBtnAddTitle = null,
   tableHead = [],
   data = [],
@@ -201,20 +200,18 @@ const TableLayout = ({
       <div className={st.container}>
         <div className={st.header}>
           <h2 className="color-grey-text">{title}</h2>
-          {isBtnAdd ? (
-            <Button
-              variant="contained"
-              endIcon={<PlusIcon />}
-              disabled={!isPermitted("store")}
-              onClick={
-                !customCreatePath
-                  ? () => router.push(`${baseRoutePath}/create`)
-                  : () => router.push(customCreatePath)
-              }
-            >
-              {customBtnAddTitle ? <>{customBtnAddTitle}</> : <>{title} Baru</>}
-            </Button>
-          ) : null}
+          <Button
+            variant="contained"
+            endIcon={<PlusIcon />}
+            disabled={!isPermitted("store")}
+            onClick={
+              !customCreatePath
+                ? () => router.push(`${baseRoutePath}/create`)
+                : () => router.push(customCreatePath)
+            }
+          >
+            {customBtnAddTitle ? <>{customBtnAddTitle}</> : <>{title} Baru</>}
+          </Button>
         </div>
         <Box sx={{ width: "100%", marginY: 4 }}>
           <Paper sx={{ width: "100%", padding: 2 }}>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useRouter } from "next/router";
 import Dialog from "@mui/material/Dialog";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -6,8 +7,12 @@ import { Grid, TextField, Button } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { stringSchema } from "utils/yupSchema";
 import Snackbar from "components/SnackbarMui";
+import { twoFactor } from "api/login";
+import { setItem as setCookie } from "utils/cookies";
+import { setItem as setStorage } from "utils/storage";
 
-const DialogOTP = ({ state, setState }) => {
+const DialogOTP = ({ state, setState, data }) => {
+  const router = useRouter();
   const [snackbar, setSnackbar] = useState({
     state: false,
     type: null,
@@ -27,7 +32,12 @@ const DialogOTP = ({ state, setState }) => {
     validationSchema: schema,
     enableReinitialize: true,
     onSubmit: async (values, { resetForm }) => {
+      data.otp = values.otp;
       try {
+        const response = await twoFactor(data);
+        setCookie("client", response.data.data.access_token);
+        setStorage("basic_client", response.data.data);
+        router.push("/dashboard");
         setSnackbar({
           state: true,
           type: "success",

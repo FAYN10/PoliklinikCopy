@@ -36,15 +36,23 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
 import st from "styles/module/components/Table.module.scss";
 import useClientPermission from "custom-hooks/useClientPermission";
+import SelectAsync from "components/SelectAsync";
+import { getListOptionPoliklinik } from "api/poliklinik";
+import { getOptionInsurance } from "api/general";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { LocalizationProvider } from "@mui/x-date-pickers//LocalizationProvider";
+import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
+import { formatIsoToGen } from "utils/formatTime";
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const TableLayout = ({
+const TableLayoutV3 = ({
   baseRoutePath = "/",
   customCreatePath = null,
-  title = "Default title",
+  title = "Pasien Radiologi",
+  isBtnAdd = true,
   customBtnAddTitle = null,
   tableHead = [],
   data = [],
@@ -70,7 +78,26 @@ const TableLayout = ({
   const { clientPermission } = useClientPermission();
   const [filter, setFilter] = useState(filterOptions[0].value);
   const [selectedFilter, setSelectedFilter] = useState([]);
+  const textFieldCategory = ["no_rm", "email", "name", "address"];
+  const [poliRef, setPoliRef] = useState({
+    values: {
+      id: "",
+      name: "",
+    },
+    touched: false,
+    errors: false,
+  });
+  const [asuransiRef, setAsuransiRef] = useState({
+    values: {
+      id: "",
+      name: "",
+    },
+    touched: false,
+    errors: false,
+  });
+  const [date, setDate] = useState(null);
 
+  // BOILER-PLATE START
   // --start table operator stuff
   function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -146,6 +173,7 @@ const TableLayout = ({
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * dataPerPage - data.length) : 0;
   // --end table operator stuff
+  // BOILER-PLATE END
 
   const handleOpenConfirmationDelete = (payload) => {
     setConfirmationDelete({
@@ -172,6 +200,22 @@ const TableLayout = ({
 
   const handleRefresh = () => {
     setSearchText("");
+    setPoliRef((e) => ({
+      ...e,
+      values: {
+        id: "",
+        name: "",
+      },
+    }));
+    setAsuransiRef((e) => ({
+      ...e,
+      values: {
+        id: "",
+        name: "",
+      },
+    }));
+    setDate(null);
+    setFilter(filterOptions[0].value);
     setSelectedFilter([]);
     refreshData();
   };
@@ -189,6 +233,21 @@ const TableLayout = ({
 
   const handleChangeFilter = (event) => {
     setSearchText("");
+    setPoliRef((e) => ({
+      ...e,
+      values: {
+        id: "",
+        name: "",
+      },
+    }));
+    setAsuransiRef((e) => ({
+      ...e,
+      values: {
+        id: "",
+        name: "",
+      },
+    }));
+    setDate(null);
     setFilter(event.target.value);
   };
 
@@ -218,24 +277,148 @@ const TableLayout = ({
     searchData(tempData);
   };
 
+  const handleOnChangePoli = (value) => {
+    if (value) {
+      setPoliRef((e) => ({
+        ...e,
+        values: {
+          ...value,
+        },
+      }));
+      let tempOptions = filterOptions.filter((e) => e.value === filter);
+      let tempFilterDisplay = [...selectedFilter];
+      tempFilterDisplay = tempFilterDisplay.filter((e) => e.type !== filter);
+      tempFilterDisplay.unshift({
+        type: filter,
+        label: tempOptions[0].label,
+        value: value.name,
+      });
+      setSelectedFilter(tempFilterDisplay);
+      searchData(tempFilterDisplay);
+    } else {
+      setPoliRef((e) => ({
+        ...e,
+        values: {
+          id: "",
+          name: "",
+        },
+      }));
+    }
+  };
+
+  const handleOnChangeAsuransi = (value) => {
+    if (value) {
+      setAsuransiRef((e) => ({
+        ...e,
+        values: {
+          ...value,
+        },
+      }));
+      let tempOptions = filterOptions.filter((e) => e.value === filter);
+      let tempFilterDisplay = [...selectedFilter];
+      tempFilterDisplay = tempFilterDisplay.filter((e) => e.type !== filter);
+      tempFilterDisplay.unshift({
+        type: filter,
+        label: tempOptions[0].label,
+        value: value.NAME,
+      });
+      setSelectedFilter(tempFilterDisplay);
+      searchData(tempFilterDisplay);
+    } else {
+      setAsuransiRef((e) => ({
+        ...e,
+        values: {
+          id: "",
+          name: "",
+        },
+      }));
+    }
+  };
+
+  const handleChangeDate = (newValue) => {
+    setDate(newValue);
+    // note: before send date
+    // let data = {
+    //   datetime_medis: formatIsoToGen(date) || null
+    // };
+    let tempOptions = filterOptions.filter((e) => e.value === filter);
+    let tempFilterDisplay = [...selectedFilter];
+    tempFilterDisplay = tempFilterDisplay.filter((e) => e.type !== filter);
+    tempFilterDisplay.unshift({
+      type: filter,
+      label: tempOptions[0].label,
+      value: formatIsoToGen(newValue),
+    });
+    setSelectedFilter(tempFilterDisplay);
+    searchData(tempFilterDisplay);
+  };
+
+  const RenderFieldFilter = (
+    <>
+      {textFieldCategory.includes(filter) ? (
+        <TextField
+          id={`search-${title}`}
+          label={`Cari ${title}`}
+          sx={{ width: "100%" }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          onKeyDownCapture={(e) => {
+            if (e.key === "Enter") {
+              handleOnEnterSearch();
+            }
+          }}
+        />
+      ) : null}
+      {filter === "poli" ? (
+        <SelectAsync
+          id="poli"
+          labelField="Pelayanan"
+          labelOptionRef="name"
+          valueOptionRef="id"
+          handlerRef={poliRef}
+          handlerFetchData={getListOptionPoliklinik}
+          handlerOnChange={(value) => handleOnChangePoli(value)}
+        />
+      ) : null}
+      {filter === "asuransi" ? (
+        <SelectAsync
+          id="asuransi"
+          labelField="Tipe Jaminan"
+          labelOptionRef="name"
+          valueOptionRef="id"
+          handlerRef={asuransiRef}
+          handlerFetchData={getOptionInsurance}
+          handlerOnChange={(value) => handleOnChangeAsuransi(value)}
+        />
+      ) : null}
+      {filter === "date" ? (
+        <FormControl fullWidth>
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <DesktopDatePicker
+              label="Tanggal"
+              inputFormat="dd/MM/yyyy"
+              value={date}
+              onChange={handleChangeDate}
+              renderInput={(params) => <TextField {...params} />}
+            />
+          </LocalizationProvider>
+        </FormControl>
+      ) : null}
+    </>
+  );
+
   return (
     <>
-      <div className={st.container}>
-        <div className={st.header}>
-          <h2 className="color-grey-text">{title}</h2>
-          <Button
-            variant="contained"
-            endIcon={<PlusIcon />}
-            disabled={!isPermitted("store")}
-            onClick={
-              !customCreatePath
-                ? () => router.push(`${baseRoutePath}/create`)
-                : () => router.push(customCreatePath)
-            }
-          >
-            {customBtnAddTitle ? <>{customBtnAddTitle}</> : <>{title} Baru</>}
-          </Button>
-        </div>
+      <div className={st.container}
+      title="Pasien Radiologi">
+      
         <Box sx={{ width: "100%", marginY: 4 }}>
           <Paper sx={{ width: "100%", padding: 2 }}>
             <Grid container spacing={1} alignItems={"center"}>
@@ -258,25 +441,7 @@ const TableLayout = ({
                 </FormControl>
               </Grid>
               <Grid item md={8} xs={10}>
-                <TextField
-                  id={`search-${title}`}
-                  label={`Cari ${title}`}
-                  sx={{ width: "100%" }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                  value={searchText}
-                  onChange={(e) => setSearchText(e.target.value)}
-                  onKeyDownCapture={(e) => {
-                    if (e.key === "Enter") {
-                      handleOnEnterSearch();
-                    }
-                  }}
-                />
+                {RenderFieldFilter}
               </Grid>
               <Grid item md={2} xs={2}>
                 <div className="flex justify-end">
@@ -414,7 +579,9 @@ const TableLayout = ({
                       <Select
                         labelId="select-row-per-page"
                         id="select-row-per-page"
-                        onChange={updateDataPerPage}
+                        onChange={(val) =>
+                          updateDataPerPage(val, selectedFilter)
+                        }
                         value={dataPerPage}
                       >
                         <MenuItem value={8}>8</MenuItem>
@@ -499,4 +666,4 @@ const TableLayout = ({
   );
 };
 
-export default TableLayout;
+export default TableLayoutV3;

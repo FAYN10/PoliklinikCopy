@@ -213,19 +213,3 @@ $borderRadius: 8, 16, 100;
     display: none;
   }
 }
-
-.border-gs {
-  border: 1px solid blue;
-  &--top {
-    border-top: 1px solid blue;
-  }
-  &--right {
-    border-right: 1px solid blue;
-  }
-  &--left {
-    border-left: 1px solid blue;
-  }
-  &--bottom {
-    border-bottom: 1px solid blue;
-  }
-}

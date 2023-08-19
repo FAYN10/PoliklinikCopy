@@ -325,41 +325,6 @@ const Pasien = () => {
     //   setIsUpdatingDataRawatJalan(false);
     // }
   };
-  const searchDataRawatJalanHandler = async (payload) => {
-    try {
-      setIsUpdatingDataRawatJalan(true);
-      const response = await getListRawatJalan({
-        search_text: payload.map((e) => e.value),
-        search_column: payload.map((e) => e.type),
-        per_page: dataRawatJalanPerPage,
-      });
-      if (response.data.data.length !== 0) {
-        const result = dataRawatJalanFormatHandler(response.data.data);
-        setDataRawatJalan(result);
-        setDataMetaRawatJalan(response.data.meta);
-      } else {
-        setSnackbarState({
-          state: true,
-          type: "warning",
-          message: `${payload} tidak ditemukan`,
-        });
-        const response = await getListRawatJalan({
-          per_page: dataRawatJalanPerPage,
-        });
-        const result = dataRawatJalanFormatHandler(response.data.data);
-        setDataRawatJalan(result);
-        setDataMetaRawatJalan(response.data.meta);
-      }
-    } catch (error) {
-      setSnackbarState({
-        state: true,
-        type: "error",
-        message: error.message,
-      });
-    } finally {
-      setIsUpdatingDataRawatJalan(false);
-    }
-  };
   // pasien --rawat-inap handler
   const initDataRawatInap = async () => {
     try {
@@ -414,41 +379,6 @@ const Pasien = () => {
     // } finally {
     //   setIsUpdatingDataRawatInap(false);
     // }
-  };
-  const searchDataRawatInapHandler = async (payload) => {
-    try {
-      setIsUpdatingDataRawatInap(true);
-      const response = await getListRawatInap({
-        search_text: payload.map((e) => e.value),
-        search_column: payload.map((e) => e.type),
-        per_page: dataRawatInapPerPage,
-      });
-      if (response.data.data.length !== 0) {
-        const result = dataRawatInapFormatHandler(response.data.data);
-        setDataRawatInap(result);
-        setDataMetaRawatInap(response.data.meta);
-      } else {
-        setSnackbarState({
-          state: true,
-          type: "warning",
-          message: `${payload} tidak ditemukan`,
-        });
-        const response = await getListRawatInap({
-          per_page: dataRawatInapPerPage,
-        });
-        const result = dataRawatInapFormatHandler(response.data.data);
-        setDataRawatInap(result);
-        setDataMetaRawatInap(response.data.meta);
-      }
-    } catch (error) {
-      setSnackbarState({
-        state: true,
-        type: "error",
-        message: error.message,
-      });
-    } finally {
-      setIsUpdatingDataRawatInap(false);
-    }
   };
 
   useEffect(() => {
@@ -507,13 +437,9 @@ const Pasien = () => {
                 { label: "Nama", value: "name" },
                 { label: "Alamat", value: "address" },
               ]}
-              updateDataPerPage={(e, filter) => {
+              updateDataPerPage={(e) => {
                 setDataPerPage(e.target.value);
-                updateDataPasienHandler({
-                  per_page: e.target.value,
-                  search_text: filter.map((e) => e.value),
-                  search_column: filter.map((e) => e.type),
-                });
+                updateDataPasienHandler({ per_page: e.target.value });
               }}
               updateDataNavigate={(payload) =>
                 updateDataPasienHandler({
@@ -529,81 +455,6 @@ const Pasien = () => {
             />
           )}
           {activeContent === 2 && (
-            <TableLayoutV2
-              baseRoutePath={`${router.asPath}`}
-              title="Pasien Rawat Jalan"
-              isBtnAdd={false}
-              tableHead={rawatJalanTableHead}
-              data={dataRawatJalan}
-              meta={dataMetaRawatJalan}
-              dataPerPage={dataRawatJalanPerPage}
-              isUpdatingData={isUpdatingDataRawatJalan}
-              filterOptions={[
-                { label: "No. RM", value: "no_rm" },
-                { label: "Email", value: "email" },
-                { label: "Nama", value: "name" },
-                { label: "Poli", value: "poli" },
-                { label: "Dokter", value: "doctor" },
-                { label: "Tanggal", value: "date" },
-              ]}
-              updateDataPerPage={(e, filter) => {
-                setDataRawatJalanPerPage(e.target.value);
-                updateDataRawatJalanHandler({
-                  per_page: e.target.value,
-                  search_text: filter.map((e) => e.value),
-                  search_column: filter.map((e) => e.type),
-                });
-              }}
-              updateDataNavigate={(payload) =>
-                updateDataRawatJalanHandler({
-                  per_page: dataRawatJalanPerPage,
-                  cursor: payload,
-                })
-              }
-              refreshData={() =>
-                updateDataPasienHandler({ per_page: dataRawatJalanPerPage })
-              }
-              deleteData={deletaDataRawatJalanHandler}
-              searchData={searchDataRawatJalanHandler}
-            />
-          )}
-          {activeContent === 3 && (
-            <TableLayoutV2
-              baseRoutePath={`${router.asPath}`}
-              title="Pasien Rawat Inap"
-              isBtnAdd={false}
-              tableHead={rawatInapTableHead}
-              data={dataRawatInap}
-              meta={dataMetaRawatInap}
-              dataPerPage={dataRawatInapPerPage}
-              isUpdatingData={isUpdatingDataRawatInap}
-              filterOptions={[
-                { label: "No. RM", value: "no_rm" },
-                { label: "Nama", value: "name" },
-                { label: "Tanggal", value: "date" },
-              ]}
-              updateDataPerPage={(e, filter) => {
-                setDataRawatInapPerPage(e.target.value);
-                updateDataRawatInapHandler({
-                  per_page: e.target.value,
-                  search_text: filter.map((e) => e.value),
-                  search_column: filter.map((e) => e.type),
-                });
-              }}
-              updateDataNavigate={(payload) =>
-                updateDataRawatInapHandler({
-                  per_page: dataRawatInapPerPage,
-                  cursor: payload,
-                })
-              }
-              refreshData={() =>
-                updateDataRawatInapHandler({ per_page: dataRawatInapPerPage })
-              }
-              deleteData={deletaDataRawatInapHandler}
-              searchData={searchDataRawatInapHandler}
-            />
-          )}
-          {/* {activeContent === 2 && (
             <TableLayout
               isCustomHeader
               customHeader={
@@ -621,7 +472,6 @@ const Pasien = () => {
               customCreatePath="/pasien/create/rawat-jalan"
               baseRoutePath={`${router.asPath}`}
               title="Pasien Rawat Jalan"
-              isBtnAdd={false}
               customBtnAddTitle="pendaftaran rawat jalan"
               tableHead={rawatJalanTableHead}
               data={dataRawatJalan}
@@ -640,8 +490,8 @@ const Pasien = () => {
               }
               deleteData={deletaDataRawatJalanHandler}
             />
-          )} */}
-          {/* {activeContent === 3 && (
+          )}
+          {activeContent === 3 && (
             <TableLayout
               isCustomHeader
               customHeader={
@@ -659,7 +509,6 @@ const Pasien = () => {
               customCreatePath="/pasien/create/rawat-inap"
               baseRoutePath={`${router.asPath}`}
               title="Pasien Rawat Inap"
-              isBtnAdd={false}
               customBtnAddTitle="pendaftaran rawat inap"
               tableHead={rawatInapTableHead}
               data={dataRawatInap}
@@ -681,7 +530,7 @@ const Pasien = () => {
               }
               deleteData={deletaDataRawatInapHandler}
             />
-          )} */}
+          )}
         </>
       )}
       <Snackbar

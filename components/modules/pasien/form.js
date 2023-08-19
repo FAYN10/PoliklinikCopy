@@ -62,35 +62,33 @@ const LabelToPrint = forwardRef(function LabelToPrint({ data }, ref) {
       {/* def - w: 189px. h: 75.6px */}
       <div className="flex">
         <div
-          className="flex px-4 pb-6"
+          className="font-10 flex p-4"
           style={{
             width: "189px",
-            height: "75.2px",
+            height: "75.6px",
             flexDirection: "column",
-            fontSize: '9px'
           }}
         >
           <div className="font-w-600">{data.no_rm || "-"}</div>
           <div className="font-w-600">{data.nik || "-"}</div>
-          <div>{data.nama_pasien.length > 28 ? data.nama_pasien.substring(0, 28) + '...' : data.nama_pasien}</div>
+          <div>{data.nama_pasien || "-"}</div>
           <div className="mt-auto">
             <span className="font-w-600">TGL LAHIR: </span>
             {formatLabelDate(data.tanggal_lahir) || "-"}
           </div>
         </div>
         <div
-          className="font-10 flex px-4 pb-6"
+          className="font-10 flex p-4"
           style={{
             width: "189px",
-            height: "75.2px",
+            height: "75.6px",
             flexDirection: "column",
-            fontSize: '9px',
             marginLeft: "7.56px",
           }}
         >
           <div className="font-w-600">{data.no_rm || "-"}</div>
           <div className="font-w-600">{data.nik || "-"}</div>
-          <div>{data.nama_pasien.length > 28 ? data.nama_pasien.substring(0, 28) + '...' : data.nama_pasien}</div>
+          <div>{data.nama_pasien || "-"}</div>
           <div className="mt-auto">
             <span className="font-w-600">TGL LAHIR: </span>
             {formatLabelDate(data.tanggal_lahir) || "-"}
@@ -122,7 +120,6 @@ const FormPasien = ({
   prePopulatedDataForm = {},
   detailPrePopulatedData = {},
   updatePrePopulatedData = () => "update data",
-  handleClose = () => {},
 }) => {
   const router = useRouter();
   const { isActionPermitted } = useClientPermission();
@@ -1327,8 +1324,7 @@ const FormPasien = ({
               variant="outlined"
               startIcon={<BackIcon />}
               sx={{ marginRight: 2 }}
-              // onClick={() => router.push("/pasien")}
-              onClick={() => handleClose()}
+              onClick={() => router.push("/pasien")}
             >
               Kembali
             </Button>

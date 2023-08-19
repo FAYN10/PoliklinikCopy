@@ -204,16 +204,14 @@ const FormRawatInap = () => {
   });
 
   useEffect(() => {
-    // note-unfinished, data flow is unclear
-    // initDataRawatJalan();
+    initDataRawatJalan();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <>
       <Grid container spacing={2}>
-        {/* old table layout */}
-        {/* <Grid item xs={12} md={7}>
+        <Grid item xs={12} md={7}>
           {isLoadingDataRawatJalan ? (
             <div className="full-width flex justify-center">
               <Spinner />
@@ -221,9 +219,9 @@ const FormRawatInap = () => {
           ) : (
             <FormRawatInapTable
               isCustomHeader
-              // note -> what is been managed here is data rawat jalan!
               customHeader={
                 <>
+                  {/* note -> what is been managed here is data rawat jalan! */}
                   <FormRawatInapTableHeader
                     refreshData={(payload) =>
                       updateDataRawatJalanHandler({
@@ -257,8 +255,8 @@ const FormRawatInap = () => {
               selectData={(payload) => onSelectedFromTable(payload)}
             />
           )}
-        </Grid> */}
-        <Grid item xs={12} md={12}>
+        </Grid>
+        <Grid item xs={12} md={5}>
           <Paper sx={{ width: "100%", padding: 2, paddingTop: 3 }}>
             <form onSubmit={createPasienValidation.handleSubmit}>
               <FocusError formik={createPasienValidation} />
@@ -483,14 +481,13 @@ const FormRawatInap = () => {
                   startIcon={<BackIcon />}
                   sx={{ marginRight: 2 }}
                   onClick={() =>
-                    // router.push(
-                    //   {
-                    //     pathname: "/pasien",
-                    //     query: { active_content: 3 },
-                    //   },
-                    //   "/pasien"
-                    // )
-                    router.push(`/pasien/${router.query.id}`)
+                    router.push(
+                      {
+                        pathname: "/pasien",
+                        query: { active_content: 3 },
+                      },
+                      "/pasien"
+                    )
                   }
                 >
                   Kembali
