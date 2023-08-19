@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { getListPasien, deletePasien, searchPasien } from "api/pasien";
+import { getListRadiologi, deleteRadiologi, searchRadiologi } from "api/radiologi";
 import TableLayout from "components/TableLayout";
 import TableLayoutV3 from "components/TableLayoutV3";
 import LoaderOnLayout from "components/LoaderOnLayout";
@@ -21,10 +21,6 @@ const radiologiTableHead = [
         id: "nama_pasien",
         label: "Nama",
     },
-    // {
-    //     id: "nik",
-    //     label: "NIK/Passport",
-    // },
     {
         id: "alamat",
         label: "Alamat",
@@ -47,13 +43,37 @@ const radiologiTableHead = [
     },
 ];
 
-const dataPasienFormatHandler = (payload) => {
+const dummyRadiologiData = [
+    {
+        id: 1,
+        antrian: "001",
+        no_rm: "12345",
+        nama_pasien: "John Doe",
+        alamat_domisili: "123 Main St, City",
+        asuransi: "BPJS",
+        prioritas: "Biasa",
+        poli: "Radiologi",
+        dokter: "Dr. Smith",
+    },
+    {
+        id: 2,
+        antrian: "002",
+        no_rm: "54321",
+        nama_pasien: "Jane Smith",
+        alamat_domisili: "456 Elm St, Town",
+        asuransi: "Private",
+        prioritas: "Urgent",
+        poli: "Radiologi",
+        dokter: "Dr. Johnson",
+    },
+];
+
+const dataRadiologiFormatHandler = (payload) => {
     const result = payload.map((e) => {
         return {
             antrian: e.antrian || "null",
             no_rm: e.no_rm || "null",
             nama_pasien: e.nama_pasien,
-            // nik: e.nik || e.no_passport || "null",
             alamat_domisili: e.alamat_domisili || "null",
             asuransi: e.asuransi || "null",
             prioriats: e.prioriats || "null",
@@ -76,36 +96,36 @@ const Radiologi = () => {
     const [activeContent, setActiveContent] = useState(1);
 
     // pasien --general state
-    const [dataPasien, setDataPasien] = useState([]);
-    const [dataMetaPasien, setDataMetaPasien] = useState({});
-    const [dataPasienPerPage, setDataPerPage] = useState(8);
-    const [isLoadingDataPasien, setIsLoadingDataPasien] = useState(false);
-    const [isUpdatingDataPasien, setIsUpdatingDataPasien] = useState(false);
+    const [dataRadiologi, setDataRadiologi] = useState(dummyRadiologiData);
+    const [dataMetaRadiologi, setDataMetaRadiologi] = useState({});
+    const [dataRadiologiPerPage, setDataPerPage] = useState(8);
+    const [isLoadingDataRadiologi, setIsLoadingDataRadiologi] = useState(false);
+    const [isUpdatingDataRadiologi, setIsUpdatingDataRadiologi] = useState(false);
 
     // pasien --general handler
-    const initDataPasien = async () => {
+    const initDataRadiologi = async () => {
         try {
-            setIsLoadingDataPasien(true);
+            setIsLoadingDataRadiologi(true);
             const params = {
-                per_page: dataPasienPerPage,
+                per_page: dataRadiologiPerPage,
             };
-            const response = await getListPasien(params);
-            const result = dataPasienFormatHandler(response.data.data);
-            setDataPasien(result);
-            setDataMetaPasien(response.data.meta);
+            const response = await getListRadiologi(params);
+            const result = dataRadiologiFormatHandler(response.data.data);
+            setDataRadiologi(result);
+            setDataMetaRadiologi(response.data.meta);
         } catch (error) {
             console.log(error);
         } finally {
-            setIsLoadingDataPasien(false);
+            setIsLoadingDataRadiologi(false);
         }
     };
-    const updateDataPasienHandler = async (payload) => {
+    const updateDataRadiologiHandler = async (payload) => {
         try {
-            setIsUpdatingDataPasien(true);
-            const response = await getListPasien(payload);
-            const result = dataPasienFormatHandler(response.data.data);
-            setDataPasien(result);
-            setDataMetaPasien(response.data.meta);
+            setIsUpdatingDataRadiologi(true);
+            const response = await getListRadiologi(payload);
+            const result = dataRadiologiFormatHandler(response.data.data);
+            setDataRadiologi(result);
+            setDataMetaRadiologi(response.data.meta);
         } catch (error) {
             console.log(error);
             setSnackbarState({
@@ -114,19 +134,19 @@ const Radiologi = () => {
                 message: error.message,
             });
         } finally {
-            setIsUpdatingDataPasien(false);
+            setIsUpdatingDataRadiologi(false);
         }
     };
-    const deletaDataPasienHandler = async (payload) => {
+    const deletaDataRadiologiHandler = async (payload) => {
         try {
-            setIsUpdatingDataPasien(true);
-            const response = await deletePasien({ id: payload });
+            setIsUpdatingDataRadiologi(true);
+            const response = await deleteRadiologi({ id: payload });
             setSnackbarState({
                 state: true,
                 type: "success",
                 message: response.data.message,
             });
-            updateDataPasienHandler({ per_page: dataPasienPerPage });
+            updateDataRadiologiHandler({ per_page: dataRadiologiPerPage });
         } catch (error) {
             setSnackbarState({
                 state: true,
@@ -134,33 +154,33 @@ const Radiologi = () => {
                 message: error.message,
             });
         } finally {
-            setIsUpdatingDataPasien(false);
+            setIsUpdatingDataRadiologi(false);
         }
     };
-    const searchDataPasienHandler = async (payload) => {
+    const searchDataRadiologiHandler = async (payload) => {
         try {
-            setIsUpdatingDataPasien(true);
-            const response = await searchPasien({
+            setIsUpdatingDataRadiologi(true);
+            const response = await searchRadiologi({
                 search_text: payload.map((e) => e.value),
                 search_column: payload.map((e) => e.type),
-                per_page: dataPasienPerPage,
+                per_page: dataRadiologiPerPage,
             });
             if (response.data.data.length !== 0) {
-                const result = dataPasienFormatHandler(response.data.data);
-                setDataPasien(result);
-                setDataMetaPasien(response.data.meta);
+                const result = dataRadiologiFormatHandler(response.data.data);
+                setDataRadiologi(result);
+                setDataMetaRadiologi(response.data.meta);
             } else {
                 setSnackbarState({
                     state: true,
                     type: "warning",
                     message: `${payload} tidak ditemukan`,
                 });
-                const response = await getListPasien({
-                    per_page: dataPasienPerPage,
+                const response = await getListRadiologi({
+                    per_page: dataRadiologiPerPage,
                 });
-                const result = dataPasienFormatHandler(response.data.data);
-                setDataPasien(result);
-                setDataMetaPasien(response.data.meta);
+                const result = dataRadiologiFormatHandler(response.data.data);
+                setDataRadiologi(result);
+                setDataMetaRadiologi(response.data.meta);
             }
         } catch (error) {
             setSnackbarState({
@@ -169,7 +189,7 @@ const Radiologi = () => {
                 message: error.message,
             });
         } finally {
-            setIsUpdatingDataPasien(false);
+            setIsUpdatingDataRadiologi(false);
         }
     };
     
@@ -181,13 +201,13 @@ const Radiologi = () => {
     }, [router]);
 
     useEffect(() => {
-        initDataPasien();
+        initDataRadiologi();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
         <>
-            {isLoadingDataPasien ? (
+            {isLoadingDataRadiologi ? (
                 <LoaderOnLayout />
             ) : (
                 <>
@@ -195,10 +215,10 @@ const Radiologi = () => {
                         baseRoutePath={`${router.asPath}`}
                         title="Pasien Radiologi"
                         tableHead={radiologiTableHead}
-                        data={dataPasien}
-                        meta={dataMetaPasien}
-                        dataPerPage={dataPasienPerPage}
-                        isUpdatingData={isUpdatingDataPasien}
+                        data={dataRadiologi}
+                        meta={dataMetaRadiologi}
+                        dataPerPage={dataRadiologiPerPage}
+                        isUpdatingData={isUpdatingDataRadiologi}
                         filterOptions={[
                             { label: "Tipe Jaminan", value: "asuransi" },
                             { label: "Pelayanan", value: "poli" },
@@ -207,19 +227,19 @@ const Radiologi = () => {
                           ]}
                         updateDataPerPage={(e) => {
                             setDataPerPage(e.target.value);
-                            updateDataPasienHandler({ per_page: e.target.value });
+                            updateDataRadiologiHandler({ per_page: e.target.value });
                         }}
                         updateDataNavigate={(payload) =>
-                            updateDataPasienHandler({
-                                per_page: dataPasienPerPage,
+                            updateDataRadiologiHandler({
+                                per_page: dataRadiologiPerPage,
                                 cursor: payload,
                             })
                         }
                         refreshData={() =>
-                            updateDataPasienHandler({ per_page: dataPasienPerPage })
+                            updateDataRadiologiHandler({ per_page: dataRadiologiPerPage })
                         }
-                        deleteData={deletaDataPasienHandler}
-                        searchData={searchDataPasienHandler}
+                        deleteData={deletaDataRadiologiHandler}
+                        searchData={searchDataRadiologiHandler}
                     />
                 </>
             )}

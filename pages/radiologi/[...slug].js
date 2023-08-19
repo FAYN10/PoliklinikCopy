@@ -11,6 +11,7 @@ import Popover from "@mui/material/Popover";
 import TableLayout from "pages/pasien/TableLayout";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
+import useClientPermission from "custom-hooks/useClientPermission";
 import { formatLabelDate } from "utils/formatTime";
 import { Grid, Card, IconButton, Tooltip, Avatar, Dialog } from "@mui/material";
 import PermContactCalendarIcon from "@mui/icons-material/PermContactCalendar";
@@ -19,132 +20,31 @@ import CreditCardIcon from "@mui/icons-material/CreditCard";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import GroupIcon from "@mui/icons-material/Group";
+import Switch from "@mui/material/Switch";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import FormAssessmentPasien from "components/modules/radiologi/formAssessmentPasien";
-import PermintaanRadiologi from "components/modules/radiologi/permintaanRadiologi"; 
+import PermintaanRadiologi from "components/modules/radiologi/permintaanRadiologi";
 import FormAssessmentPetugas from "components/modules/radiologi/formAssessmentPetugas";
 import FormExpertise from "components/modules/radiologi/formExpertise";
+import RiwayatPemeriksaanTable from "components/modules/radiologi/riwayatPemeriksaanTable";
+import { dummyRadiologiData } from "pages/radiologi/index.js";
 
-const rawatJalanTableHead = [
-  // {
-  //   id: "no_rm",
-  //   label: "Nomor RM",
-  // },
-  // {
-  //   id: "nama",
-  //   label: "Nama",
-  // },
-  // {
-  //   id: "alamat",
-  //   label: "Alamat",
-  // },
-  {
-    id: "asuransi",
-    label: "Asuransi",
-  },
-  {
-    id: "DATETIME_MEDIS",
-    label: "Tgl Masuk",
-  },
-  {
-    id: "poliklinik",
-    label: "Poliklinik",
-  },
-  {
-    id: "dokter",
-    label: "Dokter",
-  },
-  {
-    id: "antrian",
-    label: "No. Antri",
-  },
-  {
-    id: "rujukan",
-    label: "Rujukan",
-  },
-];
-const dataRawatJalanFormatHandler = (payload) => {
-  const result = payload.map((e) => {
-    return {
-      // no_rm: e.no_rm || "-",
-      // nama: e.nama || "-",
-      // alamat: e.alamat || "-",
-      asuransi: e.asuransi || "-",
-      DATETIME_MEDIS: e.DATETIME_MEDIS || "-",
-      poliklinik: e.poliklinik || "-",
-      dokter: e.dokter || "-",
-      antrian: e.antrian || "-",
-      rujukan: e.rujukan || "-",
-      // id: e.id,
-    };
-  });
-  return result;
-};
-const rawatInapTableHead = [
-  // {
-  //   id: "no_rm",
-  //   label: "Nomor RM",
-  // },
-  // {
-  //   id: "nik",
-  //   label: "NIK",
-  // },
-  // {
-  //   id: "nama",
-  //   label: "Nama",
-  // },
-  // {
-  //   id: "alamat",
-  //   label: "Alamat",
-  // },
-  {
-    id: "tgl_masuk",
-    label: "Tgl Masuk",
-  },
-  {
-    id: "kamar",
-    label: "Kamar/Bangsal",
-  },
-  {
-    id: "diet",
-    label: "Diet",
-  },
-  {
-    id: "dpjp",
-    label: "DPJP",
-  },
-];
-const dataRawatInapFormatHandler = (payload) => {
-  const result = payload.map((e) => {
-    return {
-      // no_rm: e.no_rm || "-",
-      // nik: e.nik || "-",
-      // nama: e.nama || "-",
-      // alamat: e.alamat || "-",
-      tgl_masuk: e.tgl_masuk || "-",
-      kamar: e.kamar || "-",
-      diet: e.diet || "-",
-      dpjp: e.dpjp || "-",
-      // id: e.id,
-    };
-  });
-  return result;
-};
-
-const Detail = () => {
+const DetailRadiologi = () => {
+  const [isEditingMode, setIsEditingMode] = useState(false);
   const router = useRouter();
   const { slug } = router.query;
-  const [dataPasien, setDataPasien] = useState({});
-  const [detailDataPasien, setDetailDataPasien] = useState({});
-  const [isLoadingDataPasien, setIsLoadingDataPasien] = useState(true);
+  const [dataRadiologi, setDataRadiologi] = useState({});
+  const [detailDataRadiologi, setDetailDataRadiologi] = useState({});
+  const [isLoadingDataRadiologi, setIsLoadingDataRadiologi] = useState(true);
   const [menuState, setMenuState] = useState(null);
+  const { isActionPermitted } = useClientPermission();
   const openMenuPopover = Boolean(menuState);
   const menuPopover = menuState ? "menu-popover" : undefined;
-  const [activeContent, setActiveContent] = useState(1);
-  const [dataRawatJalan, setDataRawatJalan] = useState([]);
-  const [dataRawatInap, setDataRawatInap] = useState([]);
   const [dialogProfileState, setDialogProfileState] = useState(false);
-
+  const handleIsEditingMode = (e) => {
+    setIsEditingMode(e.target.checked);
+  };
   const dataFormatter = (data) => {
     let tempData = {
       nama_pasien: data.nama_pasien || "",
@@ -192,50 +92,24 @@ const Detail = () => {
   };
 
   const updateData = (data) => {
-    setDetailDataPasien(data);
-    setDataPasien(() => dataFormatter(data));
+    setDetailDataRadiologi(data);
+    setDataRadiologi(() => dataFormatter(data));
   };
 
   useEffect(() => {
     if (router.isReady) {
       (async () => {
         try {
-          const response = await getDetailPasien({ id: slug[0] });
-          const data = response.data.data;
+          const data = dummyRadiologiData;
+          const response = await getDetailRadiologi({ id: slug[0] });
+          // const data = response.data.data;
           const formattedData = dataFormatter(data);
-          setDataPasien(formattedData);
-          setDetailDataPasien(data);
-          if (data?.no_rm) {
-            const [responseRawatJalan, responseRawatInap] =
-              await Promise.allSettled([
-                getListRawatJalan({
-                  filter: "no_rm",
-                  filter_value: data.no_rm + "",
-                }),
-                getListRawatInap({
-                  filter: "no_rm",
-                  filter_value: data.no_rm + "",
-                }),
-              ]);
-            if (responseRawatJalan.status === "fulfilled") {
-              setDataRawatJalan(
-                dataRawatJalanFormatHandler(responseRawatJalan.value.data.data)
-              );
-            } else {
-              setDataRawatJalan([]);
-            }
-            if (responseRawatInap.status === "fulfilled") {
-              setDataRawatInap(
-                dataRawatInapFormatHandler(responseRawatInap.value.data.data)
-              );
-            } else {
-              setDataRawatJalan([]);
-            }
-          }
+          setDataRadiologi(formattedData);
+          setDetailDataRadiologi(data);
         } catch (error) {
           console.log(error);
         } finally {
-          setIsLoadingDataPasien(false);
+          setIsLoadingDataRadiologi(false);
         }
       })();
     }
@@ -243,11 +117,10 @@ const Detail = () => {
 
   return (
     <>
-      {isLoadingDataPasien ? (
+      {isLoadingDataRadiologi ? (
         <LoaderOnLayout />
       ) : (
         <>
-          {/* {OldLayout} */}
           <Grid container spacing={2}>
             <Grid item md={6} sm={12}>
               <Card className="px-14 py-12 mb-16">
@@ -263,31 +136,31 @@ const Detail = () => {
                 <div className="flex justify-between items-start">
                   <div className="flex items-start">
                     <Avatar
-                      src={detailDataPasien?.picture}
+                      src={detailDataRadiologi?.picture}
                       variant="rounded"
                       sx={{ width: 130, height: 130 }}
                     />
                     <div className="ml-8 mt-8">
                       <div className="font-w-700">
-                        {dataPasien?.nama_pasien}
+                        {dataRadiologi?.nama_pasien}
                       </div>
                       <div className="font-w-700">
-                        {dataPasien?.nik}
+                        {dataRadiologi?.nik}
                       </div>
                       <div className="font-14">
-                        {detailDataPasien?.tanggal_lahir
-                          ? formatLabelDate(detailDataPasien.tanggal_lahir)
+                        {detailDataRadiologi?.tanggal_lahir
+                          ? formatLabelDate(detailDataRadiologi.tanggal_lahir)
                           : ""}{" "}
-                        / {detailDataPasien?.umur} tahun
+                        / {detailDataRadiologi?.umur} tahun
                       </div>
+                      {/* <div className="font-14">
+                        {detailDataRadiologi?.agama.name}
+                      </div> */}
                       <div className="font-14">
-                        {detailDataPasien?.agama.name}
-                      </div>
-                      <div className="font-14">
-                        {detailDataPasien?.jenis_kelamin
+                        {detailDataRadiologi?.jenis_kelamin
                           ? "Laki-laki"
                           : "Perempuan"}{" "}
-                        / {detailDataPasien?.status}
+                        / {detailDataRadiologi?.status}
                       </div>
                     </div>
                   </div>
@@ -297,23 +170,27 @@ const Detail = () => {
                       className="font-28 font-w-700"
                       style={{ textAlign: "right" }}
                     >
-                      {detailDataPasien?.no_rm}
+                      {detailDataRadiologi?.no_rm}
                     </div>
                   </div>
                 </div>
               </Card>
 
             </Grid>
-            
+
           </Grid>
           <div style={{ overflow: "auto", maxHeight: "calc(100vh - 340px)" }}>
-           
+
 
             <Card className="px-14 py-12 mb-16">
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}>
+              <div className="flex items-center">
+                <p className="m-0 ml-8 font-14">Permintaan Radiologi</p>
+              </div>
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}>
                 <PermintaanRadiologi />
               </div>
-              </Card> <Card className="px-14 py-12 mb-16">
+            </Card>
+            <Card className="px-14 py-12 mb-16">
               <div className="flex justify-between items-center mb-16">
                 <div className="flex items-center">
                   <CheckCircleIcon
@@ -322,18 +199,18 @@ const Detail = () => {
                   />
                   <p className="m-0 ml-8 font-14">Assessment Pasien Radiologi</p>
                 </div>
-                <div>
-                  {/* Add the edit icon here */}
-                  <Tooltip title="Edit Assessment" arrow>
-                    <IconButton
-                      onClick={() => {
-                        // Handle edit assessment logic here
-                        console.log("Edit Assessment clicked");
-                      }}
-                    >
-                      <BorderColorIcon fontSize="small" color="warning" />
-                    </IconButton>
-                  </Tooltip>
+                <div className="flex justify-end mb-40">
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={isEditingMode}
+                        onChange={handleIsEditingMode}
+                        inputProps={{ "aria-label": "controlled" }}
+                        disabled={!isActionPermitted("pasien:update")}
+                      />
+                    }
+                    label="Ubah data"
+                  />
                 </div>
               </div>
               <div style={{ display: "flex", justifyContent: "center" }}>
@@ -350,18 +227,18 @@ const Detail = () => {
                   />
                   <p className="m-0 ml-8 font-14">Assessment Petugas Radiologi</p>
                 </div>
-                <div>
-                  {/* Add the edit icon here */}
-                  <Tooltip title="Edit Assessment" arrow>
-                    <IconButton
-                      onClick={() => {
-                        // Handle edit assessment logic here
-                        console.log("Edit Assessment clicked");
-                      }}
-                    >
-                      <BorderColorIcon fontSize="small" color="warning" />
-                    </IconButton>
-                  </Tooltip>
+                <div className="flex justify-end mb-40">
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={isEditingMode}
+                        onChange={handleIsEditingMode}
+                        inputProps={{ "aria-label": "controlled" }}
+                        disabled={!isActionPermitted("pasien:update")}
+                      />
+                    }
+                    label="Ubah data"
+                  />
                 </div>
               </div>
               <div style={{ display: "flex", justifyContent: "center" }}>
@@ -369,16 +246,21 @@ const Detail = () => {
               </div>
             </Card>
 
-              <Card className="px-14 py-12 mb-16">
+            <Card className="px-14 py-12 mb-16">
               <div style={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}>
                 <FormExpertise />
               </div>
-              
+
             </Card>
 
-
-
-
+            <Card className="px-14 py-12 mb-16">
+              <div className="flex items-center">
+                <p className="m-0 ml-8 font-14">Riwayat Pemeriksaan</p>
+              </div>
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}>
+                <RiwayatPemeriksaanTable />
+              </div>
+            </Card>
           </div>
           <Dialog
             fullScreen
@@ -398,4 +280,4 @@ const Detail = () => {
   );
 };
 
-export default Detail;
+export default DetailRadiologi;

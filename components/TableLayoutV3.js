@@ -51,7 +51,7 @@ const Transition = forwardRef(function Transition(props, ref) {
 const TableLayoutV3 = ({
   baseRoutePath = "/",
   customCreatePath = null,
-  title = "Pasien Radiologi",
+  title = "Daftar Pasien Radiologi",
   isBtnAdd = true,
   customBtnAddTitle = null,
   tableHead = [],
@@ -416,9 +416,10 @@ const TableLayoutV3 = ({
 
   return (
     <>
-      <div className={st.container}
-      title="Pasien Radiologi">
-      
+      <div className={st.container}>
+        <div className={st.header}>
+          <h2 className="color-grey-text">{title}</h2>
+        </div>
         <Box sx={{ width: "100%", marginY: 4 }}>
           <Paper sx={{ width: "100%", padding: 2 }}>
             <Grid container spacing={1} alignItems={"center"}>

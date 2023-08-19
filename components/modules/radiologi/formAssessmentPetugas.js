@@ -27,8 +27,8 @@ const FormAssessmentPetugas = () => {
     },
   });
 
-  const namaPemeriksaanOptions = ["X-RAY", "CT Scan", "USG", "MRI", "APPENDICOGRAM", "BNO", "HSG"];
-
+  const namaPemeriksaanOptions = ["X-RAY", "CT Scan", "USG", "MRI"];
+  
   const persiapanPemeriksaanOptions = {
     APPENDICOGRAM: [
       "Pasien minum Barium Sulfat (BaSO4)",

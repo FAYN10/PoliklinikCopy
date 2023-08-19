@@ -44,6 +44,11 @@ let SideList = [
         permission: ["radiologi:all"],
         routePath: "/radiologi",
       },
+      {
+        name: "BMHP Radiologi",
+        permission: ["bmhpradiologi:all"],
+        routePath: "/bmhpradiologi",
+      },
     ],
     childrenState: false,
 

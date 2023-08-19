@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { Grid, Paper, TextField, Button, MenuItem } from "@mui/material";
+import { Grid, Paper, TextField, Button, MenuItem, Dialog,
+DialogTitle,
+DialogContent, } from "@mui/material";
 import DateTimePickerComp from "components/DateTimePicker";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -140,21 +142,8 @@ const FormAssessmentPasien = () => {
               handlerRef={formik}
             />
           </div>
-        </form>
-      </Grid>
-      <Grid item xs={12} md={12}>
-        <Grid container justifyContent="center" spacing={2}>
-          <Grid item>
-            <LoadingButton
-              type="submit"
-              variant="contained"
-              color="success"
-              startIcon={<SaveIcon />}
-              loading={formik.isSubmitting}
-            >
-              SIMPAN
-            </LoadingButton>
-          </Grid>
+        </form><Grid item xs={12} md={12}>
+        <Grid container justifyContent="right" spacing={2}>
           <Grid item>
             <Button
               variant="contained"
@@ -167,7 +156,19 @@ const FormAssessmentPasien = () => {
               BATAL
             </Button>
           </Grid>
+          <Grid item>
+            <LoadingButton
+              type="submit"
+              variant="contained"
+              startIcon={<SaveIcon />}
+              loading={formik.isSubmitting}
+            >
+              SIMPAN
+            </LoadingButton>
+          </Grid>
         </Grid>
+      </Grid>
+      
       </Grid>
     </Grid>
   );

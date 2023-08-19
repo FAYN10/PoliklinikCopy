@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, forwardRef, useRef } from "react";
 import {
   Grid,
   Button,
@@ -25,17 +25,59 @@ import * as Yup from "yup";
 import LoadingButton from "@mui/lab/LoadingButton";
 import SaveIcon from "@material-ui/icons/Save";
 import { ExpandLess as ExpandLessIcon, ExpandMore as ExpandMoreIcon } from "@material-ui/icons";
-import FormAssessmentPetugas from "./formAssessmentPetugas";
+import EditIcon from "@material-ui/icons/Edit";
+import PrintIcon from "@mui/icons-material/Print";
+import ReactToPrint from "react-to-print";
 
 const FormExpertise = () => {
+  const labelPrintRef = useRef();
   const [isCardMinimized, setIsCardMinimized] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null); // Untuk gambar yang dipilih di-klik
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const LabelToPrint = forwardRef(function LabelToPrint({ data }, ref) {
+    return (
+      <div ref={ref} className="printableContent">
+        {/* ... (printing logic remains the same) */}
+      </div>
+    );
+  });
 
   const initialValues = {
     images: [],
     expertises: [],
   };
+  const handleDeleteImage = (index) => {
+    const images = [...formik.values.images];
+    images.splice(index, 1);
+    formik.setFieldValue("images", images);
+  };
+
+
+  const handleEditImage = (index) => {
+    setSelectedImageIndex(index);
+    setIsEditing(true);
+  };
+
+  const handleUpdateImage = (newImage) => {
+    if (newImage instanceof File) {
+      const images = [...formik.values.images];
+  
+      const reader = new FileReader();
+      reader.onload = () => {
+        images[selectedImageIndex] = reader.result;
+        formik.setFieldValue("images", images);
+        setSelectedImageIndex(null);
+        setIsEditing(false);
+      };
+      reader.readAsDataURL(newImage);
+    } else {
+      console.error("Invalid file input for handleUpdateImage");
+    }
+  };
+  
 
   const validationSchema = Yup.object({
     images: Yup.array().min(1, "Paling tidak harus ada satu gambar"),
@@ -54,26 +96,20 @@ const FormExpertise = () => {
     setIsCardMinimized(!isCardMinimized);
   };
 
-  const handleDeleteImage = (index) => {
-    const images = [...formik.values.images];
-    images.splice(index, 1);
-    formik.setFieldValue("images", images);
-  };
-
   const handleAddImage = (event) => {
     const images = [...formik.values.images];
     images.push(URL.createObjectURL(event.target.files[0]));
     formik.setFieldValue("images", images);
   };
-
-  const handleImageClick = (image) => {
+ const handleImageClick = (image) => {
     setSelectedImage(image);
     setOpenDialog(true);
   };
-
   const handleCloseDialog = () => {
     setOpenDialog(false);
   };
+  
+  
 
   return (
     <Grid container spacing={2}>
@@ -93,6 +129,22 @@ const FormExpertise = () => {
           />
           <Collapse in={!isCardMinimized}>
             <CardContent>
+              <div className="mr-8" style={{ display: "flex", justifyContent: "flex-end" }}>
+                <ReactToPrint
+                  trigger={() => (
+                    <Button variant="contained" color="secondary" startIcon={<PrintIcon />}>
+                      EXPORT HASIL
+                    </Button>
+                  )}
+                  content={() => labelPrintRef.current}
+                />
+                <LabelToPrint
+                  data={{
+                    // ... (printing data remains the same)
+                  }}
+                  ref={labelPrintRef}
+                />
+              </div>
               <TableContainer>
                 <Table>
                   <TableHead>
@@ -108,26 +160,61 @@ const FormExpertise = () => {
                       <TableRow key={index}>
                         <TableCell align="center">{index + 1}</TableCell>
                         <TableCell align="center">
-                          <div onClick={() => handleImageClick(image)} style={{ cursor: "pointer" }}>
-                            <img src={image} alt={`expertise ${index + 1}`} height={200} />
-                          </div>
+                          {selectedImageIndex === index ? (
+                            <div>
+                              <img src={image} alt={`expertise ${index + 1}`} height={200} />
+                              <div>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => handleUpdateImage(e.target.files[0])}
+                                />
+                                <Button variant="outlined" onClick={() => setIsEditing(false)}>
+                                  Cancel
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div onClick={() => handleImageClick(image)} style={{ cursor: "pointer" }}>
+                              <img src={image} alt={`expertise ${index + 1}`} height={200} />
+                              <Typography variant="body2">
+                                {formik.values.expertises[index] || "-"}
+                              </Typography>
+                            </div>
+                          )}
                         </TableCell>
                         <TableCell align="center">
-                          <input
-                            type="text"
-                            value={formik.values.expertises[index] || ""}
-                            onChange={(e) => {
-                              const expertises = [...formik.values.expertises];
-                              expertises[index] = e.target.value;
-                              formik.setFieldValue("expertises", expertises);
-                            }}
-                            style={{ width: "100%", height: "100px" }} // Perbesar teks area
-                          />
+                          {isEditing && selectedImageIndex === index ? (
+                            <input
+                              type="text"
+                              value={formik.values.expertises[index] || ""}
+                              onChange={(e) => {
+                                const expertises = [...formik.values.expertises];
+                                expertises[index] = e.target.value;
+                                formik.setFieldValue("expertises", expertises);
+                              }}
+                              style={{ width: "100%", height: "100px" }}
+                            />
+                          ) : (
+                            <Typography variant="body2">
+                              {formik.values.expertises[index] || "-"}
+                            </Typography>
+                          )}
                         </TableCell>
                         <TableCell align="center">
                           <IconButton onClick={() => handleDeleteImage(index)}>
                             <DeleteIcon />
                           </IconButton>
+                          {!isEditing && selectedImageIndex !== index && (
+                            <IconButton onClick={() => handleEditImage(index)}>
+                              <EditIcon />
+                            </IconButton>
+                          )}
+                          {isEditing && selectedImageIndex === index && (
+                            <IconButton onClick={() => handleUpdateImage(/* pass new image here */)}>
+                              <SaveIcon />
+                            </IconButton>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -146,8 +233,8 @@ const FormExpertise = () => {
               <label htmlFor="image-upload-expertise">
                 <Button
                   variant="contained"
-                  color="primary"
                   component="span"
+                  color="success"
                   startIcon={<AddCircleOutlineIcon />}
                 >
                   Tambah Gambar
@@ -156,7 +243,6 @@ const FormExpertise = () => {
               <LoadingButton
                 type="submit"
                 variant="contained"
-                color="success"
                 startIcon={<SaveIcon />}
                 loading={formik.isSubmitting}
                 onClick={formik.handleSubmit}

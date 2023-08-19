@@ -1,53 +1,43 @@
 import React from "react";
 import { useRouter } from "next/router";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
-import FormPersiapanPemeriskaan from "./formPersiapanPemeriksaan";
-import FormAssessmentPetugas from "./formAssessmentPetugas";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from "@mui/material";
 
 
-const PermintaanRadiologi = () => {
+const RiwayatPemeriksaanTable = () => {
   const router = useRouter();
   const { selectedData } = router.query;
 
   const dataPermintaanRadiologi = [
     {
+      waktuPemeriksaan: "2023-08-15 10:30",
       noPemeriksaan: "1",
       namaPemeriksaan: "XRay",
       jenisPemeriksaan: "BNO",
-      waktuPemeriksaan: "2023-08-15 10:30",
       dokterPengirim: "Dr. John Doe",
-      unitPengirim: "UGD",
       diagnosisKerja: "Patah tulang",
-      catatanPermintaan: "Harap segera diprioritaskan",
     },
     {
-      noPemeriksaan: "2",
-      namaPemeriksaan: "USG",
-      jenisPemeriksaan: "USG_ABDOMEN",
-      waktuPemeriksaan: "2023-08-15 10:30",
-      dokterPengirim: "Dr. Jhonny",
-      unitPengirim: "UGD",
-      diagnosisKerja: "Patah tulang",
-      catatanPermintaan: "Harap segera diprioritaskan",
+        waktuPemeriksaan: "2023-08-15 10:30",
+        noPemeriksaan: "2",
+        namaPemeriksaan: "USG",
+        jenisPemeriksaan: "USG_ABDOMEN",
+        dokterPengirim: "Dr. John Doe",
+        diagnosisKerja: "Patah tulang",
     },
-
   ];
-
-  const handleRowClick = (data) => {
-    router.push(`/components/modules/radiologi/formAssessmentPetugas?jenisPemeriksaan=${data.jenisPemeriksaan}`);
-  };
 
   return (
     <div>
       <TableContainer component={Paper}>
+       
         <Table>
           <TableHead>
             <TableRow>
               <TableCell sx={{ backgroundColor: (theme) => theme.palette.success.main, color: (theme) => theme.palette.common.white }}>
-                No. Pemeriksaan
+                Tanggal Pemeriksaan
               </TableCell>
               <TableCell sx={{ backgroundColor: (theme) => theme.palette.success.main, color: (theme) => theme.palette.common.white }}>
-                Waktu Pemeriksaan
+                No. Pemeriksaan
               </TableCell>
               <TableCell sx={{ backgroundColor: (theme) => theme.palette.success.main, color: (theme) => theme.palette.common.white }}>
                 Nama Pemeriksaan
@@ -58,28 +48,25 @@ const PermintaanRadiologi = () => {
               <TableCell sx={{ backgroundColor: (theme) => theme.palette.success.main, color: (theme) => theme.palette.common.white }}>
                 Dokter Pengirim
               </TableCell>
-              <TableCell sx={{ backgroundColor: (theme) => theme.palette.success.main, color: (theme) => theme.palette.common.white }}>
-                Unit Pengirim
-              </TableCell>
+              
               <TableCell sx={{ backgroundColor: (theme) => theme.palette.success.main, color: (theme) => theme.palette.common.white }}>
                 Diagnosis Kerja
               </TableCell>
-              <TableCell sx={{ backgroundColor: (theme) => theme.palette.success.main, color: (theme) => theme.palette.common.white }}>
-                Catatan Permintaan
-              </TableCell>
+             
             </TableRow>
           </TableHead>
           <TableBody>
             {dataPermintaanRadiologi.map((data, index) => (
               <TableRow key={index}>
-                <TableCell>{data.noPemeriksaan}</TableCell>
+                
                 <TableCell>{data.waktuPemeriksaan}</TableCell>
+                <TableCell>{data.noPemeriksaan}</TableCell>
                 <TableCell>{data.namaPemeriksaan}</TableCell>
                 <TableCell>{data.jenisPemeriksaan}</TableCell>
                 <TableCell>{data.dokterPengirim}</TableCell>
-                <TableCell>{data.unitPengirim}</TableCell>
+                
                 <TableCell>{data.diagnosisKerja}</TableCell>
-                <TableCell>{data.catatanPermintaan}</TableCell>
+                
               </TableRow>
             ))}
           </TableBody>
@@ -91,4 +78,4 @@ const PermintaanRadiologi = () => {
   );
 };
 
-export default PermintaanRadiologi;
+export default RiwayatPemeriksaanTable;
