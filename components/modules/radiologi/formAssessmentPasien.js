@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { Grid, Paper, TextField, Button, MenuItem, Dialog,
-DialogTitle,
-DialogContent, } from "@mui/material";
+import {
+  Grid, Paper, TextField, Button, MenuItem, Dialog,
+  DialogTitle,
+  DialogContent,
+} from "@mui/material";
 import DateTimePickerComp from "components/DateTimePicker";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -35,13 +37,13 @@ const FormAssessmentPasien = () => {
       then: Yup.string()
         .email("Email tidak valid")
         .required("Email wajib diisi"),
-    }),diambil: Yup.string().when("metodePenyampaianHasil", {
+    }), diambil: Yup.string().when("metodePenyampaianHasil", {
       is: "Tanggal Diambil",
       then: Yup.date().required("Tanggal diambil wajib diisi"),
     }),
     statusAlergi: Yup.string().required("Status alergi wajib dipilih"),
     statusKehamilan: Yup.string().required("Status kehamilan wajib dipilih"),
- 
+
     waktuPemeriksaan: Yup.date().required("Waktu pemeriksaan wajib diisi"),
   });
 
@@ -61,89 +63,113 @@ const FormAssessmentPasien = () => {
   return (
     <Grid container spacing={2}>
       <Grid item xs={12} md={6}>
-        <form onSubmit={formik.handleSubmit}>
-          <div className="mb-16">
-            <TextField
-              fullWidth
-              id="noWhatsapp"
-              name="noWhatsapp"
-              label="No. WhatsApp"
-              value={formik.values.noWhatsapp}
-              onChange={formik.handleChange}
-              error={formik.touched.noWhatsapp && Boolean(formik.errors.noWhatsapp)}
-              helperText={formik.touched.noWhatsapp && formik.errors.noWhatsapp}
-            />
-          </div>
-          <div className="mb-16">
-            <TextField
-              fullWidth
-              id="email"
-              name="email"
-              label="Email"
-              value={formik.values.email}
-              onChange={formik.handleChange}
-              error={formik.touched.email && Boolean(formik.errors.email)}
-              helperText={formik.touched.email && formik.errors.email}
-            />
-          </div>
-          <div className="mb-16">
-            <DateTimePickerComp
-              id="diambil"
-              label="Tanggal Diambil"
-              handlerRef={formik}
-            />
-          </div>
-          
-        </form>
+        <Paper
+          elevation={3}
+          sx={{
+            padding: "16px",
+            mb: "16px", // Add margin-bottom for spacing
+            mt: "16px", // Add margin-top for spacing
+          }}
+        >
+          <form onSubmit={formik.handleSubmit}>
+            <div className="mb-16">
+              <TextField
+                fullWidth
+                id="noWhatsapp"
+                name="noWhatsapp"
+                label="No. WhatsApp"
+                value={formik.values.noWhatsapp}
+                onChange={formik.handleChange}
+                error={formik.touched.noWhatsapp && Boolean(formik.errors.noWhatsapp)}
+                helperText={formik.touched.noWhatsapp && formik.errors.noWhatsapp}
+              />
+            </div>
+            <div className="mb-16">
+              <TextField
+                fullWidth
+                id="email"
+                name="email"
+                label="Email"
+                value={formik.values.email}
+                onChange={formik.handleChange}
+                error={formik.touched.email && Boolean(formik.errors.email)}
+                helperText={formik.touched.email && formik.errors.email}
+              />
+            </div>
+            <div className="mb-16">
+              <DateTimePickerComp
+                id="diambil"
+                label="Tanggal Diambil"
+                handlerRef={formik}
+              />
+            </div>
+
+          </form>
+        </Paper>
       </Grid>
       <Grid item xs={12} md={6}>
-        <form onSubmit={formik.handleSubmit}>
-          <div className="mb-16">
-            <TextField
-              fullWidth
-              select
-              id="statusAlergi"
-              name="statusAlergi"
-              label="Status Alergi"
-              value={formik.values.statusAlergi}
-              onChange={formik.handleChange}
-              error={formik.touched.statusAlergi && Boolean(formik.errors.statusAlergi)}
-              helperText={formik.touched.statusAlergi && formik.errors.statusAlergi}
-            >
-              {statusAlergiOptions.map((option) => (
-                <MenuItem key={option} value={option}>
-                  {option}
-                </MenuItem>
-              ))}
-            </TextField>
-          </div>
-          <div className="mb-16">
-            <TextField
-              fullWidth
-              select
-              id="statusKehamilan"
-              name="statusKehamilan"
-              label="Status Kehamilan"
-              value={formik.values.statusKehamilan}
-              onChange={formik.handleChange}
-              error={formik.touched.statusKehamilan && Boolean(formik.errors.statusKehamilan)}
-              helperText={formik.touched.statusKehamilan && formik.errors.statusKehamilan}
-            >
-              {statusKehamilanOptions.map((option) => (
-                <MenuItem key={option} value={option}>
-                  {option}
-                </MenuItem>
-              ))}
-            </TextField>
-          </div><div className="mb-16">
-            <DateTimePickerComp
-              id="waktuPemeriksaan"
-              label="Waktu Pemeriksaan"
-              handlerRef={formik}
-            />
-          </div>
-        </form><Grid item xs={12} md={12}>
-        <Grid container justifyContent="right" spacing={2}>
+        <Paper
+          elevation={3}
+          sx={{
+            padding: "16px",
+            mb: "16px", // Add margin-bottom for spacing
+            mt: "16px", // Add margin-top for spacing
+          }}
+        >
+          <form onSubmit={formik.handleSubmit}>
+            <div className="mb-16">
+              <TextField
+                fullWidth
+                select
+                id="statusAlergi"
+                name="statusAlergi"
+                label="Status Alergi"
+                value={formik.values.statusAlergi}
+                onChange={formik.handleChange}
+                error={formik.touched.statusAlergi && Boolean(formik.errors.statusAlergi)}
+                helperText={formik.touched.statusAlergi && formik.errors.statusAlergi}
+              >
+                {statusAlergiOptions.map((option) => (
+                  <MenuItem key={option} value={option}>
+                    {option}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </div>
+            <div className="mb-16">
+              <TextField
+                fullWidth
+                select
+                id="statusKehamilan"
+                name="statusKehamilan"
+                label="Status Kehamilan"
+                value={formik.values.statusKehamilan}
+                onChange={formik.handleChange}
+                error={formik.touched.statusKehamilan && Boolean(formik.errors.statusKehamilan)}
+                helperText={formik.touched.statusKehamilan && formik.errors.statusKehamilan}
+              >
+                {statusKehamilanOptions.map((option) => (
+                  <MenuItem key={option} value={option}>
+                    {option}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </div><div className="mb-16">
+              <DateTimePickerComp
+                id="waktuPemeriksaan"
+                label="Waktu Pemeriksaan"
+                handlerRef={formik}
+              />
+            </div>
+          </form>
+
+        </Paper>
+      </Grid>
+      <Grid item xs={12} md={12}>
+        <Grid container
+          justifyContent="flex-end"
+          spacing={2}
+          sx={{ marginBottom: "16px"}} >
           <Grid item>
             <Button
               variant="contained"
@@ -167,8 +193,6 @@ const FormAssessmentPasien = () => {
             </LoadingButton>
           </Grid>
         </Grid>
-      </Grid>
-      
       </Grid>
     </Grid>
   );

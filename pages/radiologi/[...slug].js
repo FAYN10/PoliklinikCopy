@@ -29,6 +29,7 @@ import FormAssessmentPetugas from "components/modules/radiologi/formAssessmentPe
 import FormExpertise from "components/modules/radiologi/formExpertise";
 import RiwayatPemeriksaanTable from "components/modules/radiologi/riwayatPemeriksaanTable";
 import { dummyRadiologiData } from "pages/radiologi/index.js";
+import Assessment from "components/modules/radiologi/assessment";
 
 const DetailRadiologi = () => {
   const [isEditingMode, setIsEditingMode] = useState(false);
@@ -115,6 +116,17 @@ const DetailRadiologi = () => {
     }
   }, [router.isReady, slug]);
 
+  const menuItems = [
+    { label: "Permintaan Radiologi", component: <PermintaanRadiologi /> },
+    { label: "Assessment Pemeriksaan", component: <Assessment /> },
+    { label: "Hasil Pemeriksaan", component: <FormExpertise /> },
+    { label: "Riwayat Pemeriksaan", component: <RiwayatPemeriksaanTable /> },
+  ];
+
+  const [selectedTab, setSelectedTab] = useState(0);
+
+
+
   return (
     <>
       {isLoadingDataRadiologi ? (
@@ -179,101 +191,35 @@ const DetailRadiologi = () => {
             </Grid>
 
           </Grid>
-          <div style={{ overflow: "auto", maxHeight: "calc(100vh - 340px)" }}>
-
-
-            <Card className="px-14 py-12 mb-16">
-              <div className="flex items-center">
-                <p className="m-0 ml-8 font-14">Permintaan Radiologi</p>
-              </div>
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}>
-                <PermintaanRadiologi />
-              </div>
-            </Card>
-            <Card className="px-14 py-12 mb-16">
-              <div className="flex justify-between items-center mb-16">
-                <div className="flex items-center">
-                  <CheckCircleIcon
-                    fontSize="small"
-                    style={{ color: "rgb(99, 115, 129)" }}
-                  />
-                  <p className="m-0 ml-8 font-14">Assessment Pasien Radiologi</p>
-                </div>
-                <div className="flex justify-end mb-40">
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={isEditingMode}
-                        onChange={handleIsEditingMode}
-                        inputProps={{ "aria-label": "controlled" }}
-                        disabled={!isActionPermitted("pasien:update")}
-                      />
-                    }
-                    label="Ubah data"
-                  />
-                </div>
-              </div>
-              <div style={{ display: "flex", justifyContent: "center" }}>
-                <FormAssessmentPasien />
-              </div>
-            </Card>
-
-            <Card className="px-14 py-12 mb-16">
-              <div className="flex justify-between items-center mb-16">
-                <div className="flex items-center">
-                  <CheckCircleIcon
-                    fontSize="small"
-                    style={{ color: "rgb(99, 115, 129)" }}
-                  />
-                  <p className="m-0 ml-8 font-14">Assessment Petugas Radiologi</p>
-                </div>
-                <div className="flex justify-end mb-40">
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={isEditingMode}
-                        onChange={handleIsEditingMode}
-                        inputProps={{ "aria-label": "controlled" }}
-                        disabled={!isActionPermitted("pasien:update")}
-                      />
-                    }
-                    label="Ubah data"
-                  />
-                </div>
-              </div>
-              <div style={{ display: "flex", justifyContent: "center" }}>
-                <FormAssessmentPetugas />
-              </div>
-            </Card>
-
-            <Card className="px-14 py-12 mb-16">
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}>
-                <FormExpertise />
-              </div>
-
-            </Card>
-
-            <Card className="px-14 py-12 mb-16">
-              <div className="flex items-center">
-                <p className="m-0 ml-8 font-14">Riwayat Pemeriksaan</p>
-              </div>
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}>
-                <RiwayatPemeriksaanTable />
-              </div>
-            </Card>
-          </div>
-          <Dialog
-            fullScreen
-            open={dialogProfileState}
-            onClose={() => setDialogProfileState(false)}
+          <Tabs
+            value={selectedTab}
+            onChange={(event, newValue) => setSelectedTab(newValue)}
+            variant="scrollable"
+            scrollButtons="auto"
+            aria-label="Sub-menu"
+            sx={{ marginBottom: "16px" }} // Add spacing below the tabs
           >
-            {/* <FormPasienRadiologi
-              isEditType
-              prePopulatedDataForm={dataPasien}
-              detailPrePopulatedData={detailDataPasien}
-              updatePrePopulatedData={updateData}
-            /> */}
-          </Dialog>
+            {menuItems.map((item, index) => (
+              <Tab
+                key={index}
+                label={item.label}
+                sx={{
+                  borderBottom: selectedTab === index ? "2px solid #3f51b5" : "none",
+                  marginRight: "16px", // Add spacing between tabs
+                }}
+              />
+            ))}
+          </Tabs>
+          <Card
+            sx={{
+              border: "1px solid #e0e0e0",
+              borderTop: "none",
+              borderRadius: "0px",
+              marginBottom: "16px", // Add spacing below the card
+            }}
+          >
+            {menuItems[selectedTab].component}
+          </Card>
         </>
       )}
     </>

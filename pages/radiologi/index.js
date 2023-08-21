@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { getListRadiologi, deleteRadiologi, searchRadiologi } from "api/radiologi";
+// import { getListRadiologi, deleteRadiologi, searchRadiologi } from "api/radiologi";
 import TableLayout from "components/TableLayout";
 import TableLayoutV3 from "components/TableLayoutV3";
 import LoaderOnLayout from "components/LoaderOnLayout";
@@ -48,22 +48,22 @@ const dummyRadiologiData = [
         id: 1,
         antrian: "001",
         no_rm: "12345",
-        nama_pasien: "John Doe",
-        alamat_domisili: "123 Main St, City",
+        nama_pasien: "John Doe Re Mi Fa Sol La Si Doe",
+        alamat_domisili: "123 Main St, City Town Square mana aja gitu loooohhhhhhhhhhhh",
         asuransi: "BPJS",
-        prioritas: "Biasa",
-        poli: "Radiologi",
+        prioritas: "CITO",
+        poli: "Kandungan",
         dokter: "Dr. Smith",
     },
     {
         id: 2,
         antrian: "002",
         no_rm: "54321",
-        nama_pasien: "Jane Smith",
+        nama_pasien: "Jane Smithhhhhhhhhhhhhhh",
         alamat_domisili: "456 Elm St, Town",
         asuransi: "Private",
-        prioritas: "Urgent",
-        poli: "Radiologi",
+        prioritas: "Non-CITO",
+        poli: "UGD",
         dokter: "Dr. Johnson",
     },
 ];

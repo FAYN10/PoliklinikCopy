@@ -60,11 +60,11 @@ const TableLayoutV3 = ({
   dataPerPage = 8,
   isUpdatingData,
   filterOptions = [{ label: "Def label", value: "def_value" }],
-  updateDataPerPage = () => {},
-  updateDataNavigate = () => {},
-  refreshData = () => {},
-  deleteData = () => {},
-  searchData = () => {},
+  updateDataPerPage = () => { },
+  updateDataNavigate = () => { },
+  refreshData = () => { },
+  deleteData = () => { },
+  searchData = () => { },
 }) => {
   const router = useRouter();
   const [order, setOrder] = useState("asc");
@@ -188,10 +188,18 @@ const TableLayoutV3 = ({
       state: false,
     }));
   };
+  const isAuthorizedToDelete = (data) => {
+    return true;
+  };
+  const handleContinueConfirmationDelete = (tableHead) => () => {
+    if (isAuthorizedToDelete(confirmationDelete.data)) {
+      deleteData(confirmationDelete.data.id);
+      handleCloseConfirmationDelete();
+    } else {
 
-  const handleContinueConfirmationDelete = () => {
-    deleteData(confirmationDelete.data.id);
-    handleCloseConfirmationDelete();
+      console.log("You are not authorized to delete this data.");
+      handleCloseConfirmationDelete();
+    }
   };
 
   const handleNavigate = (payload) => {
@@ -505,9 +513,9 @@ const TableLayoutV3 = ({
                                 onDoubleClick={
                                   row.id && isPermitted("show")
                                     ? () =>
-                                        router.push(
-                                          `${baseRoutePath}/${row.id}`
-                                        )
+                                      router.push(
+                                        `${baseRoutePath}/${row.id}`
+                                      )
                                     : null
                                 }
                                 className="pointer"
@@ -523,6 +531,7 @@ const TableLayoutV3 = ({
                                       sx={{
                                         paddingLeft: idx === 0 ? 1 : 0,
                                         paddingRight: 2,
+                                        width: obKey === "name" ? "20%" : undefined,
                                       }}
                                     >
                                       {row[obKey]}
@@ -645,26 +654,26 @@ const TableLayoutV3 = ({
         <DialogContent>
           {Object.keys(confirmationDelete.data).map((obKey, idx) => {
             // hide id and static number
-            if (obKey === "id" || obKey === "no") return;
-            else
-              return (
-                <DialogContentText key={idx}>
-                  {tableHead[idx].label}: {confirmationDelete.data[obKey]}
-                </DialogContentText>
-              );
+            if (obKey === "id" || obKey === "no") return null;
+            return (
+              <DialogContentText key={idx}>
+                {tableHead[idx].label}: {confirmationDelete.data[obKey]}
+              </DialogContentText>
+            );
           })}
         </DialogContent>
         <DialogActions>
           <Button color="error" onClick={handleCloseConfirmationDelete}>
             Batal
           </Button>
-          <Button color="success" onClick={handleContinueConfirmationDelete}>
-            Lanjutkan
-          </Button>
+          {isAuthorizedToDelete(confirmationDelete.data) && (
+            <Button color="success" onClick={handleContinueConfirmationDelete(tableHead)}>
+              Lanjutkan
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
     </>
   );
 };
-
 export default TableLayoutV3;

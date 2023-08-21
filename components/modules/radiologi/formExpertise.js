@@ -40,10 +40,45 @@ const FormExpertise = () => {
   const LabelToPrint = forwardRef(function LabelToPrint({ data }, ref) {
     return (
       <div ref={ref} className="printableContent">
-        {/* ... (printing logic remains the same) */}
+      <div className="flex p-4" style={{ display: "flex", justifyContent: "space-between" }}>
+        <div className="column">
+          <div className="font-w-600">No. Pemeriksaan: {data.no_pemeriksaan || "-"}</div>
+          <div className="font-w-600">No. RM: {data.no_rm || "-"}</div>
+          <div className="font-w-600">Nama Pasien: {data.nama_pasien || "-"}</div>
+          <div className="font-w-600">Tanggal Lahir: {data.tanggal_lahir || "-"}</div>
+          <div className="font-w-600">Umur: {data.umur || "-"}</div>
+        </div>
+        <div className="column">
+          <div className="font-w-600">Tanggal Pemeriksaan: {data.tanggal_pemeriksaan || "-"}</div>
+          <div className="font-w-600">Diagnosa: {data.diagnosis_kerja || "-"}</div>
+          <div className="font-w-600">Nama Pemeriksaan: {data.namaPemeriksaan || "-"}</div>
+          <div className="font-w-600">Jenis Pemeriksaan: {data.jenis_pemeriksaan || "-"}</div>
+          <div className="font-w-600">Dokter Pengirim: {data.dokter || "-"}</div>
+          <div className="font-w-600">Pelayanan: {data.poli || "-"}</div>
+        </div>
       </div>
+      <div className="font-w-600">Hasil Expertise: {data.hasil_expertise || "-"}</div>
+    </div>
+    
+   
     );
   });
+  
+const CheckupToPrint = forwardRef(function CheckupToPrint({ data }, ref) {
+  return (
+    <div ref={ref} className="printableContent">
+      <div className="m-8">
+        <div className="font-w-600">
+          <div className="font-18">RSU MITRA PARAMEDIKA</div>
+          <div style={{ maxWidth: "250px" }}>
+            Jl. Raya Ngemplak, Kemasan, Widodomartani, Ngemplak, Sleman
+          </div>
+        </div>
+        <div className="font-w-600 mt-24">{data.no_rm || "-"}</div>
+      </div>
+    </div>
+  );
+});
 
   const initialValues = {
     images: [],
@@ -64,7 +99,7 @@ const FormExpertise = () => {
   const handleUpdateImage = (newImage) => {
     if (newImage instanceof File) {
       const images = [...formik.values.images];
-  
+
       const reader = new FileReader();
       reader.onload = () => {
         images[selectedImageIndex] = reader.result;
@@ -77,7 +112,7 @@ const FormExpertise = () => {
       console.error("Invalid file input for handleUpdateImage");
     }
   };
-  
+
 
   const validationSchema = Yup.object({
     images: Yup.array().min(1, "Paling tidak harus ada satu gambar"),
@@ -101,15 +136,15 @@ const FormExpertise = () => {
     images.push(URL.createObjectURL(event.target.files[0]));
     formik.setFieldValue("images", images);
   };
- const handleImageClick = (image) => {
+  const handleImageClick = (image) => {
     setSelectedImage(image);
     setOpenDialog(true);
   };
   const handleCloseDialog = () => {
     setOpenDialog(false);
   };
-  
-  
+
+
 
   return (
     <Grid container spacing={2}>
@@ -123,28 +158,13 @@ const FormExpertise = () => {
             }
             title={
               <Typography variant="h6" component="div" fontWeight="bold">
-                Hasil pemeriksaan {formik.values.assessmentPetugas} <hr /> 
+                Hasil pemeriksaan {formik.values.assessmentPetugas} <hr />
               </Typography>
             }
           />
           <Collapse in={!isCardMinimized}>
             <CardContent>
-              <div className="mr-8" style={{ display: "flex", justifyContent: "flex-end" }}>
-                <ReactToPrint
-                  trigger={() => (
-                    <Button variant="contained" color="secondary" startIcon={<PrintIcon />}>
-                      EXPORT HASIL
-                    </Button>
-                  )}
-                  content={() => labelPrintRef.current}
-                />
-                <LabelToPrint
-                  data={{
-                    // ... (printing data remains the same)
-                  }}
-                  ref={labelPrintRef}
-                />
-              </div>
+
               <TableContainer>
                 <Table>
                   <TableHead>
@@ -250,7 +270,22 @@ const FormExpertise = () => {
               >
                 SIMPAN
               </LoadingButton>
+              <ReactToPrint
+                trigger={() => (
+                  <Button variant="contained" color="secondary" startIcon={<PrintIcon />} style={{ marginLeft: "16px" }}>
+                    EXPORT HASIL
+                  </Button>
+                )}
+                content={() => labelPrintRef.current}
+              />
+              <LabelToPrint
+                data={{
+           
+                }}
+                ref={labelPrintRef}
+              />
             </div>
+
           </Collapse>
         </Card>
       </Grid>
