@@ -43,30 +43,7 @@ const radiologiTableHead = [
     },
 ];
 
-const dummyRadiologiData = [
-    {
-        id: 1,
-        antrian: "001",
-        no_rm: "12345",
-        nama_pasien: "John Doe Re Mi Fa Sol La Si Doe",
-        alamat_domisili: "123 Main St, City Town Square mana aja gitu loooohhhhhhhhhhhh",
-        asuransi: "BPJS",
-        prioritas: "CITO",
-        poli: "Kandungan",
-        dokter: "Dr. Smith",
-    },
-    {
-        id: 2,
-        antrian: "002",
-        no_rm: "54321",
-        nama_pasien: "Jane Smithhhhhhhhhhhhhhh",
-        alamat_domisili: "456 Elm St, Town",
-        asuransi: "Private",
-        prioritas: "Non-CITO",
-        poli: "UGD",
-        dokter: "Dr. Johnson",
-    },
-];
+
 
 const dataRadiologiFormatHandler = (payload) => {
     const result = payload.map((e) => {
@@ -96,7 +73,7 @@ const Radiologi = () => {
     const [activeContent, setActiveContent] = useState(1);
 
     // pasien --general state
-    const [dataRadiologi, setDataRadiologi] = useState(dummyRadiologiData);
+    const [dataRadiologi, setDataRadiologi] = useState([]);
     const [dataMetaRadiologi, setDataMetaRadiologi] = useState({});
     const [dataRadiologiPerPage, setDataPerPage] = useState(8);
     const [isLoadingDataRadiologi, setIsLoadingDataRadiologi] = useState(false);
@@ -202,7 +179,7 @@ const Radiologi = () => {
 
     useEffect(() => {
         initDataRadiologi();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }, []);
 
     return (

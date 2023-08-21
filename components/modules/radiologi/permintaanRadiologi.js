@@ -10,29 +10,7 @@ import {
 } from "@mui/material";
 
 const PermintaanRadiologi = () => {
-  const dummyPermintaanData = [
-    {
-      noPemeriksaan: 1,
-      waktuPermintaan: "2023-08-20 09:00:00",
-      namaPemeriksaan: "X-Ray",
-      jenisPemeriksaan: "APPENDICOGRAM",
-      dokterPengirim: "Dr. John Doe",
-      unitPengirim: "Poli Umum",
-      diagnosisKerja: "Appendicitis",
-      catatanPermintaan: "Harap segera dilakukan pemeriksaan.",
-    },
-    {
-      noPemeriksaan: 2,
-      waktuPermintaan: "2023-08-21 14:30:00",
-      namaPemeriksaan: "X-Ray",
-      jenisPemeriksaan: "HSG",
-      dokterPengirim: "Dr. Jane Smith",
-      unitPengirim: "Poli Kandungan",
-      diagnosisKerja: "Infertility",
-      catatanPermintaan: "Pasien sedang menjalani program hamil.",
-    },
 
-  ];
 
   return (
     <TableContainer component={Paper}>

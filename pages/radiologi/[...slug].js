@@ -28,7 +28,6 @@ import PermintaanRadiologi from "components/modules/radiologi/permintaanRadiolog
 import FormAssessmentPetugas from "components/modules/radiologi/formAssessmentPetugas";
 import FormExpertise from "components/modules/radiologi/formExpertise";
 import RiwayatPemeriksaanTable from "components/modules/radiologi/riwayatPemeriksaanTable";
-import { dummyRadiologiData } from "pages/radiologi/index.js";
 import Assessment from "components/modules/radiologi/assessment";
 
 const DetailRadiologi = () => {
@@ -101,7 +100,7 @@ const DetailRadiologi = () => {
     if (router.isReady) {
       (async () => {
         try {
-          const data = dummyRadiologiData;
+          const data = response.data.data;
           const response = await getDetailRadiologi({ id: slug[0] });
           // const data = response.data.data;
           const formattedData = dataFormatter(data);
