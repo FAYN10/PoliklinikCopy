@@ -17,7 +17,7 @@ const PembelianTableHead = [
   },
   {
     id: "tanggal_jatuh_tempo",
-    label: "Tanggal Jatuh Tempo",
+    label: "Jatuh Tempo Pembayaran",
   },
   {
     id: "nomor_faktur",
@@ -32,11 +32,11 @@ const PembelianTableHead = [
 const dataPembelianFormatHandler = (payload) => {
   const result = payload.map((e) => {
     return {
-      nomor_po: e.nomor_po || "null",
+      nomor_po: e.purchase_order.nomor_po || "null",
       tanggal_pembelian: formatReadable(e.tanggal_pembelian) || "null",
       tanggal_jatuh_tempo: formatReadable(e.tanggal_jatuh_tempo) || "null",
       nomor_faktur: e.nomor_faktur || "null",
-      supplier: e.supplier.name || "null",
+      supplier: e.purchase_order.supplier.name || "null",
       id: e.id,
     };
   });
@@ -166,17 +166,17 @@ const Pembelian = () => {
             <TableLayoutGudang
               baseRoutePath={`${router.asPath}`}
               title="Pembelian"
-              isBtnAdd={false}
+              isBtnAdd={true}
               tableHead={PembelianTableHead}
               data={dataPembelian}
               meta={dataMetaPembelian}
               dataPerPage={dataPembelianPerPage}
               isUpdatingData={isUpdatingDataPembelian}
               filterOptions={[
-                { label: "Gudang", value: "gudang" },
-                { label: "Nomor PO", value: "nomor_po" },
+                // { label: "Gudang", value: "gudang" },
+                { label: "Nomor Faktur", value: "nomor_faktur" },
                 { label: "Supplier", value: "supplier" },
-                { label: "Tanggal PO", value: "date" },
+                { label: "Tanggal Pembelian", value: "date" },
               ]}
               updateDataPerPage={(e, filter) => {
                 setDataPerPage(e.target.value);

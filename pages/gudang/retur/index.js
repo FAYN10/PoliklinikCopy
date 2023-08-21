@@ -24,8 +24,8 @@ const dataReturFormatHandler = (payload) => {
   const result = payload.map((e) => {
     return {
       nomor_retur: e.nomor_retur || "null",
-      nomor_faktur: e.nomor_faktur || "null",
-      supplier: e.supplier || "null",
+      nomor_faktur: e.receive.nomor_faktur || "null",
+      supplier: e.receive.purchase_order.supplier.name || "null",
       id: e.id,
     };
   });

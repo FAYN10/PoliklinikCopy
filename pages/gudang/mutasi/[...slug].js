@@ -7,7 +7,7 @@ import {formatGenToIso} from 'utils/formatTime';
 import getStaticData from 'utils/getStaticData';
 import {getDetailMutasi} from 'api/gudang/mutasi';
 import TableLayout from 'pages/pasien/TableLayout';
-import { formatReadable } from "utils/formatTime";
+import {formatReadable} from 'utils/formatTime';
 import BackIcon from '@material-ui/icons/ArrowBack';
 import {
   Grid,
@@ -25,30 +25,62 @@ import {
 } from '@mui/material';
 import ReactToPrint from 'react-to-print';
 import {Paper} from '@material-ui/core';
+import TableLayoutDetail from 'components/TableLayoutDetail';
+import DialogMutasiItem from 'components/modules/gudang/dialogMutasiItem';
 
 const Detail = () => {
   const router = useRouter();
   const {slug} = router.query;
   // const [dataMutasi, setDataMutasi] = useState({});
   const [detailDataMutasi, setDetailDataMutasi] = useState({});
-  const [isLoadingDataMutasi, setIsLoadingDataMutasi] =
-    useState(true);
-  const [rows, setRows] = useState(
-    detailDataMutasi?.mutation_detail || []
-  );
+  const [dataMutasi, setDataMutasi] = useState({});
+  const [isLoadingDataMutasi, setIsLoadingDataMutasi] = useState(true);
+
+  const [isEditingMode, setIsEditingMode] = useState(false);
+  const [dataDetail, setDataDetail] = useState([]);
+  const [isDialogItem, setIsDialogItem] = useState(false);
   const generalConsentPrintRef = useRef();
 
-  // const dataFormatter = (data) => {
-  //   let tempData = {
-  //     nomor_po: data.nomor_po || "null",
-  //     tanggal_po: data.tanggal_po || "null",
-  //     nama_supplier: data.supplier.name || "null",
-  //     telepon_supplier: data.supplier.telp || "null",
-  //     alamat_supplier: data.supplier.address || "null",
-  //     po_type: data.po_type.name || "null",
-  //   };
-  //   return { ...tempData };
-  // };
+  const handleIsEditingMode = (e) => {
+    setIsEditingMode(e.target.checked);
+  };
+
+  const detailMutasiTableHead = [
+    {
+      id: "kode_item",
+      label: "Kode Item",
+    },
+    {
+      id: "nama_item",
+      label: "Nama Item",
+    },
+    {
+      id: "nomor_batch",
+      label: "Nomor Batch",
+    },
+    {
+      id: "jumlah",
+      label: "Jumlah",
+    },
+    {
+      id: "sediaan",
+      label: "Sediaan",
+    },
+  ];
+
+  const dataDetailFormatHandler = (payload) => {
+    const result = payload.map((e) => {
+      return {
+        kode_item: e.item.kode || "null",
+        nama_item: e.item.name || "null",
+        nomor_batch: e.nomor_batch || "null",
+        jumlah: e.jumlah || "null",
+        sediaan: e.sediaan.sediaan || "null",
+        id: e,
+      };
+    });
+    return result;
+  };
 
   useEffect(() => {
     if (router.isReady) {
@@ -56,13 +88,14 @@ const Detail = () => {
         try {
           const response = await getDetailMutasi({id: slug[0]});
           const data = response.data.data;
-          // const formattedData = dataFormatter(data); // format data untuk error handling
-          // setDataMutasi(formattedData); // setDataPO pakai data yang diformat di atas
+          const formattedData = dataDetailFormatHandler(data.mutation_detail); // format data untuk error handling
+          setDetailDataMutasi(formattedData); // setDataPO pakai data yang diformat di atas
+          setDataMutasi(data);
           console.log('Fetched Data:', data);
-          setDetailDataMutasi(data); // setDetailPO pakai data dari resnpose API
-          const MutasiDetails = data.mutation_detail || []; // ambil data detail PO jika nggak ada maka array kosong
-          console.log('Mutasi Details:', MutasiDetails);
-          setRows(MutasiDetails);
+          // setDetailDataMutasi(data); // setDetailPO pakai data dari resnpose API
+          // const MutasiDetails = data.mutation_detail || []; // ambil data detail PO jika nggak ada maka array kosong
+          // console.log('Mutasi Details:', MutasiDetails);
+          // setRows(MutasiDetails);
         } catch (error) {
           console.log('Error fetching data:', error);
         } finally {
@@ -97,55 +130,44 @@ const Detail = () => {
                       <Grid item md={7} sm={12}>
                         <div>
                           {' : '}
-                          {formatReadable(detailDataMutasi?.tanggal_mutasi)}
+                          {formatReadable(dataMutasi?.tanggal_mutasi)}
                         </div>
                       </Grid>
                       <Grid item xs={4}>
-                        <Typography variant='h1 font-w-700'>
-                          Unit
-                        </Typography>
+                        <Typography variant='h1 font-w-700'>Unit</Typography>
                       </Grid>
                       <Grid item md={7} sm={12}>
                         <div>
                           {' : '}
-                          {detailDataMutasi?.unit}
+                          {dataMutasi?.unit.name}
                         </div>
                       </Grid>
                     </Grid>
                   </div>
                 </div>
               </div>
+
               <Divider sx={{borderWidth: '1px', marginTop: 2}} />
+
               <div className='mt-32 p-16'>
-                <TableContainer component={Paper}>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell sx={{fontWeight: 'bold'}}>No</TableCell>
-                        <TableCell sx={{fontWeight: 'bold'}}>
-                          Kode Item
-                        </TableCell>
-                        <TableCell sx={{fontWeight: 'bold'}}>
-                          Nama Item
-                        </TableCell>
-                        <TableCell sx={{fontWeight: 'bold'}}>Jumlah</TableCell>
-                        <TableCell sx={{fontWeight: 'bold'}}>Sediaan</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {rows.map((row, index) => (
-                        <TableRow key={index}>
-                          <TableCell>{index+1}</TableCell>
-                          <TableCell>{row.item.kode}</TableCell>
-                          <TableCell>{row.item.name}</TableCell>
-                          <TableCell>{row.jumlah}</TableCell>
-                          <TableCell>{row.sediaan.sediaan}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                <TableLayoutDetail
+                  baseRoutePath={`${router.asPath}`}
+                  title='Mutasi'
+                  tableHead={detailMutasiTableHead}
+                  data={detailDataMutasi}
+                  btnEditHandler={setIsDialogItem}
+                  // isUpdatingData={isUpdatingDataRawatJalan}
+                  // deleteData={deleteDetailDataHandler}
+                  // createData={createDetailDataHandler}
+                />
+
+                <DialogMutasiItem
+                  state={isDialogItem}
+                  setState={setIsDialogItem}
+                  // createData={createDetailDataHandler}
+                />
               </div>
+
               <div className='flex justify-end'>
                 <Button
                   type='button'

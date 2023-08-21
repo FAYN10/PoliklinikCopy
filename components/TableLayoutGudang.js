@@ -1,69 +1,69 @@
-import { useState, forwardRef, useEffect, useMemo } from "react";
-import { useRouter } from "next/router";
-import Box from "@mui/system/Box";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Grid from "@mui/material/Grid";
-import Chip from "@mui/material/Chip";
-import visuallyHidden from "@mui/utils/visuallyHidden";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-import PlusIcon from "@material-ui/icons/Add";
-import DeleteIcon from "@material-ui/icons/Delete";
-import NextIcon from "@material-ui/icons/NavigateNext";
-import PrevIcon from "@material-ui/icons/NavigateBefore";
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
-import Paper from "@mui/material/Paper";
-import TableContainer from "@mui/material/TableContainer";
-import Table from "@mui/material/Table";
-import TableHead from "@mui/material/TableHead";
-import TableBody from "@mui/material/TableBody";
-import TableRow from "@mui/material/TableRow";
-import TableCell from "@mui/material/TableCell";
-import TableSortLabel from "@mui/material/TableSortLabel";
-import InputAdornment from "@mui/material/InputAdornment";
-import SearchIcon from "@material-ui/icons/SearchOutlined";
-import RefreshIcon from "@material-ui/icons/CachedOutlined";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
-import SpinnerMui from "components/SpinnerMui";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
-import Slide from "@mui/material/Slide";
-import st from "styles/module/components/Table.module.scss";
-import useClientPermission from "custom-hooks/useClientPermission";
-import SelectAsync from "components/SelectAsync";
-import { getSupplier } from "api/supplier";
-import { getUnit } from "api/unit";
-import { getPoType } from "api/gudang/po-type";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { LocalizationProvider } from "@mui/x-date-pickers//LocalizationProvider";
-import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
-import { formatIsoToGen } from "utils/formatTime";
-import { jenisGudang } from "public/static/data";
-import { jenisMutasi } from "public/static/data";
+import {useState, forwardRef, useEffect, useMemo} from 'react';
+import {useRouter} from 'next/router';
+import Box from '@mui/system/Box';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Grid from '@mui/material/Grid';
+import Chip from '@mui/material/Chip';
+import visuallyHidden from '@mui/utils/visuallyHidden';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import PlusIcon from '@material-ui/icons/Add';
+import DeleteIcon from '@material-ui/icons/Delete';
+import NextIcon from '@material-ui/icons/NavigateNext';
+import PrevIcon from '@material-ui/icons/NavigateBefore';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import Paper from '@mui/material/Paper';
+import TableContainer from '@mui/material/TableContainer';
+import Table from '@mui/material/Table';
+import TableHead from '@mui/material/TableHead';
+import TableBody from '@mui/material/TableBody';
+import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
+import TableSortLabel from '@mui/material/TableSortLabel';
+import InputAdornment from '@mui/material/InputAdornment';
+import SearchIcon from '@material-ui/icons/SearchOutlined';
+import RefreshIcon from '@material-ui/icons/CachedOutlined';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import SpinnerMui from 'components/SpinnerMui';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Slide from '@mui/material/Slide';
+import st from 'styles/module/components/Table.module.scss';
+import useClientPermission from 'custom-hooks/useClientPermission';
+import SelectAsync from 'components/SelectAsync';
+import {getSupplier} from 'api/supplier';
+import {getUnit} from 'api/unit';
+import {getPoType} from 'api/gudang/po-type';
+import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
+import {LocalizationProvider} from '@mui/x-date-pickers//LocalizationProvider';
+import {DesktopDatePicker} from '@mui/x-date-pickers/DesktopDatePicker';
+import {formatIsoToGen} from 'utils/formatTime';
+import {jenisGudang} from 'public/static/data';
 
 const Transition = forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />;
+  return <Slide direction='up' ref={ref} {...props} />;
 });
 
 const TableLayout = ({
-  baseRoutePath = "/",
+  baseRoutePath = '/',
   customCreatePath = null,
-  title = "Default title",
+  title = 'Default title',
   isBtnAdd = false,
   isTerima = false,
+  isDelete = false,
   customBtnAddTitle = null,
   tableHead = [],
   data = [],
   meta = {},
   dataPerPage = 8,
   isUpdatingData,
-  filterOptions = [{ label: "Def label", value: "def_value" }],
+  filterOptions = [{label: 'Def label', value: 'def_value'}],
   updateDataPerPage = () => {},
   updateDataNavigate = () => {},
   refreshData = () => {},
@@ -71,18 +71,18 @@ const TableLayout = ({
   searchData = () => {},
 }) => {
   const router = useRouter();
-  const [order, setOrder] = useState("asc");
+  const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState(tableHead[0].id);
   const [page] = useState(0);
   const [confirmationDelete, setConfirmationDelete] = useState({
     state: false,
     data: {},
   });
-  const [searchText, setSearchText] = useState("");
-  const { clientPermission } = useClientPermission();
+  const [searchText, setSearchText] = useState('');
+  const {clientPermission} = useClientPermission();
   const [filter, setFilter] = useState(filterOptions[0].value);
   const [selectedFilter, setSelectedFilter] = useState([]);
-  const textFieldCategory = ['nomor_po', 'nomor_faktur'];
+  const textFieldCategory = ['nomor_po', 'nomor_retur', 'nomor_faktur', 'nomor_batch', 'kode_item', 'nama_item'];
   const [jenisGudangRef, setJenisGudangRef] = useState({
     values: {
       id: '',
@@ -100,14 +100,6 @@ const TableLayout = ({
     errors: false,
   });
   const [supplierRef, setSupplierRef] = useState({
-    values: {
-      id: '',
-      name: '',
-    },
-    touched: false,
-    errors: false,
-  });
-  const [jenisMutasiRef, setJenisMutasiRef] = useState({
     values: {
       id: '',
       name: '',
@@ -137,7 +129,7 @@ const TableLayout = ({
     return 0;
   }
   function getComparator(order, orderBy) {
-    return order === "desc"
+    return order === 'desc'
       ? (a, b) => descendingComparator(a, b, orderBy)
       : (a, b) => -descendingComparator(a, b, orderBy);
   }
@@ -155,7 +147,7 @@ const TableLayout = ({
     return stabilizedThis.map((el) => el[0]);
   }
   function EnhancedTableHead(props) {
-    const { order, orderBy, onRequestSort } = props;
+    const {order, orderBy, onRequestSort} = props;
     const createSortHandler = (property) => (event) => {
       onRequestSort(event, property);
     };
@@ -166,35 +158,35 @@ const TableLayout = ({
           {tableHead.map((headCell, idx) => (
             <TableCell
               key={headCell.id}
-              align="left"
+              align='left'
               sortDirection={orderBy === headCell.id ? order : false}
-              sx={{ paddingLeft: idx === 0 ? 1 : 0 }}
+              sx={{paddingLeft: idx === 0 ? 1 : 0}}
             >
               <TableSortLabel
                 active={orderBy === headCell.id}
-                direction={orderBy === headCell.id ? order : "asc"}
+                direction={orderBy === headCell.id ? order : 'asc'}
                 onClick={createSortHandler(headCell.id)}
-                className="font-w-600"
+                className='font-w-600'
               >
                 {headCell.label}
                 {orderBy === headCell.id ? (
-                  <Box component="span" sx={visuallyHidden}>
-                    {order === "desc"
-                      ? "sorted descending"
-                      : "sorted ascending"}
+                  <Box component='span' sx={visuallyHidden}>
+                    {order === 'desc'
+                      ? 'sorted descending'
+                      : 'sorted ascending'}
                   </Box>
                 ) : null}
               </TableSortLabel>
             </TableCell>
           ))}
-          <TableCell align="right" padding="normal" />
+          <TableCell align='right' padding='normal' />
         </TableRow>
       </TableHead>
     );
   }
   const handleRequestSort = (event, property) => {
-    const isAsc = orderBy === property && order === "asc";
-    setOrder(isAsc ? "desc" : "asc");
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
   };
   // Avoid a layout jump when reaching the last page with empty rows.
@@ -227,40 +219,33 @@ const TableLayout = ({
   };
 
   const handleRefresh = () => {
-    setSearchText("");
+    setSearchText('');
     setJenisGudangRef((e) => ({
       ...e,
       values: {
-        id: "",
-        name: "",
+        id: '',
+        name: '',
       },
     }));
     setJenisSuratRef((e) => ({
       ...e,
       values: {
-        id: "",
-        name: "",
+        id: '',
+        name: '',
       },
     }));
     setSupplierRef((e) => ({
       ...e,
       values: {
-        id: "",
-        name: "",
-      },
-    }));
-    setJenisMutasiRef((e) => ({
-      ...e,
-      values: {
-        id: "",
-        name: "",
+        id: '',
+        name: '',
       },
     }));
     setUnitRef((e) => ({
       ...e,
       values: {
-        id: "",
-        name: "",
+        id: '',
+        name: '',
       },
     }));
     setDate(null);
@@ -271,7 +256,7 @@ const TableLayout = ({
 
   const isPermitted = (payload) => {
     let value = true;
-    if (clientPermission.includes("admin")) return value;
+    if (clientPermission.includes('admin')) return value;
     if (
       !clientPermission.includes(`${baseRoutePath.substring(1)}:${payload}`)
     ) {
@@ -281,40 +266,33 @@ const TableLayout = ({
   };
 
   const handleChangeFilter = (event) => {
-    setSearchText("");
+    setSearchText('');
     setJenisGudangRef((e) => ({
       ...e,
       values: {
-        id: "",
-        name: "",
+        id: '',
+        name: '',
       },
     }));
     setJenisSuratRef((e) => ({
       ...e,
       values: {
-        id: "",
-        name: "",
+        id: '',
+        name: '',
       },
     }));
     setSupplierRef((e) => ({
       ...e,
       values: {
-        id: "",
-        name: "",
-      },
-    }));
-    setJenisMutasiRef((e) => ({
-      ...e,
-      values: {
-        id: "",
-        name: "",
+        id: '',
+        name: '',
       },
     }));
     setUnitRef((e) => ({
       ...e,
       values: {
-        id: "",
-        name: "",
+        id: '',
+        name: '',
       },
     }));
     setDate(null);
@@ -322,8 +300,8 @@ const TableLayout = ({
   };
 
   const handleOnEnterSearch = () => {
-    if (!searchText.replace(/\s/g, "").length) {
-      setSearchText("");
+    if (!searchText.replace(/\s/g, '').length) {
+      setSearchText('');
       return;
     }
     let tempOptions = filterOptions.filter((e) => e.value === filter);
@@ -332,9 +310,10 @@ const TableLayout = ({
     tempFilterDisplay.unshift({
       type: filter,
       label: tempOptions[0].label,
+      name: searchText,
       value: searchText,
     });
-    setSearchText("");
+    setSearchText('');
     setSelectedFilter(tempFilterDisplay);
     searchData(tempFilterDisplay);
   };
@@ -361,6 +340,7 @@ const TableLayout = ({
       tempFilterDisplay.unshift({
         type: filter,
         label: tempOptions[0].label,
+        name: value.name,
         value: value.name,
       });
       setSelectedFilter(tempFilterDisplay);
@@ -369,8 +349,8 @@ const TableLayout = ({
       setJenisGudangRef((e) => ({
         ...e,
         values: {
-          id: "",
-          name: "",
+          id: '',
+          name: '',
         },
       }));
     }
@@ -390,7 +370,8 @@ const TableLayout = ({
       tempFilterDisplay.unshift({
         type: filter,
         label: tempOptions[0].label,
-        value: value.name,
+        name: value.name,
+        value: value.kode,
       });
       setSelectedFilter(tempFilterDisplay);
       searchData(tempFilterDisplay);
@@ -398,8 +379,8 @@ const TableLayout = ({
       setJenisSuratRef((e) => ({
         ...e,
         values: {
-          id: "",
-          name: "",
+          id: '',
+          name: '',
         },
       }));
     }
@@ -419,7 +400,8 @@ const TableLayout = ({
       tempFilterDisplay.unshift({
         type: filter,
         label: tempOptions[0].label,
-        value: value.name,
+        name: value.name,
+        value: value.id,
       });
       setSelectedFilter(tempFilterDisplay);
       searchData(tempFilterDisplay);
@@ -427,37 +409,8 @@ const TableLayout = ({
       setSupplierRef((e) => ({
         ...e,
         values: {
-          id: "",
-          name: "",
-        },
-      }));
-    }
-  };
-
-  const handleOnChangeJenisMutasi = (value) => {
-    if (value) {
-      setJenisMutasiRef((e) => ({
-        ...e,
-        values: {
-          ...value,
-        },
-      }));
-      let tempOptions = filterOptions.filter((e) => e.value === filter);
-      let tempFilterDisplay = [...selectedFilter];
-      tempFilterDisplay = tempFilterDisplay.filter((e) => e.type !== filter);
-      tempFilterDisplay.unshift({
-        type: filter,
-        label: tempOptions[0].label,
-        value: value.name,
-      });
-      setSelectedFilter(tempFilterDisplay);
-      searchData(tempFilterDisplay);
-    } else {
-      setJenisMutasiRef((e) => ({
-        ...e,
-        values: {
-          id: "",
-          name: "",
+          id: '',
+          name: '',
         },
       }));
     }
@@ -477,7 +430,8 @@ const TableLayout = ({
       tempFilterDisplay.unshift({
         type: filter,
         label: tempOptions[0].label,
-        value: value.name,
+        name: value.name,
+        value: value.id,
       });
       setSelectedFilter(tempFilterDisplay);
       searchData(tempFilterDisplay);
@@ -485,8 +439,8 @@ const TableLayout = ({
       setUnitRef((e) => ({
         ...e,
         values: {
-          id: "",
-          name: "",
+          id: '',
+          name: '',
         },
       }));
     }
@@ -504,6 +458,7 @@ const TableLayout = ({
     tempFilterDisplay.unshift({
       type: filter,
       label: tempOptions[0].label,
+      name: formatIsoToGen(newValue),
       value: formatIsoToGen(newValue),
     });
     setSelectedFilter(tempFilterDisplay);
@@ -516,10 +471,10 @@ const TableLayout = ({
         <TextField
           id={`search-${title}`}
           label={`Cari ${title}`}
-          sx={{ width: "100%" }}
+          sx={{width: '100%'}}
           InputProps={{
             startAdornment: (
-              <InputAdornment position="start">
+              <InputAdornment position='start'>
                 <SearchIcon />
               </InputAdornment>
             ),
@@ -527,73 +482,62 @@ const TableLayout = ({
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
           onKeyDownCapture={(e) => {
-            if (e.key === "Enter") {
+            if (e.key === 'Enter') {
               handleOnEnterSearch();
             }
           }}
         />
       ) : null}
-      {filter === "gudang" ? (
+      {filter === 'gudang' ? (
         <SelectAsync
-          id="gudang"
-          labelField="Gudang"
-          labelOptionRef="name"
-          valueOptionRef="id"
+          id='gudang'
+          labelField='Gudang'
+          labelOptionRef='name'
+          valueOptionRef='id'
           handlerRef={jenisGudangRef}
           handlerFetchData={jenisGudang}
           handlerOnChange={(value) => handleOnChangeJenisGudang(value)}
         />
       ) : null}
-      {filter === "jenis_surat" ? (
+      {filter === 'potype' ? (
         <SelectAsync
-          id="jenis_surat"
-          labelField="Jenis Surat"
-          labelOptionRef="name"
-          valueOptionRef="id"
+          id='potype'
+          labelField='Jenis Surat'
+          labelOptionRef='name'
+          valueOptionRef='id'
           handlerRef={jenisSuratRef}
           handlerFetchData={getPoType}
           handlerOnChange={(value) => handleOnChangeJenisSurat(value)}
         />
       ) : null}
-      {filter === "supplier" ? (
+      {filter === 'supplier' ? (
         <SelectAsync
-          id="supplier"
-          labelField="Supplier"
-          labelOptionRef="name"
-          valueOptionRef="id"
+          id='supplier'
+          labelField='Supplier'
+          labelOptionRef='name'
+          valueOptionRef='id'
           handlerRef={supplierRef}
           handlerFetchData={getSupplier}
           handlerOnChange={(value) => handleOnChangeSupplier(value)}
         />
       ) : null}
-      {filter === "mutasi" ? (
+      {filter === 'unit' ? (
         <SelectAsync
-          id="mutasi"
-          labelField="Mutasi"
-          labelOptionRef="name"
-          valueOptionRef="id"
-          handlerRef={jenisMutasiRef}
-          handlerFetchData={jenisMutasi}
-          handlerOnChange={(value) => handleOnChangeJenisMutasi(value)}
-        />
-      ) : null}
-      {filter === "unit" ? (
-        <SelectAsync
-          id="unit"
-          labelField="Unit"
-          labelOptionRef="name"
-          valueOptionRef="id"
+          id='unit'
+          labelField='Unit'
+          labelOptionRef='name'
+          valueOptionRef='id'
           handlerRef={unitRef}
           handlerFetchData={getUnit}
           handlerOnChange={(value) => handleOnChangeUnit(value)}
         />
       ) : null}
-      {filter === "date" ? (
+      {filter === 'date' ? (
         <FormControl fullWidth>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DesktopDatePicker
-              label="Tanggal"
-              inputFormat="dd/MM/yyyy"
+              label='Tanggal'
+              inputFormat='dd/MM/yyyy'
               value={date}
               onChange={handleChangeDate}
               renderInput={(params) => <TextField {...params} />}
@@ -608,12 +552,12 @@ const TableLayout = ({
     <>
       <div className={st.container}>
         <div className={st.header}>
-          <h2 className="color-grey-text">{title}</h2>
+          <h2 className='color-grey-text'>{title}</h2>
           {isBtnAdd ? (
             <Button
-              variant="contained"
+              variant='contained'
               endIcon={<PlusIcon />}
-              disabled={!isPermitted("store")}
+              disabled={!isPermitted('store')}
               onClick={
                 !customCreatePath
                   ? () => router.push(`${baseRoutePath}/create`)
@@ -624,17 +568,17 @@ const TableLayout = ({
             </Button>
           ) : null}
         </div>
-        <Box sx={{ width: "100%", marginY: 4 }}>
-          <Paper sx={{ width: "100%", padding: 2 }}>
-            <Grid container spacing={1} alignItems={"center"}>
+        <Box sx={{width: '100%', marginY: 4}}>
+          <Paper sx={{width: '100%', padding: 2}}>
+            <Grid container spacing={1} alignItems={'center'}>
               <Grid item md={2} xs={12}>
                 <FormControl fullWidth>
-                  <InputLabel id="filter-select-label">Filter</InputLabel>
+                  <InputLabel id='filter-select-label'>Filter</InputLabel>
                   <Select
-                    labelId="filter-select-label"
-                    id="filter-select"
+                    labelId='filter-select-label'
+                    id='filter-select'
                     value={filter}
-                    label="Filter"
+                    label='Filter'
                     onChange={handleChangeFilter}
                   >
                     {filterOptions.map((e) => (
@@ -649,8 +593,8 @@ const TableLayout = ({
                 {RenderFieldFilter}
               </Grid>
               <Grid item md={2} xs={2}>
-                <div className="flex justify-end">
-                  <Tooltip title="Refresh Data" arrow>
+                <div className='flex justify-end'>
+                  <Tooltip title='Refresh Data' arrow>
                     <span>
                       <IconButton
                         onClick={isUpdatingData ? null : handleRefresh}
@@ -662,12 +606,12 @@ const TableLayout = ({
                 </div>
               </Grid>
             </Grid>
-            <div className="flex mt-8">
+            <div className='flex mt-8'>
               {selectedFilter.map((data) => {
                 return (
-                  <div key={data.type} className="mr-4">
+                  <div key={data.type} className='mr-4'>
                     <Chip
-                      label={data.label + ": " + data.value}
+                      label={data.label + ': ' + data.name}
                       onDelete={() => handleDeleteDisplayFilter(data)}
                     ></Chip>
                   </div>
@@ -677,8 +621,8 @@ const TableLayout = ({
             <div>
               {isUpdatingData ? (
                 <div
-                  className="flex justify-center items-center"
-                  style={{ height: "200px" }}
+                  className='flex justify-center items-center'
+                  style={{height: '200px'}}
                 >
                   <SpinnerMui />
                 </div>
@@ -686,7 +630,7 @@ const TableLayout = ({
                 <>
                   <TableContainer>
                     <Table
-                      sx={{ minWidth: 750 }}
+                      sx={{minWidth: 750}}
                       aria-labelledby={`table${title}`}
                     >
                       <EnhancedTableHead
@@ -707,26 +651,28 @@ const TableLayout = ({
                                 tabIndex={-1}
                                 key={row.id || idR}
                                 onDoubleClick={
-                                  row.id && isPermitted("show")
+                                  row.id && isPermitted('show')
                                     ? () =>
                                         router.push(
                                           `${baseRoutePath}/${row.id}`
                                         )
                                     : null
                                 }
-                                className="pointer"
+                                className='pointer'
                               >
                                 {Object.keys(row).map((obKey, idx) => {
                                   // hide id
-                                  if (obKey === "id") return;
+                                  if (obKey === 'id') return;
                                   return (
                                     <TableCell
                                       key={idx}
-                                      align="left"
-                                      padding="none"
+                                      align='left'
+                                      padding='none'
                                       sx={{
                                         paddingLeft: idx === 0 ? 1 : 0,
                                         paddingRight: 2,
+                                        height: 56,
+                                        minHeight: 56,
                                       }}
                                     >
                                       {row[obKey]}
@@ -735,31 +681,39 @@ const TableLayout = ({
                                 })}
                                 {isTerima ? (
                                   <TableCell
-                                  sx={{
-                                    paddingRight: 1,
-                                    paddingY: 0.8,
-                                  }}>
-                                    <Button variant="contained">
-                                    Terima
-                                  </Button>
-                                </TableCell>
-                                ) : null }
-                                <TableCell
-                                  padding="none"
+                                    sx={{
+                                      paddingRight: 1,
+                                      paddingY: 0.8,
+                                    }}
+                                    onClick={
+                                      row.id && isPermitted('show')
+                                        ? () =>
+                                            router.push(
+                                              `${baseRoutePath}/terima/${row.id}`
+                                            )
+                                        : null
+                                    }
+                                  >
+                                    <Button variant='contained'>Terima</Button>
+                                  </TableCell>
+                                ) : null}
+                                {isDelete ? (
+                                  <TableCell
+                                  padding='none'
                                   sx={{
                                     paddingRight: 1,
                                     paddingY: 0.8,
                                   }}
                                 >
-                                  {isPermitted("destroy") ? (
-                                    <Tooltip title="Delete" arrow>
+                                  {isPermitted('destroy') ? (
+                                    <Tooltip title='Delete' arrow>
                                       <IconButton
                                         onClick={(event) => {
                                           event.stopPropagation();
                                           handleOpenConfirmationDelete(row);
                                         }}
                                       >
-                                        <DeleteIcon color="error" />
+                                        <DeleteIcon color='error' />
                                       </IconButton>
                                     </Tooltip>
                                   ) : (
@@ -772,6 +726,7 @@ const TableLayout = ({
                                     </Tooltip>
                                   )}
                                 </TableCell>
+                                ) : null}
                               </TableRow>
                             );
                           })}
@@ -788,12 +743,12 @@ const TableLayout = ({
                       </TableBody>
                     </Table>
                   </TableContainer>
-                  <div className="flex justify-end items-center pt-16 pb-8">
+                  <div className='flex justify-end items-center pt-16 pb-8'>
                     <div>
-                      <span className="font-16 mr-16">Rows per page</span>
+                      <span className='font-16 mr-16'>Rows per page</span>
                       <Select
-                        labelId="select-row-per-page"
-                        id="select-row-per-page"
+                        labelId='select-row-per-page'
+                        id='select-row-per-page'
                         onChange={(val) =>
                           updateDataPerPage(val, selectedFilter)
                         }
@@ -806,7 +761,7 @@ const TableLayout = ({
                       </Select>
                     </div>
                     <div>
-                      <Tooltip title="Previous" arrow>
+                      <Tooltip title='Previous' arrow>
                         <span>
                           <IconButton
                             disabled={meta.prev_page === null}
@@ -820,7 +775,7 @@ const TableLayout = ({
                           </IconButton>
                         </span>
                       </Tooltip>
-                      <Tooltip title="Next" arrow>
+                      <Tooltip title='Next' arrow>
                         <span>
                           <IconButton
                             disabled={meta.next_page === null}
@@ -838,7 +793,7 @@ const TableLayout = ({
                   </div>
                 </>
               ) : (
-                <div style={{ textAlign: "center", margin: "12 0" }}>
+                <div style={{textAlign: 'center', margin: '12 0'}}>
                   No data found
                 </div>
               )}
@@ -850,16 +805,16 @@ const TableLayout = ({
         open={confirmationDelete.state}
         onClose={handleCloseConfirmationDelete}
         TransitionComponent={Transition}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
       >
-        <DialogTitle id="alert-dialog-title">
+        <DialogTitle id='alert-dialog-title'>
           {`Hapus data ${title} berikut?`}
         </DialogTitle>
         <DialogContent>
           {Object.keys(confirmationDelete.data).map((obKey, idx) => {
             // hide id and static number
-            if (obKey === "id" || obKey === "no") return;
+            if (obKey === 'id' || obKey === 'no') return;
             else
               return (
                 <DialogContentText key={idx}>
@@ -869,10 +824,10 @@ const TableLayout = ({
           })}
         </DialogContent>
         <DialogActions>
-          <Button color="error" onClick={handleCloseConfirmationDelete}>
+          <Button color='error' onClick={handleCloseConfirmationDelete}>
             Batal
           </Button>
-          <Button color="success" onClick={handleContinueConfirmationDelete}>
+          <Button color='success' onClick={handleContinueConfirmationDelete}>
             Lanjutkan
           </Button>
         </DialogActions>

@@ -110,6 +110,16 @@ let SideList = [
         permission: [],
         routePath: "/gudang/retur",
       },
+      {
+        name: "Inventory",
+        permission: [],
+        routePath: "/gudang/inventory",
+      },
+      {
+        name: "Laporan",
+        permission: [],
+        routePath: "/gudang/laporan",
+      },
     ],
     childrenState: false,
     routePath: null,

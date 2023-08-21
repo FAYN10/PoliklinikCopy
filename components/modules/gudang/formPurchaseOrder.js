@@ -1,26 +1,27 @@
 import {useState, forwardRef, useRef, useEffect} from 'react';
 import {useRouter} from 'next/router';
 import {FocusError} from 'focus-formik-error';
-import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
 import FormControl from '@mui/material/FormControl';
 import Grid from '@mui/material/Grid';
-import Button from '@mui/material/Button';
 import LoadingButton from '@mui/lab/LoadingButton';
 import PlusIcon from '@material-ui/icons/Add';
 import SaveIcon from '@material-ui/icons/Save';
 import BackIcon from '@material-ui/icons/ArrowBack';
+import DoneIcon from '@mui/icons-material/Done';
 import {parse} from 'date-fns';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DatePicker from '@mui/lab/DatePicker';
 import {
+  formatIsoToGen,
   formatGenToIso,
   formatReadable,
   formatLabelDate,
 } from 'utils/formatTime';
 import {useFormik} from 'formik';
 import * as Yup from 'yup';
+import {stringSchema} from 'utils/yupSchema';
 import Snackbar from 'components/SnackbarMui';
 import {
   createPurchaseOrder,
@@ -37,9 +38,15 @@ import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import useClientPermission from 'custom-hooks/useClientPermission';
 import {filterFalsyValue} from 'utils/helper';
-import {Divider, Typography} from '@mui/material';
-import TableItem from './tableItem';
-// import DialogConfirmPasien from 'components/modules/pasien/DialogConfirmFormPasien';
+import {
+  Divider,
+  Typography,
+  Button,
+  Paper,
+} from '@mui/material';
+import {Add as AddIcon, Delete as DeleteIcon} from '@mui/icons-material';
+import DialogAddItem from './dialogAddItem';
+import TableLayoutDetail from "components/TableLayoutDetail";
 
 const LabelToPrint = forwardRef(function LabelToPrint({data}, ref) {
   return (
@@ -124,32 +131,63 @@ const FormPurchaseOrder = ({
     type: null,
     message: '',
   });
-  const [dialogConfirmToRawatJalan, setConfrimToRawatJalan] = useState({
-    state: false,
-    noRm: null,
-  });
   const [isEditingMode, setIsEditingMode] = useState(false);
+  const [dataDetail, setDataDetail] = useState([]);
+  const [isDialogItem, setIsDialogItem] = useState(false);
 
+  const detailPoTableHead = [
+    {
+      id: "kode_item",
+      label: "Kode Item",
+    },
+    {
+      id: "nama_item",
+      label: "Nama Item",
+    },
+    {
+      id: "jumlah",
+      label: "Jumlah",
+    },
+    {
+      id: "sediaan",
+      label: "Sediaan",
+    },
+  ];
+
+  const dataDetailFormatHandler = (payload) => {
+    const result = payload.map((e) => {
+      return {
+        kode_item: e.item.kode || "null",
+        nama_item: e.item.name,
+        jumlah: e.jumlah || "null",
+        sediaan: e.sediaan.name || "null",
+        id: e,
+      };
+    });
+    return result;
+  };
+  
   const handleIsEditingMode = (e) => {
     setIsEditingMode(e.target.checked);
   };
 
   const purchaseOrderInitialValues = !isEditType
     ? {
-        jenis_po: {id: '', name: ''},
+        potype: {kode: '', name: ''},
         nomor_po: '',
         tanggal_po: null,
         supplier: {id: '', name: ''},
         gudang: {id: '', name: ''},
         keterangan: '',
+        purchase_order_detail: []
       }
     : prePopulatedDataForm;
 
   const createPurchaseOrderSchema = Yup.object({
-    jenis_po: Yup.object({
-      code: Yup.string().required('Jenis surat wajib dipilih'),
+    potype: Yup.object({
+      kode: stringSchema('Jenis Surat', true),
     }),
-    nomor_po: Yup.string().required('Nomor PO wajib diisi'),
+    nomor_po: Yup.string(),
     tanggal_po: Yup.date()
       .transform(function (value, originalValue) {
         if (this.isType(value)) {
@@ -162,12 +200,12 @@ const FormPurchaseOrder = ({
       .min('2023-01-01', 'Tanggal PO tidak valid')
       .required('Tanggal PO wajib diisi'),
     supplier: Yup.object({
-      code: Yup.string().required('Supplier wajib dipilih'),
+      id: stringSchema('Supplier', true),
     }),
     gudang: Yup.object({
-      code: Yup.string().required('Gudang wajib dipilih'),
+      id: stringSchema('Gudang', true),
     }),
-    keterangan: Yup.string().required('Keterangan wajib diisi'),
+    purchase_order_detail: Yup.array(),
   });
 
   const createPurchaseOrderValidation = useFormik({
@@ -177,14 +215,17 @@ const FormPurchaseOrder = ({
     onSubmit: async (values, {resetForm, setFieldError}) => {
       let messageContext = isEditType ? 'diperbarui' : 'ditambahkan';
       let data = {...values};
-      const formattedData = filterFalsyValue({...data});
-      let quickFixJenisSurat = data.jenis_po !== '' ? data.jenis_po : null;
-      if (quickFixJenisSurat !== null) {
-        formattedData.jenis_po = quickFixJenisSurat;
-      }
+      data = {
+        ...data,
+        potype: data.potype.kode,
+        tanggal_po: formatIsoToGen(data.tanggal_po),
+        supplier: data.supplier.id,
+        gudang: data.gudang.name,
+      };
       try {
         let response;
         if (!isEditType) {
+          const formattedData = filterFalsyValue({...data});
           response = await createPurchaseOrder(formattedData);
           resetForm();
         } else {
@@ -202,12 +243,6 @@ const FormPurchaseOrder = ({
           type: 'success',
           message: `"${data.nomor_po}" berhasil ${messageContext}!`,
         });
-        if (!isEditType) {
-          setConfrimToRawatJalan({
-            state: true,
-            noRm: response.data.data.jenis_po,
-          });
-        }
       } catch (error) {
         if (Object.keys(error.errorValidationObj).length >= 1) {
           for (let key in error.errorValidationObj) {
@@ -222,6 +257,42 @@ const FormPurchaseOrder = ({
       }
     },
   });
+
+  const createDetailDataHandler = (payload) => {
+    let tempData = [...createPurchaseOrderValidation.values.purchase_order_detail];
+    const isAvailable = tempData.some(data => data.item.id !== payload.item.id && data.sediaan.id !== payload.sediaan.id);
+    if (isAvailable) {
+      createPurchaseOrderValidation.setFieldValue(
+        "purchase_order_detail",
+        tempData.filter((e) => e.item.id !== payload.item.id)
+      );
+    } else {
+      createPurchaseOrderValidation.setFieldValue("purchase_order_detail", [...tempData, payload]);
+    }
+    console.log(createPurchaseOrderValidation.values.purchase_order_detail);
+    setDataDetail(dataDetailFormatHandler(createPurchaseOrderValidation.values.purchase_order_detail));
+  };
+
+  const deleteDetailDataHandler = (payload) => {
+    let tempData =dataDetail.filter(data => data.id == payload);
+    // const result = dataDetailFormatHandler(createPurchaseOrderValidation.values.purchase_order_detail);
+    // createPurchaseOrderValidation.setFieldValue("purchase_order_detail", ...tempData);
+    // console.log(result);
+    setDataDetail(tempData);
+  };
+
+  useEffect(() => {
+    if (!isEditType) {
+      const nomor_po = "";
+      if(createPurchaseOrderValidation.values.potype.kode != "" && createPurchaseOrderValidation.values.tanggal_po != null){
+        const year = formatIsoToGen(createPurchaseOrderValidation.values.tanggal_po).substring(0,4);
+        const potype = createPurchaseOrderValidation.values.potype;
+        nomor_po = `${potype.kode}${year}${String(potype.state_number + 1).padStart(6, '0')}`;
+      }
+      createPurchaseOrderValidation.setFieldValue('nomor_po', nomor_po);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [createPurchaseOrderValidation.values.potype, createPurchaseOrderValidation.values.tanggal_po]);
 
   return (
     <>
@@ -243,229 +314,248 @@ const FormPurchaseOrder = ({
         ) : null}
         <form onSubmit={createPurchaseOrderValidation.handleSubmit}>
           <FocusError formik={createPurchaseOrderValidation} />
-          <div className='pl-16'>
-          <Grid container spacing={0}>
-            <Grid item xs={12} md={6}>
-              <Grid container spacing={1}>
-                <Grid item xs={3}>
-                  <Typography variant='h1 font-w-600'>Jenis Surat</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <div className='mb-16'>
-                    <SelectAsync
-                      id='jenis_po'
-                      labelField='Jenis Surat'
-                      labelOptionRef='name'
-                      valueOptionRef='id'
-                      handlerRef={createPurchaseOrderValidation}
-                      handlerFetchData={getPoType}
-                      handlerOnChange={(value) => {
-                        if (value) {
-                          createPurchaseOrderValidation.setFieldValue(
-                            'jenis_po',
-                            value
-                          );
-                        } else {
-                          createPurchaseOrderValidation.setFieldValue(
-                            'jenis_po',
-                            {
-                              id: '',
-                              name: '',
-                            }
-                          );
-                        }
-                      }}
-                      isDisabled={isEditType && !isEditingMode}
-                    />
-                  </div>
-                </Grid>
-              </Grid>
-              <Grid container spacing={1}>
-                <Grid item xs={3}>
-                  <Typography variant='h1 font-w-600'>Nomor PO</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <div className='mb-16'>
-                    <TextField
-                      fullWidth
-                      id='nomor_po'
-                      name='nomor_po'
-                      label='Nomor PO'
-                      value={createPurchaseOrderValidation.values.nomor_po}
-                      onChange={createPurchaseOrderValidation.handleChange}
-                      error={
-                        createPurchaseOrderValidation.touched.nomor_po &&
-                        Boolean(createPurchaseOrderValidation.errors.nomor_po)
-                      }
-                      helperText={
-                        createPurchaseOrderValidation.touched.nomor_po &&
-                        createPurchaseOrderValidation.errors.nomor_po
-                      }
-                      disabled={isEditType && !isEditingMode}
-                    />
-                  </div>
-                </Grid>
-              </Grid>
-              <Grid container spacing={1}>
-                <Grid item xs={3}>
-                  <Typography variant='h1 font-w-600'>Tanggal PO</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <div className='mb-16'>
-                    <FormControl fullWidth>
-                      <LocalizationProvider dateAdapter={AdapterDateFns}>
-                        <DatePicker
-                          id='tanggal_po'
-                          name='tanggal_po'
-                          label='Tanggal PO'
-                          inputFormat='dd-MM-yyyy'
-                          mask='__-__-____'
-                          value={
-                            createPurchaseOrderValidation.values.tanggal_po
-                              ? formatGenToIso(
-                                  createPurchaseOrderValidation.values
-                                    .tanggal_po
-                                )
-                              : null
-                          }
-                          onChange={(newValue) => {
+          <div className='p-16'>
+            <Grid container spacing={0}>
+              <Grid item xs={12} md={6}>
+                <Grid container spacing={1}>
+                  <Grid item xs={3}>
+                    <Typography variant='h1 font-w-600'>Jenis Surat</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <div className='mb-16'>
+                      <SelectAsync
+                        id='potype'
+                        labelField='Jenis Surat'
+                        labelOptionRef='name'
+                        valueOptionRef='kode'
+                        handlerRef={createPurchaseOrderValidation}
+                        handlerFetchData={getPoType}
+                        handlerOnChange={(value) => {
+                          if (value) {
                             createPurchaseOrderValidation.setFieldValue(
-                              'tanggal_po',
-                              newValue
+                              'potype',
+                              value
                             );
-                          }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              error={
-                                createPurchaseOrderValidation.touched
-                                  .tanggal_po &&
-                                Boolean(
+                          } else {
+                            createPurchaseOrderValidation.setFieldValue(
+                              'potype',
+                              {
+                                kode: '',
+                                name: '',
+                              }
+                            );
+                          }
+                        }}
+                        isDisabled={isEditType && !isEditingMode}
+                      />
+                    </div>
+                  </Grid>
+                </Grid>
+                <Grid container spacing={1}>
+                  <Grid item xs={3}>
+                    <Typography variant='h1 font-w-600'>Tanggal PO</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <div className='mb-16'>
+                      <FormControl fullWidth>
+                        <LocalizationProvider dateAdapter={AdapterDateFns}>
+                          <DatePicker
+                            id='tanggal_po'
+                            name='tanggal_po'
+                            label='Tanggal PO'
+                            inputFormat='dd-MM-yyyy'
+                            mask='__-__-____'
+                            value={
+                              createPurchaseOrderValidation.values.tanggal_po
+                                ? formatGenToIso(
+                                    createPurchaseOrderValidation.values
+                                      .tanggal_po
+                                  )
+                                : null
+                            }
+                            onChange={(newValue) => {
+                              createPurchaseOrderValidation.setFieldValue(
+                                'tanggal_po',
+                                newValue
+                              );
+                            }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                error={
+                                  createPurchaseOrderValidation.touched
+                                    .tanggal_po &&
+                                  Boolean(
+                                    createPurchaseOrderValidation.errors
+                                      .tanggal_po
+                                  )
+                                }
+                                helperText={
+                                  createPurchaseOrderValidation.touched
+                                    .tanggal_po &&
                                   createPurchaseOrderValidation.errors
                                     .tanggal_po
-                                )
+                                }
+                              />
+                            )}
+                            disabled={isEditType && !isEditingMode}
+                          />
+                        </LocalizationProvider>
+                      </FormControl>
+                    </div>
+                  </Grid>
+                </Grid>
+                <Grid container spacing={1}>
+                  <Grid item xs={3}>
+                    <Typography variant='h1 font-w-600'>Nomor PO</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <div className='mb-16'>
+                      <TextField
+                        fullWidth
+                        id='nomor_po'
+                        name='nomor_po'
+                        label='Nomor PO'
+                        value={createPurchaseOrderValidation.values.nomor_po}
+                        onChange={createPurchaseOrderValidation.handleChange}
+                        error={
+                          createPurchaseOrderValidation.touched.nomor_po &&
+                          Boolean(createPurchaseOrderValidation.errors.nomor_po)
+                        }
+                        helperText={
+                          createPurchaseOrderValidation.touched.nomor_po &&
+                          createPurchaseOrderValidation.errors.nomor_po
+                        }
+                        disabled
+                      />
+                    </div>
+                  </Grid>
+                </Grid>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Grid container spacing={1}>
+                  <Grid item xs={3}>
+                    <Typography variant='h1 font-w-600'>Supplier</Typography>
+                  </Grid>
+                  <Grid item xs={8}>
+                    <div className='mb-16'>
+                      <SelectAsync
+                        id='supplier'
+                        labelField='Supplier'
+                        labelOptionRef='name'
+                        valueOptionRef='id'
+                        handlerRef={createPurchaseOrderValidation}
+                        handlerFetchData={getSupplier}
+                        handlerOnChange={(value) => {
+                          if (value) {
+                            createPurchaseOrderValidation.setFieldValue(
+                              'supplier',
+                              value
+                            );
+                          } else {
+                            createPurchaseOrderValidation.setFieldValue(
+                              'supplier',
+                              {
+                                id: '',
+                                name: '',
                               }
-                              helperText={
-                                createPurchaseOrderValidation.touched
-                                  .tanggal_po &&
-                                createPurchaseOrderValidation.errors.tanggal_po
+                            );
+                          }
+                        }}
+                        isDisabled={isEditType && !isEditingMode}
+                      />
+                    </div>
+                  </Grid>
+                </Grid>
+                <Grid container spacing={1}>
+                  <Grid item xs={3}>
+                    <Typography variant='h1 font-w-600'>Gudang</Typography>
+                  </Grid>
+                  <Grid item xs={8}>
+                    <div className='mb-16'>
+                      <SelectAsync
+                        id='gudang'
+                        labelField='Gudang'
+                        labelOptionRef='name'
+                        valueOptionRef='id'
+                        handlerRef={createPurchaseOrderValidation}
+                        handlerFetchData={jenisGudang}
+                        handlerOnChange={(value) => {
+                          if (value) {
+                            createPurchaseOrderValidation.setFieldValue(
+                              'gudang',
+                              value
+                            );
+                          } else {
+                            createPurchaseOrderValidation.setFieldValue(
+                              'gudang',
+                              {
+                                id: '',
+                                name: '',
                               }
-                            />
-                          )}
-                          disabled={isEditType && !isEditingMode}
-                        />
-                      </LocalizationProvider>
-                    </FormControl>
-                  </div>
+                            );
+                          }
+                        }}
+                        isDisabled={isEditType && !isEditingMode}
+                      />
+                    </div>
+                  </Grid>
+                </Grid>
+                <Grid container spacing={1}>
+                  <Grid item xs={3}>
+                    <Typography variant='h1 font-w-600'>Keterangan</Typography>
+                  </Grid>
+                  <Grid item xs={8}>
+                    <div className='mb-16'>
+                      <TextField
+                        fullWidth
+                        id='keterangan'
+                        name='keterangan'
+                        label='Keterangan'
+                        multiline
+                        rows={3}
+                        value={createPurchaseOrderValidation.values.keterangan}
+                        onChange={createPurchaseOrderValidation.handleChange}
+                        error={
+                          createPurchaseOrderValidation.touched.keterangan &&
+                          Boolean(
+                            createPurchaseOrderValidation.errors.keterangan
+                          )
+                        }
+                        helperText={
+                          createPurchaseOrderValidation.touched.keterangan &&
+                          createPurchaseOrderValidation.errors.keterangan
+                        }
+                        disabled={isEditType && !isEditingMode}
+                      />
+                    </div>
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={12} md={6}>
-              <Grid container spacing={1}>
-                <Grid item xs={3}>
-                  <Typography variant='h1 font-w-600'>Supplier</Typography>
-                </Grid>
-                <Grid item xs={8}>
-                  <div className='mb-16'>
-                    <SelectAsync
-                      id='supplier'
-                      labelField='Supplier'
-                      labelOptionRef='name'
-                      valueOptionRef='id'
-                      handlerRef={createPurchaseOrderValidation}
-                      handlerFetchData={getSupplier}
-                      handlerOnChange={(value) => {
-                        if (value) {
-                          createPurchaseOrderValidation.setFieldValue(
-                            'supplier',
-                            value
-                          );
-                        } else {
-                          createPurchaseOrderValidation.setFieldValue(
-                            'supplier',
-                            {
-                              id: '',
-                              name: '',
-                            }
-                          );
-                        }
-                      }}
-                      isDisabled={isEditType && !isEditingMode}
-                    />
-                  </div>
-                </Grid>
-              </Grid>
-              <Grid container spacing={1}>
-                <Grid item xs={3}>
-                  <Typography variant='h1 font-w-600'>Gudang</Typography>
-                </Grid>
-                <Grid item xs={8}>
-                  <div className='mb-16'>
-                    <SelectAsync
-                      id='gudang'
-                      labelField='Gudang'
-                      labelOptionRef='name'
-                      valueOptionRef='id'
-                      handlerRef={createPurchaseOrderValidation}
-                      handlerFetchData={jenisGudang}
-                      handlerOnChange={(value) => {
-                        if (value) {
-                          createPurchaseOrderValidation.setFieldValue(
-                            'gudang',
-                            value
-                          );
-                        } else {
-                          createPurchaseOrderValidation.setFieldValue(
-                            'gudang',
-                            {
-                              id: '',
-                              name: '',
-                            }
-                          );
-                        }
-                      }}
-                      isDisabled={isEditType && !isEditingMode}
-                    />
-                  </div>
-                </Grid>
-              </Grid>
-              <Grid container spacing={1}>
-                <Grid item xs={3}>
-                  <Typography variant='h1 font-w-600'>Keterangan</Typography>
-                </Grid>
-                <Grid item xs={8}>
-                  <div className='mb-16'>
-                    <TextField
-                      fullWidth
-                      id='keterangan'
-                      name='keterangan'
-                      label='Keterangan'
-                      multiline
-                      rows={3}
-                      value={createPurchaseOrderValidation.values.keterangan}
-                      onChange={createPurchaseOrderValidation.handleChange}
-                      error={
-                        createPurchaseOrderValidation.touched.keterangan &&
-                        Boolean(createPurchaseOrderValidation.errors.keterangan)
-                      }
-                      helperText={
-                        createPurchaseOrderValidation.touched.keterangan &&
-                        createPurchaseOrderValidation.errors.keterangan
-                      }
-                      disabled={isEditType && !isEditingMode}
-                    />
-                  </div>
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
           </div>
-          
-          <Divider sx={{ borderWidth: '1px' }}/>
 
-          <div className='mt-32 p-16'>
-            <TableItem />
-          </div>
+          <Divider sx={{borderWidth: '1px'}} />
+                        
+          <div className='p-16'>
+
+          <TableLayoutDetail
+              baseRoutePath={`${router.asPath}`}
+              title="Item"
+              isBtnAdd
+              btnAddHandler={setIsDialogItem}
+              tableHead={detailPoTableHead}
+              data={dataDetail}
+              // isUpdatingData={isUpdatingDataRawatJalan}
+              deleteData={deleteDetailDataHandler}
+              // createData={createDetailDataHandler}
+            />
+
+          <DialogAddItem
+              state={isDialogItem}
+              setState={setIsDialogItem}
+              createData={createDetailDataHandler}
+            />
 
           <div className='flex justify-end items-center mt-16'>
             {isEditType && (
@@ -528,8 +618,8 @@ const FormPurchaseOrder = ({
               type='button'
               variant='outlined'
               startIcon={<BackIcon />}
-              sx={{marginBottom: 1, marginRight: 2}}
-              onClick={() => router.push("/inventory/purchase-order")}
+              sx={{marginRight: 2}}
+              onClick={() => router.push('/gudang/purchase-order')}
             >
               Kembali
             </Button>
@@ -553,17 +643,18 @@ const FormPurchaseOrder = ({
               </LoadingButton>
             ) : (
               <LoadingButton
-                type='submit'
-                variant='contained'
-                sx={{marginBottom: 1, marginRight: 2}}
+                type="submit"
+                variant="contained"
                 disabled={!isActionPermitted('pasien:store')}
-                startIcon={<PlusIcon />}
-                loadingPosition='start'
+                startIcon={<DoneIcon />}
+                loadingPosition="start"
                 loading={createPurchaseOrderValidation.isSubmitting}
               >
                 Simpan Purchase Order
               </LoadingButton>
             )}
+
+            </div>
           </div>
         </form>
       </Paper>
@@ -574,11 +665,6 @@ const FormPurchaseOrder = ({
         isSuccessType={snackbar.type === 'success'}
         isErrorType={snackbar.type === 'error'}
       />
-      {/* <DialogConfirmPasien
-        state={dialogConfirmToRawatJalan.state}
-        stateHandler={setConfrimToRawatJalan}
-        noRm={dialogConfirmToRawatJalan.noRm}
-      /> */}
     </>
   );
 };

@@ -2,7 +2,7 @@ import request from "utils/request";
 
 export function getPembelian(params) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/receive`,
+    url: `${process.env.NEXT_PUBLIC_MOCK_BASE_URL}/receive`,
     method: "GET",
     params,
   });
@@ -10,7 +10,7 @@ export function getPembelian(params) {
 
 export function getDetailPembelian(params) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/receive/show`,
+    url: `${process.env.NEXT_PUBLIC_MOCK_BASE_URL}/receive/show`,
     method: "GET",
     params,
   });

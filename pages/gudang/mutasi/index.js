@@ -1,32 +1,64 @@
-import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import { getMutasi } from "api/gudang/mutasi";
-import TableLayoutGudang from "components/TableLayoutGudang";
-import LoaderOnLayout from "components/LoaderOnLayout";
-import Snackbar from "components/SnackbarMui";
-import { formatReadable } from "utils/formatTime";
+import {useEffect, useState} from 'react';
+import {useRouter} from 'next/router';
+import {getMutasi, deleteMutasi} from 'api/gudang/mutasi';
+import TableLayoutGudang from 'components/TableLayoutGudang';
+import LoaderOnLayout from 'components/LoaderOnLayout';
+import Snackbar from 'components/SnackbarMui';
+import {formatReadable} from 'utils/formatTime';
 
-const MutasiTableHead = [
+const PermintaanMutasiTableHead = [
   {
-    id: "tanggal_permintaan",
-    label: "Tanggal Permintaan",
+    id: 'tanggal_permintaan',
+    label: 'Tanggal Permintaan',
   },
   {
-    id: "unit",
-    label: "Unit",
+    id: 'unit',
+    label: 'Unit',
   },
   {
-    id: "gudang",
-    label: "Gudang",
+    id: 'gudang',
+    label: 'Gudang',
   },
 ];
 
-const dataMutasiFormatHandler = (payload) => {
+const dataPermintaanMutasiFormatHandler = (payload) => {
   const result = payload.map((e) => {
     return {
-      tanggal_permintaan: formatReadable(e.tanggal_permintaan) || "null",
-      unit: e.unit || "null",
-      gudang: e.gudang || "null",
+      tanggal_permintaan: formatReadable(e.tanggal_permintaan) || 'null',
+      unit: e.unit.name || 'null',
+      gudang: e.gudang || 'null',
+      id: e.id,
+    };
+  });
+  return result;
+};
+
+const RiwayatMutasiTableHead = [
+  {
+    id: 'tanggal_mutasi',
+    label: 'Tanggal Mutasi',
+  },
+  {
+    id: 'tanggal_permintaan',
+    label: 'Tanggal Permintaan',
+  },
+  {
+    id: 'unit',
+    label: 'Unit',
+  },
+  {
+    id: 'gudang',
+    label: 'Gudang',
+  },
+];
+
+const dataRiwayatMutasiFormatHandler = (payload) => {
+  const result = payload.map((e) => {
+    return {
+      tanggal_mutasi: formatReadable(e.tanggal_mutasi) || 'null',
+      tanggal_permintaan: formatReadable(e.tanggal_permintaan) || 'null',
+      unit: e.unit || 'null',
+      gudang: e.gudang || 'null',
       id: e.id,
     };
   });
@@ -38,154 +70,321 @@ const Mutasi = () => {
   const [snackbarState, setSnackbarState] = useState({
     state: false,
     type: null,
-    message: "",
+    message: '',
   });
+  const [activeContent, setActiveContent] = useState(1);
 
-  // Mutasi --general state
-  const [dataMutasi, setDataMutasi] = useState([]);
-  const [dataMetaMutasi, setDataMetaMutasi] = useState({});
-  const [dataMutasiPerPage, setDataPerPage] = useState(8);
-  const [isLoadingDataMutasi, setIsLoadingDataMutasi] = useState(false);
-  const [isUpdatingDataMutasi, setIsUpdatingDataMutasi] = useState(false);
+  // Permintaan Mutasi --general state
+  const [dataPermintaanMutasi, setDataPermintaanMutasi] = useState([]);
+  const [dataMetaPermintaanMutasi, setDataMetaPermintaanMutasi] = useState({});
+  const [dataPermintaanMutasiPerPage, setDataPermintaanMutasiPerPage] =
+    useState(8);
+  const [isLoadingDataPermintaanMutasi, setIsLoadingDataPermintaanMutasi] =
+    useState(false);
+  const [isUpdatingDataPermintaanMutasi, setIsUpdatingDataPermintaanMutasi] =
+    useState(false);
+  // Riwayat Mutasi --general state
+  const [dataRiwayatMutasi, setDataRiwayatMutasi] = useState([]);
+  const [dataMetaRiwayatMutasi, setDataMetaRiwayatMutasi] = useState({});
+  const [dataRiwayatMutasiPerPage, setDataRiwayatMutasiPerPage] = useState(8);
+  const [isLoadingDataRiwayatMutasi, setIsLoadingDataRiwayatMutasi] =
+    useState(false);
+  const [isUpdatingDataRiwayatMutasi, setIsUpdatingDataRiwayatMutasi] =
+    useState(false);
 
-  // Mutasi --general handler
-  const initDataMutasi = async () => {
+  // Permintaan Mutasi --general handler
+  const initDataPermintaanMutasi = async () => {
     try {
-      setIsLoadingDataMutasi(true);
+      setIsLoadingDataPermintaanMutasi(true);
       const params = {
-        per_page: dataMutasiPerPage,
+        per_page: dataPermintaanMutasiPerPage,
       };
       const response = await getMutasi(params);
-      const result = dataMutasiFormatHandler(response.data.data);
-      setDataMutasi(result);
-      setDataMetaMutasi(response.data.meta);
+      const result = dataPermintaanMutasiFormatHandler(response.data.data);
+      setDataPermintaanMutasi(result);
+      setDataMetaPermintaanMutasi(response.data.meta);
     } catch (error) {
       console.log(error);
     } finally {
-      setIsLoadingDataMutasi(false);
+      setIsLoadingDataPermintaanMutasi(false);
     }
   };
 
-  const updateDataMutasiHandler = async (payload) => {
+  const updateDataPermintaanMutasiHandler = async (payload) => {
     try {
-      setIsUpdatingDataMutasi(true);
+      setIsUpdatingDataPermintaanMutasi(true);
       const response = await getMutasi(payload);
-      const result = dataMutasiFormatHandler(response.data.data);
-      setDataMutasi(result);
-      setDataMetaMutasi(response.data.meta);
+      const result = dataPermintaanMutasiFormatHandler(response.data.data);
+      setDataPermintaanMutasi(result);
+      setDataMetaPermintaanMutasi(response.data.meta);
     } catch (error) {
       console.log(error);
       setSnackbarState({
         state: true,
-        type: "error",
+        type: 'error',
         message: error.message,
       });
     } finally {
-      setIsUpdatingDataMutasi(false);
+      setIsUpdatingDataPermintaanMutasi(false);
     }
   };
 
-  const deleteDataMutasiHandler = async (payload) => {
+  const deleteDataPermintaanMutasiHandler = async (payload) => {
     try {
-      setIsUpdatingDataMutasi(true);
-      const response = await deleteMutasi({ id: payload });
+      setIsUpdatingDataPermintaanMutasi(true);
+      const response = await deleteMutasi({id: payload});
       setSnackbarState({
         state: true,
-        type: "success",
+        type: 'success',
         message: response.data.message,
       });
-      updateDataMutasiHandler({ per_page: dataMutasiPerPage });
+      updateDataPermintaanMutasiHandler({
+        per_page: dataPermintaanMutasiPerPage,
+      });
     } catch (error) {
       setSnackbarState({
         state: true,
-        type: "error",
+        type: 'error',
         message: error.message,
       });
     } finally {
-      setIsUpdatingDataMutasi(false);
+      setIsUpdatingDataPermintaanMutasi(false);
     }
   };
-  
-  const searchDataMutasiHandler = async (payload) => {
+
+  const searchDataPermintaanMutasiHandler = async (payload) => {
     try {
-      setIsUpdatingDataMutasi(true);
+      setIsUpdatingDataPermintaanMutasi(true);
       const response = await searchMutasi({
         search_text: payload.map((e) => e.value),
         search_column: payload.map((e) => e.type),
         per_page: dataMutasiPerPage,
       });
       if (response.data.data.length !== 0) {
-        const result = dataMutasiFormatHandler(response.data.data);
-        setDataMutasi(result);
-        setDataMetaMutasi(response.data.meta);
+        const result = dataPermintaanMutasiFormatHandler(response.data.data);
+        setDataPermintaanMutasi(result);
+        setDataMetaPermintaanMutasi(response.data.meta);
       } else {
         setSnackbarState({
           state: true,
-          type: "warning",
+          type: 'warning',
+          message: `${payload} tidak ditemukan`,
+        });
+        const response = await getMutasi({
+          per_page: dataPermintaanMutasiPerPage,
+        });
+        const result = dataPermintaanMutasiFormatHandler(response.data.data);
+        setDataPermintaanMutasi(result);
+        setDataMetaPermintaanMutasi(response.data.meta);
+      }
+    } catch (error) {
+      setSnackbarState({
+        state: true,
+        type: 'error',
+        message: error.message,
+      });
+    } finally {
+      setIsUpdatingDataPermintaanMutasi(false);
+    }
+  };
+
+  // Riwayat Mutasi --general handler
+  const initDataRiwayatMutasi = async () => {
+    try {
+      setIsLoadingDataRiwayatMutasi(true);
+      const params = {
+        trashed: "true",
+        per_page: dataRiwayatMutasiPerPage,
+      };
+      const response = await getMutasi(params);
+      const result = dataRiwayatMutasiFormatHandler(response.data.data);
+      setDataRiwayatMutasi(result);
+      setDataMetaRiwayatMutasi(response.data.meta);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoadingDataRiwayatMutasi(false);
+    }
+  };
+
+  const updateDataRiwayatMutasiHandler = async (payload) => {
+    try {
+      setIsUpdatingDataRiwayatMutasi(true);
+      const response = await getMutasi(payload);
+      const result = dataRiwayatMutasiFormatHandler(response.data.data);
+      setDataRiwayatMutasi(result);
+      setDataMetaRiwayatMutasi(response.data.meta);
+    } catch (error) {
+      console.log(error);
+      setSnackbarState({
+        state: true,
+        type: 'error',
+        message: error.message,
+      });
+    } finally {
+      setIsUpdatingDataRiwayatMutasi(false);
+    }
+  };
+
+  const deleteDataRiwayatMutasiHandler = async (payload) => {
+    try {
+      setIsUpdatingDataRiwayatMutasi(true);
+      const response = await deleteMutasi({id: payload});
+      setSnackbarState({
+        state: true,
+        type: 'success',
+        message: response.data.message,
+      });
+      updateDataRiwayatMutasiHandler({per_page: dataRiwayatMutasiPerPage});
+    } catch (error) {
+      setSnackbarState({
+        state: true,
+        type: 'error',
+        message: error.message,
+      });
+    } finally {
+      setIsUpdatingDataRiwayatMutasi(false);
+    }
+  };
+
+  const searchDataRiwayatMutasiHandler = async (payload) => {
+    try {
+      setIsUpdatingDataRiwayatMutasi(true);
+      const response = await searchMutasi({
+        search_text: payload.map((e) => e.value),
+        search_column: payload.map((e) => e.type),
+        per_page: dataMutasiPerPage,
+      });
+      if (response.data.data.length !== 0) {
+        const result = dataRiwayatMutasiFormatHandler(response.data.data);
+        setDataRiwayatMutasi(result);
+        setDataMetaRiwayatMutasi(response.data.meta);
+      } else {
+        setSnackbarState({
+          state: true,
+          type: 'warning',
           message: `${payload} tidak ditemukan`,
         });
         const response = await getMutasi({
           per_page: dataMutasiPerPage,
         });
-        const result = dataMutasiFormatHandler(response.data.data);
-        setDataMutasi(result);
-        setDataMetaMutasi(response.data.meta);
+        const result = dataRiwayatMutasiFormatHandler(response.data.data);
+        setDataRiwayatMutasi(result);
+        setDataMetaRiwayatMutasi(response.data.meta);
       }
     } catch (error) {
       setSnackbarState({
         state: true,
-        type: "error",
+        type: 'error',
         message: error.message,
       });
     } finally {
-      setIsUpdatingDataMutasi(false);
+      setIsUpdatingDataRiwayatMutasi(false);
     }
   };
 
   useEffect(() => {
-    initDataMutasi();
+    if (Object.keys(router.query).length !== 0) {
+      setActiveContent(parseInt(router.query.active_content));
+    }
+  }, [router]);
+
+  useEffect(() => {
+    initDataPermintaanMutasi();
+    initDataRiwayatMutasi();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <>
-      {isLoadingDataMutasi ? (
+      {isLoadingDataPermintaanMutasi || isLoadingDataRiwayatMutasi ? (
         <LoaderOnLayout />
       ) : (
         <>
+          <div className='tab-list flex mb-24'>
+            <div
+              className={activeContent === 1 ? 'pointer active' : 'pointer'}
+              onClick={() => setActiveContent(1)}
+            >
+              Permintaan Mutasi
+            </div>
+            <div
+              className={activeContent === 2 ? 'pointer active' : 'pointer'}
+              onClick={() => setActiveContent(2)}
+            >
+              Riwayat Mutasi
+            </div>
+          </div>
+          {activeContent === 1 && (
             <TableLayoutGudang
               baseRoutePath={`${router.asPath}`}
-              title="Mutasi"
+              title=''
               isBtnAdd={false}
-              tableHead={MutasiTableHead}
-              data={dataMutasi}
-              meta={dataMetaMutasi}
-              dataPerPage={dataMutasiPerPage}
-              isUpdatingData={isUpdatingDataMutasi}
+              tableHead={PermintaanMutasiTableHead}
+              data={dataPermintaanMutasi}
+              meta={dataMetaPermintaanMutasi}
+              dataPerPage={dataPermintaanMutasiPerPage}
+              isUpdatingData={isUpdatingDataPermintaanMutasi}
               filterOptions={[
-                { label: "Mutasi", value: "mutasi" },
-                { label: "Unit", value: "unit" },
+                {label: 'Unit', value: 'unit'},
+                {label: 'Gudang', value: 'gudang'},
               ]}
               updateDataPerPage={(e, filter) => {
                 setDataPerPage(e.target.value);
-                updateDataMutasiHandler({
+                updateDataPermintaanMutasiHandler({
                   per_page: e.target.value,
                   search_text: filter.map((e) => e.value),
                   search_column: filter.map((e) => e.type),
                 });
               }}
               updateDataNavigate={(payload) =>
-                updateDataMutasiHandler({
-                  per_page: dataMutasiPerPage,
+                updateDataPermintaanMutasiHandler({
+                  per_page: dataPermintaanMutasiPerPage,
                   cursor: payload,
                 })
               }
               refreshData={() =>
-                updateDataMutasiHandler({ per_page: dataMutasiPerPage })
+                updateDataPermintaanMutasiHandler({per_page: dataPermintaanMutasiPerPage})
               }
-              deleteData={deleteDataMutasiHandler}
-              searchData={searchDataMutasiHandler}
+              deleteData={deleteDataPermintaanMutasiHandler}
+              searchData={searchDataPermintaanMutasiHandler}
             />
+          )}
+          {activeContent === 2 && (
+            <TableLayoutGudang
+              baseRoutePath={`${router.asPath}`}
+              title=''
+              isBtnAdd={false}
+              tableHead={RiwayatMutasiTableHead}
+              data={dataRiwayatMutasi}
+              meta={dataMetaRiwayatMutasi}
+              dataPerPage={dataRiwayatMutasiPerPage}
+              isUpdatingData={isUpdatingDataRiwayatMutasi}
+              filterOptions={[
+                {label: 'Unit', value: 'unit'},
+                {label: 'Gudang', value: 'gudang'},
+              ]}
+              updateDataPerPage={(e, filter) => {
+                setDataPerPage(e.target.value);
+                updateDataRiwayatMutasiHandler({
+                  per_page: e.target.value,
+                  search_text: filter.map((e) => e.value),
+                  search_column: filter.map((e) => e.type),
+                });
+              }}
+              updateDataNavigate={(payload) =>
+                updateDataRiwayatMutasiHandler({
+                  per_page: dataRiwayatMutasiPerPage,
+                  cursor: payload,
+                })
+              }
+              refreshData={() =>
+                updateDataRiwayatMutasiHandler({per_page: dataRiwayatMutasiPerPage})
+              }
+              deleteData={deleteDataRiwayatMutasiHandler}
+              searchData={searchDataRiwayatMutasiHandler}
+            />
+          )}
         </>
       )}
       <Snackbar
@@ -194,13 +393,13 @@ const Mutasi = () => {
           setSnackbarState({
             state: payload,
             type: null,
-            message: "",
+            message: '',
           })
         }
         message={snackbarState.message}
-        isSuccessType={snackbarState.type === "success"}
-        isErrorType={snackbarState.type === "error"}
-        isWarningType={snackbarState.type === "warning"}
+        isSuccessType={snackbarState.type === 'success'}
+        isErrorType={snackbarState.type === 'error'}
+        isWarningType={snackbarState.type === 'warning'}
       />
     </>
   );

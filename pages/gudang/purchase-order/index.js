@@ -38,7 +38,7 @@ const dataPurchaseOrderFormatHandler = (payload) => {
     return {
       nomor_po: e.nomor_po || "null",
       tanggal_po: formatReadable(e.tanggal_po) || "null",
-      po_type: e.po_type.name || "null",
+      potype: e.potype.name || "null",
       supplier: e.supplier.name || "null",
       gudang: e.gudang || "null",
       id: e.id,
@@ -69,7 +69,7 @@ const PurchaseOrder = () => {
       const params = {
         per_page: dataPurchaseOrderPerPage,
       };
-      const response = await getPurchaseOrder(params);
+      const response = await getPurchaseOrder({params : params});
       const result = dataPurchaseOrderFormatHandler(response.data.data);
       setDataPurchaseOrder(result);
       setDataMetaPurchaseOrder(response.data.meta);
@@ -121,11 +121,15 @@ const PurchaseOrder = () => {
   };
   
   const searchDataPurchaseOrderHandler = async (payload) => {
+    let searchParams = payload.reduce((obj, e) => {
+      obj[e.type] = e.value;
+      return obj;
+    }, {});
+    
     try {
       setIsUpdatingDataPurchaseOrder(true);
-      const response = await searchPurchaseOrder({
-        search_text: payload.map((e) => e.value),
-        search_column: payload.map((e) => e.type),
+      const response = await getPurchaseOrder({
+        search : searchParams,
         per_page: dataPurchaseOrderPerPage,
       });
       if (response.data.data.length !== 0) {
@@ -172,6 +176,7 @@ const PurchaseOrder = () => {
               title="Purchase Order"
               isBtnAdd={true}
               isTerima={true}
+              isDelete={true}
               tableHead={purchaseOrderTableHead}
               data={dataPurchaseOrder}
               meta={dataMetaPurchaseOrder}
@@ -179,17 +184,21 @@ const PurchaseOrder = () => {
               isUpdatingData={isUpdatingDataPurchaseOrder}
               filterOptions={[
                 { label: "Gudang", value: "gudang" },
-                { label: "Jenis Surat", value: "jenis_surat" },
+                { label: "Jenis Surat", value: "potype" },
                 { label: "Nomor PO", value: "nomor_po" },
                 { label: "Supplier", value: "supplier" },
                 { label: "Tanggal PO", value: "date" },
               ]}
               updateDataPerPage={(e, filter) => {
+                let searchParams = filter.reduce((obj, e) => {
+                  obj[e.type] = e.value;
+                  return obj;
+                }, {});
+
                 setDataPerPage(e.target.value);
                 updateDataPurchaseOrderHandler({
                   per_page: e.target.value,
-                  search_text: filter.map((e) => e.value),
-                  search_column: filter.map((e) => e.type),
+                  search : searchParams,
                 });
               }}
               updateDataNavigate={(payload) =>
