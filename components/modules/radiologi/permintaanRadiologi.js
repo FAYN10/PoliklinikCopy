@@ -9,8 +9,7 @@ import {
   Paper,
 } from "@mui/material";
 
-const PermintaanRadiologi = () => {
-
+const PermintaanRadiologi = ({data}) => {
 
   return (
     <TableContainer component={Paper}>
@@ -27,8 +26,8 @@ const PermintaanRadiologi = () => {
             <TableCell>Catatan Permintaan</TableCell>
           </TableRow>
         </TableHead>
-        <TableBody>
-          {dummyPermintaanData.map((data) => (
+        {/* <TableBody>
+          {data.map((data) => (
             <TableRow key={data.noPemeriksaan}>
               <TableCell>{data.noPemeriksaan}</TableCell>
               <TableCell>{data.waktuPermintaan}</TableCell>
@@ -40,7 +39,7 @@ const PermintaanRadiologi = () => {
               <TableCell>{data.catatanPermintaan}</TableCell>
             </TableRow>
           ))}
-        </TableBody>
+        </TableBody> */}
       </Table>
     </TableContainer>
   );

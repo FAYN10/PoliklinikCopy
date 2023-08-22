@@ -22,8 +22,6 @@ const Assessment = () => {
     }
   };
 
-  const dummyPermintaanData = [
-  ];
 
   return (
     <div>
@@ -32,14 +30,14 @@ const Assessment = () => {
         <List>
           <ListItem
             button
-            onClick={() => handleFormClick('pasien', dummyPermintaanData)}
+            onClick={() => handleFormClick('pasien')}
             selected={activeForm === 'pasien'}
           >
             <ListItemText primary="Form Assessment Pasien" />
           </ListItem>
           <ListItem
             button
-            onClick={() => handleFormClick('petugas', dummyPermintaanData)}
+            onClick={() => handleFormClick('petugas')}
             selected={activeForm === 'petugas'}
           >
             <ListItemText primary="Form Assessment Petugas" />
