@@ -35,7 +35,7 @@ export function getListHasilPemeriksaanRadiologi(params) {
 
 export function getListAsesmenPasienRadiologi(params) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/bmhpradiologi`,
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/asesmenpasienradiologi`,
     method: "GET",
     params,
   });
