@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-// import { getListRadiologi, deleteRadiologi, searchRadiologi } from "api/radiologi";
+import { getListRadiologi, deleteRadiologi, searchRadiologi } from "api/radiologi";
 import TableLayout from "components/TableLayout";
 import TableLayoutV3 from "components/TableLayoutV3";
 import LoaderOnLayout from "components/LoaderOnLayout";
@@ -9,7 +9,7 @@ import Snackbar from "components/SnackbarMui";
 
 const radiologiTableHead = [
     {
-        id: "antrian",
+        id: "no_antrian",
         label: "No. Antrian",
     },
     {
@@ -18,11 +18,11 @@ const radiologiTableHead = [
         
     },
     {
-        id: "nama_pasien",
+        id: "pasien_id",
         label: "Nama",
     },
     {
-        id: "alamat",
+        id: "pasien_id",
         label: "Alamat",
     },
     {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-// import { getListBmhpRadiologi, deleteBmhpRadiologi, searchBmhpRadiologi } from "api/BmhpRadiologi";
+import { getListBmhpRadiologi, deleteBmhpRadiologi, searchBmhpRadiologi } from "api/radiologi";
 import TableLayout from "components/TableLayout";
 import Spinner from "components/SpinnerMui";
 import Snackbar from "components/SnackbarMui";
@@ -10,15 +10,15 @@ import TableLayoutV4 from "components/TableLayoutV4";
 
 const bmhpRadiologiTableHead = [
     {
-        id: "namaBarang",
+        id: "nama_barang",
         label: "Nama barang",
     },
     {
-        id: "jumlahBarang",
+        id: "jumlah_barang",
         label: "Jumlah Barang",
     },
     {
-        id: "waktuPemakaian",
+        id: "waktu_pemakaian",
         label: "Waktu Pemakaian",
     },
 ];
@@ -26,9 +26,9 @@ const bmhpRadiologiTableHead = [
 const dataBmhpRadiologiFormatHandler = (payload) => {
     const result = payload.map((e) => {
         return {
-            namaBarang: e.namaBarang || "null",
-            jumlahBarang: e.jumlahBarang || "null",
-            waktuPemakaian: e.waktuPemakaian,
+            namaBarang: e.nama_barang || "null",
+            jumlahBarang: e.jumlah_barang || "null",
+            waktuPemakaian: e.waktu_pemakaian,
 
         };
     });
