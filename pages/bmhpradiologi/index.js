@@ -52,16 +52,7 @@ const BmhpRadiologi = () => {
     });
     const router = useRouter();
     const [dataBmhpRadiologi, setDataBmhpRadiologi] = useState([
-        {
-            namaBarang: "Film S",
-            jumlahBarang: 5,
-            waktuPemakaian: "2023-08-18",
-        },
-        {
-            namaBarang: "Film M",
-            jumlahBarang: 8,
-            waktuPemakaian: "2023-08-19",
-        },]);
+        ]);
     const [openEditDialog, setOpenEditDialog] = useState(false);
     const [editData, setEditData] = useState(null);
 
