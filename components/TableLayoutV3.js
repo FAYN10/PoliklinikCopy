@@ -488,14 +488,16 @@ const TableLayoutV3 = ({
                                       sx={{
                                         paddingLeft: idx === 0 ? 1 : 0,
                                         paddingRight: 2,
-                                        width: obKey === "name" ? "20%" : undefined,
+                                        paddingTop: 2,
+                                        paddingBottom: 2,
                                       }}
                                     >
+
                                       {row[obKey]}
                                     </TableCell>
                                   );
                                 })}
-                                
+
                               </TableRow>
                             );
                           })}
