@@ -18,15 +18,15 @@ const radiologiTableHead = [
         
     },
     {
-        id: "pasien_id",
+        id: "nama",
         label: "Nama",
     },
     {
-        id: "pasien_id",
+        id: "tipe_jaminan",
         label: "Alamat",
     },
     {
-        id: "asuransi",
+        id: "tipe_jaminan",
         label: "Tipe jaminan",
     },
     {
@@ -34,7 +34,7 @@ const radiologiTableHead = [
         label: "Prioritas",
     },
     {
-        id: "poli",
+        id: "pelayanan",
         label: "Pelayanan",
     },
     {
@@ -48,13 +48,13 @@ const radiologiTableHead = [
 const dataRadiologiFormatHandler = (payload) => {
     const result = payload.map((e) => {
         return {
-            antrian: e.antrian || "null",
+            antrian: e.no_antrian || "null",
             no_rm: e.no_rm || "null",
-            nama_pasien: e.nama_pasien,
+            nama_pasien: e.nama_pasien || "null",
             alamat_domisili: e.alamat_domisili || "null",
-            asuransi: e.asuransi || "null",
-            prioriats: e.prioriats || "null",
-            poli: e.poli || "null",
+            asuransi: e.tipe_jaminan || "null",
+            prioritas: e.prioritas || "null",
+            poli: e.pelayanan || "null",
             dokter: e.dokter || "null",
             id: e.id,
         };

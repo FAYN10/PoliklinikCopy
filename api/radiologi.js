@@ -9,6 +9,14 @@ export function getListRadiologi(params) {
   });
 }
 
+export function searchRadiologi(params) {
+  return request({
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/antrianradiologi/search`,
+    method: "GET",
+    params,
+  });
+}
+
 export function getListBMHPRadiologi(params) {
   return request({
     url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/bmhpradiologi`,
@@ -17,10 +25,18 @@ export function getListBMHPRadiologi(params) {
   });
 }
 
-export function createBMHPRadiologi(params) {
+export function createBMHPRadiologi(data) {
   return request({
     url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/bmhpradiologi`,
     method: "POST",
+    data,
+  });
+}
+
+export function searchBmhpRadiologi(params) {
+  return request({
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/bmhpradiologi/search`,
+    method: "GET",
     params,
   });
 }
