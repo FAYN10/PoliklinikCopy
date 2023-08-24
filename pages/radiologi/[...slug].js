@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { getDetailPasien } from "api/pasien";
+import { getListPermintaanPemeriksaanRadiologi } from "api/radiologi";
 import LoaderOnLayout from "components/LoaderOnLayout";
 import FormPasien from "components/modules/pasien/form";
 import { formatGenToIso } from "utils/formatTime";
@@ -15,17 +16,6 @@ import useClientPermission from "custom-hooks/useClientPermission";
 import { formatLabelDate } from "utils/formatTime";
 import { Grid, Card, IconButton, Tooltip, Avatar, Dialog } from "@mui/material";
 import PermContactCalendarIcon from "@mui/icons-material/PermContactCalendar";
-import BorderColorIcon from "@mui/icons-material/BorderColor";
-import CreditCardIcon from "@mui/icons-material/CreditCard";
-import RefreshIcon from "@mui/icons-material/Refresh";
-import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import GroupIcon from "@mui/icons-material/Group";
-import Switch from "@mui/material/Switch";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import FormAssessmentPasien from "components/modules/radiologi/formAssessmentPasien";
-import PermintaanRadiologi from "components/modules/radiologi/permintaanRadiologi";
-import FormAssessmentPetugas from "components/modules/radiologi/formAssessmentPetugas";
 import FormExpertise from "components/modules/radiologi/formExpertise";
 import RiwayatPemeriksaanTable from "components/modules/radiologi/riwayatPemeriksaanTable";
 import Assessment from "components/modules/radiologi/assessment";
@@ -34,9 +24,12 @@ const DetailRadiologi = () => {
   const [isEditingMode, setIsEditingMode] = useState(false);
   const router = useRouter();
   const { slug } = router.query;
+  const [dataPermintaanRadiologi, setDataPermintaanRadiologi] = useState([]);
+  const [isLoadingDataPermintaanRadiologi, setIsLoadingDataPermintaanRadiologi] = useState(true);  
   const [dataRadiologi, setDataRadiologi] = useState({});
   const [detailDataRadiologi, setDetailDataRadiologi] = useState({});
   const [isLoadingDataRadiologi, setIsLoadingDataRadiologi] = useState(true);
+  
   const [menuState, setMenuState] = useState(null);
   const { isActionPermitted } = useClientPermission();
   const openMenuPopover = Boolean(menuState);
@@ -45,8 +38,115 @@ const DetailRadiologi = () => {
   const handleIsEditingMode = (e) => {
     setIsEditingMode(e.target.checked);
   };
+
+  const permintaanTableHead = [
+    {
+      id: "no_pemeriksaan",
+      label: "No. Pemeriksaan"
+    },
+    {
+      id: "waktu_permintaan_pemeriksaan",
+      label: "Waktu Permintaan"
+    },
+    {
+      id: "nama_pemeriksaan",
+      label: "Nama Pemeriksaan"
+    },
+    {
+      id: "jenis_pemeriksaan",
+      label: "Jenis Pemeriksaan"
+    },
+    {
+      id: "dokter_pengirim",
+      label: "Dokter Pengirim"
+    },
+    {
+      id: "unit_pengirim",
+      label: "Unit Pengirim"
+    },
+    {
+      id: "diagnosis_kerja",
+      label: "Diagnosis Kerja",
+    },
+    {
+      id: "catatan_permintaan",
+      label: "Catatan Permintaan"
+    }
+  ]
+
+  const riwayatPemeriksaanTableHead = [
+    {
+      id: "tanggal_pemeriksaan",
+      label: "Tanggal Pemeriksaan"
+    },
+    {
+      id: "no_pemeriksaan",
+      label: "No. Pemeriksaan"
+    },
+    {
+      id: "nama_pemeriksaan",
+      label: "Nama Pemeriksaan"
+    },
+    {
+      id: "jenis_pemeriksaan",
+      label: "Jenis Pemeriksaan"
+    },
+    {
+      id: "dokter_pengirim",
+      label: "Dokter Pengirim"
+    },
+    {
+      id: "diagnosis_kerja",
+      label: "Diagnosis Kerja"
+    }
+
+  ]
+  const fetchPermintaanRadiologi = async () => {
+    try {
+      const response = await getListPermintaanPemeriksaanRadiologi(detailDataRadiologi.id);
+      const permintaanData = response.data;
+      setDataPermintaanRadiologi(permintaanData);
+    } catch (error) {
+      console.error("Error fetching permintaan radiologi:", error);
+    } finally {
+      setIsLoadingDataPermintaanRadiologi(false);
+    }
+  };
+
+  useEffect(() => {
+    if (router.isReady) {
+      (async () => {
+        try {
+          const response = await getDetailRadiologi({ id: slug[0] });
+          const data = response.data.data;
+          setDetailDataRadiologi(data);
   
-  
+          setIsLoadingDataRadiologi(false); 
+          setIsLoadingDataPermintaanRadiologi(true); 
+          fetchPermintaanRadiologi(); 
+        } catch (error) {
+          console.log(error);
+          setIsLoadingDataRadiologi(false);
+          setIsLoadingDataPermintaanRadiologi(false); 
+        }
+      })();
+    }
+  }, [router.isReady, slug]);
+  const dataPermintaanRadiologiFormatHandler = (payload) => {const result = payload.map((e) => {
+    return {
+      no_pemeriksaan: e.no_pemeriksaan || "null",
+      waktu_permintaan_pemeriksaan: e.waktu_permintaan_pemeriksaan || "null",
+      nama_pemeriksaan: e.nama_pemeriksaan || "null",
+      jenis_pemeriksaan: e.jenis_pemeriksaan || "null",
+      dokter_pengirim: e.dokter_pengirim || "null",
+      unit_pengirim: e.unit_pengirim || "null",
+      diagnosis_kerja: e.diagnosis_kerja || "null",
+      catatan_permintaan: e.catatan_permintaan || "null",
+    };
+    });
+    return result;
+  };
+    
 
   const dataFormatter = (data) => {
     let tempData = {
@@ -87,6 +187,8 @@ const DetailRadiologi = () => {
       asuransi: data.asuransi || { id: "", name: "" },
       suku: data.suku || { id: "", name: "" },
       bahasa: data.bahasa || { id: "", name: "" },
+      permintaan: [],
+      riwayat: [],
     };
     if (tempData.kewarganegaraan.label === "Indonesia") {
       tempData.showNik = true;
@@ -99,27 +201,48 @@ const DetailRadiologi = () => {
     setDataRadiologi(() => dataFormatter(data));
   };
 
-  useEffect(() => {
-    if (router.isReady) {
-      (async () => {
-        try {
-          const data = response.data.data;
-          const response = await getDetailRadiologi({ id: slug[0] });
-          const formattedData = dataFormatter(data);
-          setDataRadiologi(formattedData);
-          setDetailDataRadiologi(data);
-        } catch (error) {
-          console.log(error);
-        } finally {
-          setIsLoadingDataRadiologi(false);
-        }
-      })();
-    }
-  }, [router.isReady, slug]);
+  
+  
 
   const menuItems = [
-    { label: "Permintaan Radiologi" },
-    { label: "Assessment Pemeriksaan", component: <Assessment /> },
+    {
+      label: "Permintaan Radiologi",
+      content: isLoadingDataPermintaanRadiologi ? (
+        <div>Loading...</div>
+      ) : (
+        <div>
+          <h2>Permintaan Radiologi</h2>
+          <table>
+            <thead>
+              <tr>
+                {permintaanTableHead.map((column) => (
+                  <th key={column.id}>{column.label}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {dataPermintaanRadiologi.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.no_pemeriksaan}</td>
+                  <td>{item.waktu_permintaan_pemeriksaan}</td>
+                  <td>{item.nama_pemeriksaan}</td>
+                  <td>{item.jenis_pemeriksaan}</td>
+                  <td>{item.diagnosis_kerja}</td>
+                  <td>{item.catatan_permintaan}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ),
+    },
+    { 
+      label: "Assessment Pemeriksaan", 
+      component: <Assessment 
+                    namaPemeriksaan={detailDataRadiologi.permintaan?.[0]?.nama_pemeriksaan}
+                    jenisPemeriksaan={detailDataRadiologi.permintaan?.[0]?.jenis_pemeriksaan} 
+                  /> 
+    },
     { label: "Hasil Pemeriksaan", component: <FormExpertise /> },
     { label: "Riwayat Pemeriksaan", component: <RiwayatPemeriksaanTable /> },
   ];
