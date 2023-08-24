@@ -89,7 +89,7 @@ const BmhpRadiologi = () => {
     const deletaDataRoleHandler = async (payload) => {
       try {
         setIsUpdatingDataBMHPRadiologi(true);
-        const response = await deleteBMHPRadiologi({ id: payload });
+        const response = await deleteBmhpRadiologi({ id: payload });
         setSnackbarState({
           state: true,
           type: "success",
@@ -110,7 +110,7 @@ const BmhpRadiologi = () => {
     const searchDataRoleHandler = async (payload) => {
       try {
         setIsUpdatingDataBMHPRadiologi(true);
-        const response = await searchBMHPRadiologi({
+        const response = await searchBmhpRadiologi({
           search: payload,
           per_page: dataBMHPRadiologiPerPage,
         });

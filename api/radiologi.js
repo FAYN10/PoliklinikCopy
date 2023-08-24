@@ -33,6 +33,14 @@ export function createBMHPRadiologi(data) {
   });
 }
 
+export function deleteBmhpRadiologi(data) {
+  return request({
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/bmhpradiologi`,
+    method: "DELETE",
+    data,
+  });
+}
+
 export function searchBmhpRadiologi(params) {
   return request({
     url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/bmhpradiologi/search`,
