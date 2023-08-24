@@ -45,6 +45,9 @@ const DetailRadiologi = () => {
   const handleIsEditingMode = (e) => {
     setIsEditingMode(e.target.checked);
   };
+  
+  
+
   const dataFormatter = (data) => {
     let tempData = {
       nama_pasien: data.nama_pasien || "",
@@ -102,7 +105,6 @@ const DetailRadiologi = () => {
         try {
           const data = response.data.data;
           const response = await getDetailRadiologi({ id: slug[0] });
-          // const data = response.data.data;
           const formattedData = dataFormatter(data);
           setDataRadiologi(formattedData);
           setDetailDataRadiologi(data);
@@ -116,15 +118,13 @@ const DetailRadiologi = () => {
   }, [router.isReady, slug]);
 
   const menuItems = [
-    { label: "Permintaan Radiologi", component: <PermintaanRadiologi /> },
+    { label: "Permintaan Radiologi" },
     { label: "Assessment Pemeriksaan", component: <Assessment /> },
     { label: "Hasil Pemeriksaan", component: <FormExpertise /> },
     { label: "Riwayat Pemeriksaan", component: <RiwayatPemeriksaanTable /> },
   ];
 
   const [selectedTab, setSelectedTab] = useState(0);
-
-
 
   return (
     <>

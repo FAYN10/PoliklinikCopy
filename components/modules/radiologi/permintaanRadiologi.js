@@ -8,7 +8,40 @@ import {
   TableRow,
   Paper,
 } from "@mui/material";
-
+const permintaanTableHead = [
+  {
+    id:"no_pemeriksaan",
+    label: "No. Pemeriksaan"
+  },
+  {
+    id:"waktu_permintaan",
+    label: "Waktu Permintaan"
+  },
+  {
+    id:"nama_pemeriksaan",
+    label: "Nama Pemeriksaan"
+  },
+  {
+    id:"jenis_pemeriksaan",
+    label:"Jenis Pemeriksaan"
+  },
+  {
+    id:"dokter_pengirim",
+    label:"Dokter Pengirim"
+  },
+  {
+    id:"unit_pengirim",
+    label:"Unit Pengirim"
+  },
+  {
+    id:"diagnosis_kerja",
+    label:"Diagnosis Kerja",
+  },
+  {
+    id:"catatan_permintaan",
+    label:"Catatan Permintaan"
+  }
+]
 const PermintaanRadiologi = ({data}) => {
 
   return (
@@ -26,7 +59,7 @@ const PermintaanRadiologi = ({data}) => {
             <TableCell>Catatan Permintaan</TableCell>
           </TableRow>
         </TableHead>
-        {/* <TableBody>
+        <TableBody>
           {data.map((data) => (
             <TableRow key={data.noPemeriksaan}>
               <TableCell>{data.noPemeriksaan}</TableCell>
@@ -39,7 +72,7 @@ const PermintaanRadiologi = ({data}) => {
               <TableCell>{data.catatanPermintaan}</TableCell>
             </TableRow>
           ))}
-        </TableBody> */}
+        </TableBody>
       </Table>
     </TableContainer>
   );
