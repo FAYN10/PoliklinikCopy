@@ -14,18 +14,12 @@ const Assessment = () => {
     setActiveForm(formType);
 
     if (formType === 'pasien') {
-      setSelectedNamaPemeriksaan(permintaanData[0].namaPemeriksaan);
-      setSelectedJenisPemeriksaan(permintaanData[0].jenisPemeriksaan);
     } else if (formType === 'petugas') {
-      setSelectedNamaPemeriksaan(permintaanData[1].namaPemeriksaan);
-      setSelectedJenisPemeriksaan(permintaanData[1].jenisPemeriksaan);
     }
   };
 
-
   return (
     <div>
-      <h1>Assessment</h1>
       <div style={{ display: 'flex' }}>
         <List>
           <ListItem
