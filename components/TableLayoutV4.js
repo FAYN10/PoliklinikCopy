@@ -58,6 +58,8 @@ const TableLayoutV4 = ({
     refreshData = () => { },
     deleteData = () => { },
     searchData = () => { },
+    isCustomHeader = false,
+    customHeader = <>custom header</>,
 }) => {
     const router = useRouter();
     const [order, setOrder] = useState("asc");
@@ -68,6 +70,8 @@ const TableLayoutV4 = ({
         data: {},
     });
     const [searchText, setSearchText] = useState("");
+    const memoizedSearchText = useMemo(() => searchText, [searchText]);
+    const debouncedSearchText = useDebounce(memoizedSearchText, 500);
     const { clientPermission } = useClientPermission();
     const [filter, setFilter] = useState(filterOptions[0].value);
     const [selectedFilter, setSelectedFilter] = useState([]);
@@ -170,13 +174,10 @@ const TableLayoutV4 = ({
     const handleNavigate = (payload) => {
         updateDataNavigate(payload);
     };
-
     const handleRefresh = () => {
         setSearchText("");
-        setDate(null);
-        setSelectedFilter([]);
         refreshData();
-    };
+      };
 
     const isPermitted = (payload) => {
         let value = true;
@@ -220,7 +221,15 @@ const TableLayoutV4 = ({
         setSelectedFilter(tempData);
         searchData(tempData);
     };
-
+    useEffect(
+        () => {
+          if (debouncedSearchText) {
+            searchData(debouncedSearchText);
+          }
+        },
+        // eslint-disable-next-line
+        [debouncedSearchText] // Only call effect if debounced search term change
+      );
     return (
         <>
             <div className={st.container}>
