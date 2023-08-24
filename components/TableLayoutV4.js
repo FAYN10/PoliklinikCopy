@@ -36,7 +36,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
 import st from "styles/module/components/Table.module.scss";
 import useClientPermission from "custom-hooks/useClientPermission";
-import EditIcon from "@material-ui/icons/Edit";
+
 
 const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -59,43 +59,6 @@ const TableLayoutV4 = ({
     deleteData = () => { },
     searchData = () => { },
 }) => {
-    const [openAddDialog, setOpenAddDialog] = useState(false);
-    const openAddDialogHandler = () => {
-        setOpenAddDialog(true);
-    };
-    const closeAddDialogHandler = () => {
-        setOpenAddDialog(false);
-        setNewBmhpData({
-            namaBarang: "",
-            jumlahBarang: "",
-            waktuPemakaian: "",
-        });
-    };
-    const [newBmhpData, setNewBmhpData] = useState({
-        namaBarang: "",
-        jumlahBarang: "",
-        waktuPemakaian: "",
-    });
-    const addNewBmhpHandler = () => {
-
-    };
-    const [openEditDialog, setOpenEditDialog] = useState(false);
-  const [editData, setEditData] = useState(null);
-
-  const openEditDialogHandler = (data) => {
-    setEditData(data);
-    setOpenEditDialog(true);
-  };
-
-  const closeEditDialogHandler = () => {
-    setOpenEditDialog(false);
-    setEditData(null);
-  };
-
-  const saveEditedDataHandler = () => {
-
-    closeEditDialogHandler();
-  };
     const router = useRouter();
     const [order, setOrder] = useState("asc");
     const [orderBy, setOrderBy] = useState(tableHead[0].id);
@@ -210,6 +173,7 @@ const TableLayoutV4 = ({
 
     const handleRefresh = () => {
         setSearchText("");
+        setDate(null);
         setSelectedFilter([]);
         refreshData();
     };
@@ -227,6 +191,7 @@ const TableLayoutV4 = ({
 
     const handleChangeFilter = (event) => {
         setSearchText("");
+        setDate(null);
         setFilter(event.target.value);
     };
 
@@ -265,13 +230,13 @@ const TableLayoutV4 = ({
                         variant="contained"
                         endIcon={<PlusIcon />}
                         disabled={!isPermitted("store")}
-                        onClick={openAddDialogHandler} // Aktifkan dialog popup saat tombol Add ditekan
+                        onClick={
+                            !customCreatePath
+                                ? () => router.push(`${baseRoutePath}/create`)
+                                : () => router.push(customCreatePath)
+                        }
                     >
-                        {customBtnAddTitle ? (
-                            <>{customBtnAddTitle}</>
-                        ) : (
-                            <>{title} Baru</>
-                        )}
+                        {customBtnAddTitle ? <>{customBtnAddTitle}</> : <>{title} Baru</>}
                     </Button>
                 </div>
                 <Box sx={{ width: "100%", marginY: 4 }}>
@@ -385,7 +350,8 @@ const TableLayoutV4 = ({
                                                                 className="pointer"
                                                             >
                                                                 {Object.keys(row).map((obKey, idx) => {
-                                                                    if (obKey === "id") return; // Sembunyikan kolom id
+                                                                    // hide id
+                                                                    if (obKey === "id") return;
                                                                     return (
                                                                         <TableCell
                                                                             key={idx}
@@ -401,56 +367,37 @@ const TableLayoutV4 = ({
                                                                     );
                                                                 })}
                                                                 <TableCell
-                                                                    align="right"
-                                                                    padding="none"
-                                                                    sx={{
-                                                                        paddingRight: 1,
-                                                                        paddingY: 0.8,
-                                                                    }}
-                                                                >
-                                                                    {/* Ikon Edit */}
-                                                                    {isPermitted("update") ? (
-                                                                        <Tooltip title="Edit" arrow>
-                                                                            <IconButton
-                                                                                onClick={() => {
-                                                                                    // Implement logic to handle editing data
-                                                                                }}
-                                                                            >
-                                                                                <EditIcon color="primary" />
-                                                                            </IconButton>
-                                                                        </Tooltip>
-                                                                    ) : (
-                                                                        <Tooltip title="You don't have permission to edit">
-                                                                            <span>
-                                                                                <IconButton disabled>
-                                                                                    <EditIcon />
-                                                                                </IconButton>
-                                                                            </span>
-                                                                        </Tooltip>
-                                                                    )}
-                                                                    {/* Ikon Hapus */}
-                                                                    {isPermitted("destroy") ? (
-                                                                        <Tooltip title="Delete" arrow>
-                                                                            <IconButton
-                                                                                onClick={(event) => {
-                                                                                    event.stopPropagation();
-                                                                                    handleOpenConfirmationDelete(row);
-                                                                                }}
-                                                                            >
-                                                                                <DeleteIcon color="error" />
-                                                                            </IconButton>
-                                                                        </Tooltip>
-                                                                    ) : (
-
-                                                                        <Tooltip title="You don't have permission to do this">
-                                                                            <span>
-                                                                                <IconButton disabled>
-                                                                                    <DeleteIcon />
-                                                                                </IconButton>
-                                                                            </span>
-                                                                        </Tooltip>
-                                                                    )}
-                                                                </TableCell>
+    align="right"
+    padding="none"
+    sx={{
+        paddingRight: 1,
+        paddingY: 0.8,
+    }}
+>
+    {isPermitted("destroy") ? (
+        <>
+           
+            <Tooltip title="Delete" arrow>
+                <IconButton
+                    onClick={(event) => {
+                        event.stopPropagation();
+                        handleOpenConfirmationDelete(row);
+                    }}
+                >
+                    <DeleteIcon color="error" />
+                </IconButton>
+            </Tooltip>
+        </>
+    ) : (
+        <Tooltip title="You don't have permission to do this">
+            <span>
+                <IconButton disabled>
+                    <DeleteIcon />
+                </IconButton>
+            </span>
+        </Tooltip>
+    )}
+</TableCell>
                                                             </TableRow>
                                                         );
                                                     })}
@@ -523,66 +470,37 @@ const TableLayoutV4 = ({
                     </Paper>
                 </Box>
             </div>
-            <Dialog open={openAddDialog} onClose={closeAddDialogHandler}>
-                <DialogTitle>Tambah {title} Baru</DialogTitle>
+            <Dialog
+                open={confirmationDelete.state}
+                onClose={handleCloseConfirmationDelete}
+                TransitionComponent={Transition}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    {`Hapus data ${title} berikut?`}
+                </DialogTitle>
                 <DialogContent>
-                    <TextField
-                        label="Nama Barang"
-                        fullWidth
-                        variant="outlined"
-                        value={newBmhpData.namaBarang}
-                        onChange={(e) =>
-                            setNewBmhpData({ ...newBmhpData, namaBarang: e.target.value })
-                        }
-                        sx={{ marginBottom: 2 }}
-                    />
-                    <TextField
-                        label="Jumlah Barang"
-                        fullWidth
-                        type="number"
-                        variant="outlined"
-                        value={newBmhpData.jumlahBarang}
-                        onChange={(e) =>
-                            setNewBmhpData({ ...newBmhpData, jumlahBarang: e.target.value })
-                        }
-                        sx={{ marginBottom: 2 }}
-                    />
-                    <TextField
-                        label="Waktu Pemakaian"
-                        fullWidth
-                        type="date"
-                        variant="outlined"
-                        value={newBmhpData.waktuPemakaian}
-                        onChange={(e) =>
-                            setNewBmhpData({ ...newBmhpData, waktuPemakaian: e.target.value })
-                        }
-                        sx={{ marginBottom: 2 }}
-                    />
+                    {Object.keys(confirmationDelete.data).map((obKey, idx) => {
+                        // hide id and static number
+                        if (obKey === "id" || obKey === "no") return;
+                        else
+                            return (
+                                <DialogContentText key={idx}>
+                                    {tableHead[idx].label}: {confirmationDelete.data[obKey]}
+                                </DialogContentText>
+                            );
+                    })}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={closeAddDialogHandler} color="primary">
+                    <Button color="error" onClick={handleCloseConfirmationDelete}>
                         Batal
                     </Button>
-                    <Button onClick={addNewBmhpHandler} color="primary">
-                        Tambah
+                    <Button color="success" onClick={handleContinueConfirmationDelete}>
+                        Lanjutkan
                     </Button>
                 </DialogActions>
             </Dialog>
-            <Dialog open={openEditDialog} onClose={closeEditDialogHandler}>
-        <DialogTitle>Edit Data</DialogTitle>
-        <DialogContent>
-          {/* Implement form or components for editing data */}
-          {/* Use the editData state to fill initial values in the form */}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={closeEditDialogHandler} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={saveEditedDataHandler} color="primary">
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
         </>
     );
 };
