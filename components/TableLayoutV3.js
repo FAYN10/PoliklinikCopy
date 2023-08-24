@@ -9,7 +9,6 @@ import visuallyHidden from "@mui/utils/visuallyHidden";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import PlusIcon from "@material-ui/icons/Add";
-import DeleteIcon from "@material-ui/icons/Delete";
 import NextIcon from "@material-ui/icons/NavigateNext";
 import PrevIcon from "@material-ui/icons/NavigateBefore";
 import IconButton from "@mui/material/IconButton";
@@ -63,17 +62,12 @@ const TableLayoutV3 = ({
   updateDataPerPage = () => { },
   updateDataNavigate = () => { },
   refreshData = () => { },
-  deleteData = () => { },
   searchData = () => { },
 }) => {
   const router = useRouter();
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState(tableHead[0].id);
   const [page] = useState(0);
-  const [confirmationDelete, setConfirmationDelete] = useState({
-    state: false,
-    data: {},
-  });
   const [searchText, setSearchText] = useState("");
   const { clientPermission } = useClientPermission();
   const [filter, setFilter] = useState(filterOptions[0].value);
@@ -169,38 +163,9 @@ const TableLayoutV3 = ({
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
   };
-  // Avoid a layout jump when reaching the last page with empty rows.
+
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * dataPerPage - data.length) : 0;
-  // --end table operator stuff
-  // BOILER-PLATE END
-
-  const handleOpenConfirmationDelete = (payload) => {
-    setConfirmationDelete({
-      state: true,
-      data: payload,
-    });
-  };
-
-  const handleCloseConfirmationDelete = () => {
-    setConfirmationDelete((prev) => ({
-      ...prev,
-      state: false,
-    }));
-  };
-  const isAuthorizedToDelete = (data) => {
-    return true;
-  };
-  const handleContinueConfirmationDelete = (tableHead) => () => {
-    if (isAuthorizedToDelete(confirmationDelete.data)) {
-      deleteData(confirmationDelete.data.id);
-      handleCloseConfirmationDelete();
-    } else {
-
-      console.log("You are not authorized to delete this data.");
-      handleCloseConfirmationDelete();
-    }
-  };
 
   const handleNavigate = (payload) => {
     updateDataNavigate(payload);
@@ -275,14 +240,6 @@ const TableLayoutV3 = ({
     setSearchText("");
     setSelectedFilter(tempFilterDisplay);
     searchData(tempFilterDisplay);
-  };
-
-  const handleDeleteDisplayFilter = (data) => {
-    let tempData = [...selectedFilter];
-    tempData = tempData.filter((e) => e.type !== data.type);
-    setFilter(data.type);
-    setSelectedFilter(tempData);
-    searchData(tempData);
   };
 
   const handleOnChangePoli = (value) => {
@@ -538,35 +495,7 @@ const TableLayoutV3 = ({
                                     </TableCell>
                                   );
                                 })}
-                                <TableCell
-                                  align="right"
-                                  padding="none"
-                                  sx={{
-                                    paddingRight: 1,
-                                    paddingY: 0.8,
-                                  }}
-                                >
-                                  {isPermitted("destroy") ? (
-                                    <Tooltip title="Delete" arrow>
-                                      <IconButton
-                                        onClick={(event) => {
-                                          event.stopPropagation();
-                                          handleOpenConfirmationDelete(row);
-                                        }}
-                                      >
-                                        <DeleteIcon color="error" />
-                                      </IconButton>
-                                    </Tooltip>
-                                  ) : (
-                                    <Tooltip title="You don't have permission to do this">
-                                      <span>
-                                        <IconButton disabled>
-                                          <DeleteIcon />
-                                        </IconButton>
-                                      </span>
-                                    </Tooltip>
-                                  )}
-                                </TableCell>
+                                
                               </TableRow>
                             );
                           })}
@@ -641,38 +570,6 @@ const TableLayoutV3 = ({
           </Paper>
         </Box>
       </div>
-      <Dialog
-        open={confirmationDelete.state}
-        onClose={handleCloseConfirmationDelete}
-        TransitionComponent={Transition}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">
-          {`Hapus data ${title} berikut?`}
-        </DialogTitle>
-        <DialogContent>
-          {Object.keys(confirmationDelete.data).map((obKey, idx) => {
-            // hide id and static number
-            if (obKey === "id" || obKey === "no") return null;
-            return (
-              <DialogContentText key={idx}>
-                {tableHead[idx].label}: {confirmationDelete.data[obKey]}
-              </DialogContentText>
-            );
-          })}
-        </DialogContent>
-        <DialogActions>
-          <Button color="error" onClick={handleCloseConfirmationDelete}>
-            Batal
-          </Button>
-          {isAuthorizedToDelete(confirmationDelete.data) && (
-            <Button color="success" onClick={handleContinueConfirmationDelete(tableHead)}>
-              Lanjutkan
-            </Button>
-          )}
-        </DialogActions>
-      </Dialog>
     </>
   );
 };
