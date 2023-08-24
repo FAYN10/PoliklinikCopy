@@ -9,7 +9,7 @@ export function getListRadiologi(params) {
   });
 }
 
-export function getListBmhpRadiologi(params) {
+export function getListBMHPRadiologi(params) {
   return request({
     url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/bmhpradiologi`,
     method: "GET",
