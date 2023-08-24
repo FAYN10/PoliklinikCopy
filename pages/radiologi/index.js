@@ -22,7 +22,7 @@ const radiologiTableHead = [
         label: "Nama",
     },
     {
-        id: "tipe_jaminan",
+        id: "alamat_domisili",
         label: "Alamat",
     },
     {
