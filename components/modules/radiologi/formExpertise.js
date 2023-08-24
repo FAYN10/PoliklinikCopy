@@ -8,9 +8,11 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Card,
   CardHeader,
   CardContent,
+  DialogActions,
   IconButton,
   Collapse,
   Typography,
@@ -36,63 +38,95 @@ const FormExpertise = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [deleteConfirmationIndex, setDeleteConfirmationIndex] = useState(null);
+  const [editedExpertises, setEditedExpertises] = useState({});
+  const handleSaveRow = (index) => {
+    setIsEditing(false);
+    if (editedExpertises[index]) {
+      const expertises = [...formik.values.expertises];
+      expertises[index] = editedExpertises[index];
+      formik.setFieldValue("expertises", expertises);
+      setEditedExpertises((prev) => ({ ...prev, [index]: "" }));
+    }
+  };
 
   const LabelToPrint = forwardRef(function LabelToPrint({ data }, ref) {
     return (
       <div ref={ref} className="printableContent">
-      <div className="flex p-4" style={{ display: "flex", justifyContent: "space-between" }}>
-        <div className="column">
-          <div className="font-w-600">No. Pemeriksaan: {data.no_pemeriksaan || "-"}</div>
-          <div className="font-w-600">No. RM: {data.no_rm || "-"}</div>
-          <div className="font-w-600">Nama Pasien: {data.nama_pasien || "-"}</div>
-          <div className="font-w-600">Tanggal Lahir: {data.tanggal_lahir || "-"}</div>
-          <div className="font-w-600">Umur: {data.umur || "-"}</div>
-        </div>
-        <div className="column">
-          <div className="font-w-600">Tanggal Pemeriksaan: {data.tanggal_pemeriksaan || "-"}</div>
-          <div className="font-w-600">Diagnosa: {data.diagnosis_kerja || "-"}</div>
-          <div className="font-w-600">Nama Pemeriksaan: {data.namaPemeriksaan || "-"}</div>
-          <div className="font-w-600">Jenis Pemeriksaan: {data.jenis_pemeriksaan || "-"}</div>
-          <div className="font-w-600">Dokter Pengirim: {data.dokter || "-"}</div>
-          <div className="font-w-600">Pelayanan: {data.poli || "-"}</div>
-        </div>
-      </div>
-      <div className="font-w-600">Hasil Expertise: {data.hasil_expertise || "-"}</div>
-    </div>
-    
-   
-    );
-  });
-  
-const CheckupToPrint = forwardRef(function CheckupToPrint({ data }, ref) {
-  return (
-    <div ref={ref} className="printableContent">
-      <div className="m-8">
-        <div className="font-w-600">
-          <div className="font-18">RSU MITRA PARAMEDIKA</div>
-          <div style={{ maxWidth: "250px" }}>
-            Jl. Raya Ngemplak, Kemasan, Widodomartani, Ngemplak, Sleman
+        <div className="flex p-4" style={{ display: "flex", justifyContent: "space-between" }}>
+          <div className="column">
+            <div className="font-w-600">No. Pemeriksaan: {data.no_pemeriksaan || "-"}</div>
+            <div className="font-w-600">No. RM: {data.no_rm || "-"}</div>
+            <div className="font-w-600">Nama Pasien: {data.nama_pasien || "-"}</div>
+            <div className="font-w-600">Tanggal Lahir: {data.tanggal_lahir || "-"}</div>
+            <div className="font-w-600">Umur: {data.umur || "-"}</div>
+          </div>
+          <div className="column">
+            <div className="font-w-600">Tanggal Pemeriksaan: {data.tanggal_pemeriksaan || "-"}</div>
+            <div className="font-w-600">Diagnosa: {data.diagnosis_kerja || "-"}</div>
+            <div className="font-w-600">Nama Pemeriksaan: {data.namaPemeriksaan || "-"}</div>
+            <div className="font-w-600">Jenis Pemeriksaan: {data.jenis_pemeriksaan || "-"}</div>
+            <div className="font-w-600">Dokter Pengirim: {data.dokter || "-"}</div>
+            <div className="font-w-600">Pelayanan: {data.poli || "-"}</div>
           </div>
         </div>
-        <div className="font-w-600 mt-24">{data.no_rm || "-"}</div>
+        <div className="font-w-600">Hasil Expertise: {data.hasil_expertise || "-"}</div>
       </div>
-    </div>
-  );
-});
+
+
+    );
+  });
+
+  const CheckupToPrint = forwardRef(function CheckupToPrint({ data }, ref) {
+    return (
+      <div ref={ref} className="printableContent">
+        <div className="m-8">
+          <div className="font-w-600">
+            <div className="font-18">RSU MITRA PARAMEDIKA</div>
+            <div style={{ maxWidth: "250px" }}>
+              Jl. Raya Ngemplak, Kemasan, Widodomartani, Ngemplak, Sleman
+            </div>
+          </div>
+          <div className="font-w-600 mt-24">{data.no_rm || "-"}</div>
+        </div>
+      </div>
+    );
+  });
 
   const initialValues = {
     images: [],
     expertises: [],
   };
-  const handleDeleteImage = (index) => {
+  const handleDeleteRow = (index) => {
     const images = [...formik.values.images];
+    const expertises = [...formik.values.expertises];
+
     images.splice(index, 1);
+    expertises.splice(index, 1);
+
     formik.setFieldValue("images", images);
+    formik.setFieldValue("expertises", expertises);
   };
 
+  const handleDeleteRowConfirmed = (index) => {
+    handleDeleteRow(index);
+    setDeleteConfirmationIndex(null);
+  };
+
+  const handleAddImage = (event) => {
+    const images = [...formik.values.images];
+    images.push({
+      src: URL.createObjectURL(event.target.files[0]),
+      expertise: "",
+    });
+    formik.setFieldValue("images", images);
+    setSelectedImageIndex(images.length - 1); 
+    setIsEditing(true);
+  };
 
   const handleEditImage = (index) => {
     setSelectedImageIndex(index);
+    setSelectedImage(formik.values.images[index].src);
     setIsEditing(true);
   };
 
@@ -102,9 +136,10 @@ const CheckupToPrint = forwardRef(function CheckupToPrint({ data }, ref) {
 
       const reader = new FileReader();
       reader.onload = () => {
-        images[selectedImageIndex] = reader.result;
+        images[selectedImageIndex].src = reader.result;
         formik.setFieldValue("images", images);
         setSelectedImageIndex(null);
+        setSelectedImage(null);
         setIsEditing(false);
       };
       reader.readAsDataURL(newImage);
@@ -112,7 +147,6 @@ const CheckupToPrint = forwardRef(function CheckupToPrint({ data }, ref) {
       console.error("Invalid file input for handleUpdateImage");
     }
   };
-
 
   const validationSchema = Yup.object({
     images: Yup.array().min(1, "Paling tidak harus ada satu gambar"),
@@ -131,11 +165,6 @@ const CheckupToPrint = forwardRef(function CheckupToPrint({ data }, ref) {
     setIsCardMinimized(!isCardMinimized);
   };
 
-  const handleAddImage = (event) => {
-    const images = [...formik.values.images];
-    images.push(URL.createObjectURL(event.target.files[0]));
-    formik.setFieldValue("images", images);
-  };
   const handleImageClick = (image) => {
     setSelectedImage(image);
     setOpenDialog(true);
@@ -143,8 +172,6 @@ const CheckupToPrint = forwardRef(function CheckupToPrint({ data }, ref) {
   const handleCloseDialog = () => {
     setOpenDialog(false);
   };
-
-
 
   return (
     <Grid container spacing={2}>
@@ -164,7 +191,6 @@ const CheckupToPrint = forwardRef(function CheckupToPrint({ data }, ref) {
           />
           <Collapse in={!isCardMinimized}>
             <CardContent>
-
               <TableContainer>
                 <Table>
                   <TableHead>
@@ -180,61 +206,80 @@ const CheckupToPrint = forwardRef(function CheckupToPrint({ data }, ref) {
                       <TableRow key={index}>
                         <TableCell align="center">{index + 1}</TableCell>
                         <TableCell align="center">
-                          {selectedImageIndex === index ? (
+                          {selectedImageIndex === index && isEditing ? (
                             <div>
-                              <img src={image} alt={`expertise ${index + 1}`} height={200} />
+                              <img src={image.src} alt={`expertise ${index + 1}`} height={200} align="center" />
                               <div>
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  onChange={(e) => handleUpdateImage(e.target.files[0])}
-                                />
-                                <Button variant="outlined" onClick={() => setIsEditing(false)}>
-                                  Cancel
-                                </Button>
+                                {isEditing && (
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => handleUpdateImage(e.target.files[0])}
+                                  />
+                                )}
                               </div>
                             </div>
                           ) : (
-                            <div onClick={() => handleImageClick(image)} style={{ cursor: "pointer" }}>
-                              <img src={image} alt={`expertise ${index + 1}`} height={200} />
-                              <Typography variant="body2">
-                                {formik.values.expertises[index] || "-"}
-                              </Typography>
+                            <div onClick={() => handleImageClick(image.src)} style={{ cursor: "pointer" }}>
+                              <img src={image.src} alt={`expertise ${index + 1}`} height={200} />
                             </div>
                           )}
                         </TableCell>
                         <TableCell align="center">
                           {isEditing && selectedImageIndex === index ? (
-                            <input
+                            <TextField
                               type="text"
-                              value={formik.values.expertises[index] || ""}
+                              value={image.expertise}
                               onChange={(e) => {
-                                const expertises = [...formik.values.expertises];
-                                expertises[index] = e.target.value;
-                                formik.setFieldValue("expertises", expertises);
+                                const updatedImages = [...formik.values.images];
+                                updatedImages[index].expertise = e.target.value;
+                                formik.setFieldValue("images", updatedImages);
                               }}
-                              style={{ width: "100%", height: "100px" }}
+                              multiline
+                              rows={8}
+                              fullWidth
+                              style={{ textAlign: "left", marginTop: "8px" }}
                             />
                           ) : (
                             <Typography variant="body2">
-                              {formik.values.expertises[index] || "-"}
+                              {image.expertise || "-"}
                             </Typography>
                           )}
                         </TableCell>
                         <TableCell align="center">
-                          <IconButton onClick={() => handleDeleteImage(index)}>
+                          <IconButton onClick={() => setDeleteConfirmationIndex(index)}>
                             <DeleteIcon />
                           </IconButton>
-                          {!isEditing && selectedImageIndex !== index && (
-                            <IconButton onClick={() => handleEditImage(index)}>
+                          
+                          {isEditing && selectedImageIndex === index ? (
+                            <IconButton onClick={() => handleSaveRow(index)}>
+                              <SaveIcon />
+                            </IconButton>
+                          ) : (
+                            <IconButton
+                              onClick={() => handleEditImage(index)}
+                              disabled={isEditing}
+                            >
                               <EditIcon />
                             </IconButton>
                           )}
-                          {isEditing && selectedImageIndex === index && (
-                            <IconButton onClick={() => handleUpdateImage(/* pass new image here */)}>
-                              <SaveIcon />
-                            </IconButton>
-                          )}
+                          <Dialog
+                            open={deleteConfirmationIndex === index}
+                            onClose={() => setDeleteConfirmationIndex(null)}
+                          >
+                            <DialogTitle>Konfirmasi Hapus Data</DialogTitle>
+                            <DialogContent>
+                              Apakah Anda yakin untuk menghapus data ini?
+                            </DialogContent>
+                            <DialogActions>
+                              <Button onClick={() => setDeleteConfirmationIndex(null)} color="primary">
+                                Batal
+                              </Button>
+                              <Button onClick={() => handleDeleteRowConfirmed(index)} color="primary">
+                                Hapus
+                              </Button>
+                            </DialogActions>
+                          </Dialog>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -260,16 +305,7 @@ const CheckupToPrint = forwardRef(function CheckupToPrint({ data }, ref) {
                   Tambah Gambar
                 </Button>
               </label>
-              <LoadingButton
-                type="submit"
-                variant="contained"
-                startIcon={<SaveIcon />}
-                loading={formik.isSubmitting}
-                onClick={formik.handleSubmit}
-                style={{ marginLeft: "16px" }}
-              >
-                SIMPAN
-              </LoadingButton>
+
               <ReactToPrint
                 trigger={() => (
                   <Button variant="contained" color="secondary" startIcon={<PrintIcon />} style={{ marginLeft: "16px" }}>
@@ -280,7 +316,7 @@ const CheckupToPrint = forwardRef(function CheckupToPrint({ data }, ref) {
               />
               <LabelToPrint
                 data={{
-           
+
                 }}
                 ref={labelPrintRef}
               />
