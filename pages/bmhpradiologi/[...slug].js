@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import LoaderOnLayout from "components/LoaderOnLayout";
-import FormBMHPRadiologi from "components/modules/radiologi/formBMHPRadiologi";
+import FormBMHPRadiologi from "components/modules/bmhpradiologi/formBMHPRadiologi";
 import { formatGenToIso } from "utils/formatTime";
 import getStaticData from "utils/getStaticData";
 
@@ -14,9 +14,9 @@ const DetailBMHPRadiologi = () => {
 
   const dataFormatter = (data) => {
     let tempData = {
-      namaBarang: data.namaBarang || "",
-      jumlahBarang: data.jumlahBarang || "",
-      waktuPemakaian: data.waktuPemakaian || "",
+      namaBarang: data.nama_barang || "",
+      jumlahBarang: data.jumlah_barang || "",
+      waktuPemakaian: data.waktu_pemakaian || "",
     };
     return { ...tempData };
   };

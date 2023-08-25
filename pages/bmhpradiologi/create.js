@@ -1,4 +1,4 @@
-import FormBMHPRadiologi from "components/modules/radiologi/formBMHPRadiologi";
+import FormBMHPRadiologi from "components/modules/bmhpradiologi/formBMHPRadiologi";
 
 const Create = () => {
   return (

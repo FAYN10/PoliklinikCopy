@@ -1,12 +1,5 @@
 import { useState, forwardRef, useEffect, useMemo } from "react";
 import { useRouter } from "next/router";
-import Box from "@mui/system/Box";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Grid from "@mui/material/Grid";
-import Chip from "@mui/material/Chip";
-import visuallyHidden from "@mui/utils/visuallyHidden";
-import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import PlusIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -14,6 +7,7 @@ import NextIcon from "@material-ui/icons/NavigateNext";
 import PrevIcon from "@material-ui/icons/NavigateBefore";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
+import Box from "@mui/system/Box";
 import Paper from "@mui/material/Paper";
 import TableContainer from "@mui/material/TableContainer";
 import Table from "@mui/material/Table";
@@ -22,6 +16,8 @@ import TableBody from "@mui/material/TableBody";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import TableSortLabel from "@mui/material/TableSortLabel";
+import visuallyHidden from "@mui/utils/visuallyHidden";
+import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@material-ui/icons/SearchOutlined";
 import RefreshIcon from "@material-ui/icons/CachedOutlined";
@@ -34,10 +30,9 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
+import useDebounce from "custom-hooks/useDebounce";
 import st from "styles/module/components/Table.module.scss";
 import useClientPermission from "custom-hooks/useClientPermission";
-import useDebounce from "custom-hooks/useDebounce";
-
 
 const Transition = forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -53,12 +48,12 @@ const TableLayoutV4 = ({
     meta = {},
     dataPerPage = 8,
     isUpdatingData,
-    filterOptions = [{ label: "Def label", value: "def_value" }],
-    updateDataPerPage = () => { },
-    updateDataNavigate = () => { },
+    updateDataPerPage,
+    updateDataNavigate,
+    isSearchAvailable = true,
+    searchData = () => { },
     refreshData = () => { },
     deleteData = () => { },
-    searchData = () => { },
     isCustomHeader = false,
     customHeader = <>custom header</>,
 }) => {
@@ -74,9 +69,7 @@ const TableLayoutV4 = ({
     const memoizedSearchText = useMemo(() => searchText, [searchText]);
     const debouncedSearchText = useDebounce(memoizedSearchText, 500);
     const { clientPermission } = useClientPermission();
-    const [filter, setFilter] = useState(filterOptions[0].value);
-    const [selectedFilter, setSelectedFilter] = useState([]);
-
+    const [selectedDate, setSelectedDate] = useState(null);
     // --start table operator stuff
     function descendingComparator(a, b, orderBy) {
         if (b[orderBy] < a[orderBy]) {
@@ -175,10 +168,11 @@ const TableLayoutV4 = ({
     const handleNavigate = (payload) => {
         updateDataNavigate(payload);
     };
+
     const handleRefresh = () => {
         setSearchText("");
         refreshData();
-      };
+    };
 
     const isPermitted = (payload) => {
         let value = true;
@@ -191,46 +185,16 @@ const TableLayoutV4 = ({
         return value;
     };
 
-    const handleChangeFilter = (event) => {
-        setSearchText("");
-        setDate(null);
-        setFilter(event.target.value);
-    };
-
-    const handleOnEnterSearch = () => {
-        if (!searchText.replace(/\s/g, "").length) {
-            setSearchText("");
-            return;
-        }
-        let tempOptions = filterOptions.filter((e) => e.value === filter);
-        let tempFilterDisplay = [...selectedFilter];
-        tempFilterDisplay = tempFilterDisplay.filter((e) => e.type !== filter);
-        tempFilterDisplay.unshift({
-            type: filter,
-            label: tempOptions[0].label,
-            value: searchText,
-        });
-        setSearchText("");
-        setSelectedFilter(tempFilterDisplay);
-        searchData(tempFilterDisplay);
-    };
-
-    const handleDeleteDisplayFilter = (data) => {
-        let tempData = [...selectedFilter];
-        tempData = tempData.filter((e) => e.type !== data.type);
-        setFilter(data.type);
-        setSelectedFilter(tempData);
-        searchData(tempData);
-    };
     useEffect(
         () => {
-          if (debouncedSearchText) {
-            searchData(debouncedSearchText);
-          }
+            if (debouncedSearchText || selectedDate) {
+                searchData(debouncedSearchText || selectedDate);
+            }
         },
         // eslint-disable-next-line
-        [debouncedSearchText] // Only call effect if debounced search term change
-      );
+        [debouncedSearchText, selectedDate] // Only call effect if debounced search term change
+    );
+
     return (
         <>
             <div className={st.container}>
@@ -251,71 +215,41 @@ const TableLayoutV4 = ({
                 </div>
                 <Box sx={{ width: "100%", marginY: 4 }}>
                     <Paper sx={{ width: "100%", padding: 2 }}>
-                        <Grid container spacing={1} alignItems={"center"}>
-                            <Grid item md={2} xs={12}>
-                                <FormControl fullWidth>
-                                    <InputLabel id="filter-select-label">Filter</InputLabel>
-                                    <Select
-                                        labelId="filter-select-label"
-                                        id="filter-select"
-                                        value={filter}
-                                        label="Filter"
-                                        onChange={handleChangeFilter}
-                                    >
-                                        {filterOptions.map((e) => (
-                                            <MenuItem key={e.value} value={e.value}>
-                                                {e.label}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                            </Grid>
-                            <Grid item md={8} xs={10}>
-                                <TextField
-                                    id={`search-${title}`}
-                                    label={`Cari ${title}`}
-                                    sx={{ width: "100%" }}
-                                    InputProps={{
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                <SearchIcon />
-                                            </InputAdornment>
-                                        ),
-                                    }}
-                                    value={searchText}
-                                    onChange={(e) => setSearchText(e.target.value)}
-                                    onKeyDownCapture={(e) => {
-                                        if (e.key === "Enter") {
-                                            handleOnEnterSearch();
-                                        }
-                                    }}
-                                />
-                            </Grid>
-                            <Grid item md={2} xs={2}>
-                                <div className="flex justify-end">
-                                    <Tooltip title="Refresh Data" arrow>
-                                        <span>
-                                            <IconButton
-                                                onClick={isUpdatingData ? null : handleRefresh}
-                                            >
-                                                <RefreshIcon />
-                                            </IconButton>
-                                        </span>
-                                    </Tooltip>
-                                </div>
-                            </Grid>
-                        </Grid>
-                        <div className="flex mt-8">
-                            {selectedFilter.map((data) => {
-                                return (
-                                    <div key={data.type} className="mr-4">
-                                        <Chip
-                                            label={data.label + ": " + data.value}
-                                            onDelete={() => handleDeleteDisplayFilter(data)}
-                                        ></Chip>
+                        <div className="mb-16 flex items-center">
+                            {isCustomHeader ? (
+                                customHeader
+                            ) : (
+                                <>
+                                    {isSearchAvailable && (
+                                        <div style={{ width: "100%" }}>
+                                            <TextField
+                                                id={`search-date-${title}`}
+                                                type="date"
+                                                label="Cari BMHP Radiologi"
+                                                sx={{ width: "40%", marginLeft: 2 }}
+                                                value={selectedDate || ""}
+                                                onChange={(e) => {
+                                                    setSelectedDate(e.target.value);
+                                                }}
+                                                InputLabelProps={{
+                                                    shrink: true,
+                                                }}
+                                            />
+                                        </div>
+                                    )}
+                                    <div style={{ marginLeft: "auto" }}>
+                                        <Tooltip title="Refresh Data" arrow>
+                                            <span>
+                                                <IconButton
+                                                    onClick={isUpdatingData ? null : handleRefresh}
+                                                >
+                                                    <RefreshIcon />
+                                                </IconButton>
+                                            </span>
+                                        </Tooltip>
                                     </div>
-                                );
-                            })}
+                                </>
+                            )}
                         </div>
                         <div>
                             {isUpdatingData ? (
@@ -377,37 +311,34 @@ const TableLayoutV4 = ({
                                                                     );
                                                                 })}
                                                                 <TableCell
-    align="right"
-    padding="none"
-    sx={{
-        paddingRight: 1,
-        paddingY: 0.8,
-    }}
->
-    {isPermitted("destroy") ? (
-        <>
-           
-            <Tooltip title="Delete" arrow>
-                <IconButton
-                    onClick={(event) => {
-                        event.stopPropagation();
-                        handleOpenConfirmationDelete(row);
-                    }}
-                >
-                    <DeleteIcon color="error" />
-                </IconButton>
-            </Tooltip>
-        </>
-    ) : (
-        <Tooltip title="You don't have permission to do this">
-            <span>
-                <IconButton disabled>
-                    <DeleteIcon />
-                </IconButton>
-            </span>
-        </Tooltip>
-    )}
-</TableCell>
+                                                                    align="right"
+                                                                    padding="none"
+                                                                    sx={{
+                                                                        paddingRight: 1,
+                                                                        paddingY: 0.8,
+                                                                    }}
+                                                                >
+                                                                    {isPermitted("destroy") ? (
+                                                                        <Tooltip title="Delete" arrow>
+                                                                            <IconButton
+                                                                                onClick={(event) => {
+                                                                                    event.stopPropagation();
+                                                                                    handleOpenConfirmationDelete(row);
+                                                                                }}
+                                                                            >
+                                                                                <DeleteIcon color="error" />
+                                                                            </IconButton>
+                                                                        </Tooltip>
+                                                                    ) : (
+                                                                        <Tooltip title="You don't have permission to do this">
+                                                                            <span>
+                                                                                <IconButton disabled>
+                                                                                    <DeleteIcon />
+                                                                                </IconButton>
+                                                                            </span>
+                                                                        </Tooltip>
+                                                                    )}
+                                                                </TableCell>
                                                             </TableRow>
                                                         );
                                                     })}

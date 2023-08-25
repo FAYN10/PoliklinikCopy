@@ -43,7 +43,7 @@ const BmhpRadiologi = () => {
     const [dataMetaBMHPRadiologi, setDataMetaBMHPRadiologi] = useState({});
     const [dataBMHPRadiologiPerPage, setDataPerPage] = useState(8);
     const [isLoadingDataBMHPRadiologi, setIsLoadingDataBMHPRadiologi] = useState(false);
-    const [isUpdatingDataEmploye, setIsUpdatingDataBMHPRadiologi] = useState(false);
+    const [isUpdatingDataBMHPRadiologi, setIsUpdatingDataBMHPRadiologi] = useState(false);
     const [snackbarState, setSnackbarState] = useState({
       state: false,
       type: null,
@@ -67,7 +67,7 @@ const BmhpRadiologi = () => {
       }
     };
   
-    const updateDataRoleHandler = async (payload) => {
+    const updateDataBMHPRadiologiHandler = async (payload) => {
       try {
         setIsUpdatingDataBMHPRadiologi(true);
         const response = await getListBMHPRadiologi(payload);
@@ -86,7 +86,7 @@ const BmhpRadiologi = () => {
       }
     };
   
-    const deletaDataRoleHandler = async (payload) => {
+    const deletaDataBMHPRadiologiHandler = async (payload) => {
       try {
         setIsUpdatingDataBMHPRadiologi(true);
         const response = await deleteBmhpRadiologi({ id: payload });
@@ -95,7 +95,7 @@ const BmhpRadiologi = () => {
           type: "success",
           message: response.data.message,
         });
-        updateDataRoleHandler({ per_page: dataBMHPRadiologiPerPage });
+        updateDataBMHPRadiologiHandler({ per_page: dataBMHPRadiologiPerPage });
       } catch (error) {
         setSnackbarState({
           state: true,
@@ -107,7 +107,7 @@ const BmhpRadiologi = () => {
       }
     };
   
-    const searchDataRoleHandler = async (payload) => {
+    const searchDataBMHPRadiologiHandler = async (payload) => {
       try {
         setIsUpdatingDataBMHPRadiologi(true);
         const response = await searchBmhpRadiologi({
@@ -161,25 +161,22 @@ const BmhpRadiologi = () => {
             data={dataBMHPRadiologi}
             meta={dataMetaBMHPRadiologi}
             dataPerPage={dataBMHPRadiologiPerPage}
-            isUpdatingData={isUpdatingDataEmploye}
-            filterOptions={[
-                { label: "Tanggal", value: "waktuPemakaian" },
-              ]}
+            isUpdatingData={isUpdatingDataBMHPRadiologi}
             updateDataPerPage={(e) => {
               setDataPerPage(e.target.value);
-              updateDataRoleHandler({ per_page: e.target.value });
+              updateDataBMHPRadiologiHandler({ per_page: e.target.value });
             }}
             updateDataNavigate={(payload) =>
-              updateDataRoleHandler({
+              updateDataBMHPRadiologiHandler({
                 per_page: dataBMHPRadiologiPerPage,
                 cursor: payload,
               })
             }
             refreshData={() =>
-              updateDataRoleHandler({ per_page: dataBMHPRadiologiPerPage })
+              updateDataBMHPRadiologiHandler({ per_page: dataBMHPRadiologiPerPage })
             }
-            deleteData={deletaDataRoleHandler}
-            searchData={searchDataRoleHandler}
+            deleteData={deletaDataBMHPRadiologiHandler}
+            searchData={searchDataBMHPRadiologiHandler}
           />
         )}
         <Snackbar
