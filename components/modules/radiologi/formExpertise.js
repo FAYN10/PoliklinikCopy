@@ -33,6 +33,7 @@ import ReactToPrint from "react-to-print";
 
 const FormExpertise = () => {
   const labelPrintRef = useRef();
+  const checkupPrintRef = useRef();
   const [isCardMinimized, setIsCardMinimized] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
@@ -267,7 +268,6 @@ const FormExpertise = () => {
                             open={deleteConfirmationIndex === index}
                             onClose={() => setDeleteConfirmationIndex(null)}
                           >
-                            <DialogTitle>Konfirmasi Hapus Data</DialogTitle>
                             <DialogContent>
                               Apakah Anda yakin untuk menghapus data ini?
                             </DialogContent>
@@ -307,19 +307,19 @@ const FormExpertise = () => {
               </label>
 
               <ReactToPrint
-                trigger={() => (
-                  <Button variant="contained" color="secondary" startIcon={<PrintIcon />} style={{ marginLeft: "16px" }}>
-                    EXPORT HASIL
-                  </Button>
-                )}
-                content={() => labelPrintRef.current}
-              />
-              <LabelToPrint
-                data={{
-
-                }}
-                ref={labelPrintRef}
-              />
+                      trigger={() => (
+                        <Button variant="outlined" startIcon={<PrintIcon />}>
+                          Cetak Kartu Periksa
+                        </Button>
+                      )}
+                      content={() => checkupPrintRef.current}
+                    />
+                    <CheckupToPrint
+                      data={{
+                        no_rm: detailPrePopulatedData.no_rm,
+                      }}
+                      ref={checkupPrintRef}
+                    />
             </div>
 
           </Collapse>
