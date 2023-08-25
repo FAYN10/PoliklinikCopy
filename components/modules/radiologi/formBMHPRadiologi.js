@@ -12,16 +12,11 @@ import BackIcon from "@material-ui/icons/ArrowBack";
 import SaveIcon from "@material-ui/icons/Save";
 import Grid from "@mui/material/Grid";
 import DatePicker from "components/DatePicker";
-import SelectCountry from "components/SelectCountry";
-import SelectRegion from "components/SelectRegion";
-import SelectStatic from "components/SelectStatic";
-import SelectAsync from "components/SelectAsync";
-import InputPhoneNumber from "components/InputPhoneNumber";
 import Snackbar from "components/SnackbarMui";
 import { formatIsoToGen } from "utils/formatTime";
 import { dateSchema, stringSchema, phoneNumberSchema } from "utils/yupSchema";
 import useClientPermission from "custom-hooks/useClientPermission";
-
+import {createBMHPRadiologi, updateBMHPRadiologi, getDetailBMHPRadiologi} from "api/radiologi";
 
     const FormBMHPRadiologi = ({
         isEditType = false,
@@ -57,12 +52,13 @@ import useClientPermission from "custom-hooks/useClientPermission";
             enableReinitialize: true,
             onSubmit: async (values, {resetForm, setFieldError}) => {
                 let messageContext = isEditType ? "diperbarui" : "ditambahkan";
-                let formattedData = {
-                    ...values,
-                    namaBarang: values.namaBarang,
-                    jumlahBarang: values.jumlahBarang,
-                    waktuPemakaian: formatIsoToGen(values.waktuPemakaian),
-                };
+                let formattedData = {...values};
+                    formattedData = {
+                      ...formattedData,
+                      namaBarang: values.namaBarang,
+                      jumlahBarang: values.jumlahBarang,
+                      waktuPemakaian: formatIsoToGen(values.waktuPemakaian),
+                    };
                 let validData = {};
                 for (let key in formattedData) {
                     if (formattedData[key]) {
