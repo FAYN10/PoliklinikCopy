@@ -6,8 +6,6 @@ import LoaderOnLayout from "components/LoaderOnLayout";
 import FormPasien from "components/modules/pasien/form";
 import { formatGenToIso } from "utils/formatTime";
 import getStaticData from "utils/getStaticData";
-import { getListRawatJalan } from "api/rawat-jalan";
-import { getListRawatInap } from "api/rawat-inap";
 import Popover from "@mui/material/Popover";
 import TableLayout from "pages/pasien/TableLayout";
 import Tabs from "@mui/material/Tabs";
@@ -19,17 +17,21 @@ import PermContactCalendarIcon from "@mui/icons-material/PermContactCalendar";
 import FormExpertise from "components/modules/radiologi/formExpertise";
 import RiwayatPemeriksaanTable from "components/modules/radiologi/riwayatPemeriksaanTable";
 import Assessment from "components/modules/radiologi/assessment";
+import PermintaanRadiologiTableLayout from "components/modules/radiologi/permintaanRadiologiTableLayout";
 
 const DetailRadiologi = () => {
   const [isEditingMode, setIsEditingMode] = useState(false);
   const router = useRouter();
   const { slug } = router.query;
   const [dataPermintaanRadiologi, setDataPermintaanRadiologi] = useState([]);
-  const [isLoadingDataPermintaanRadiologi, setIsLoadingDataPermintaanRadiologi] = useState(true);  
+  const [isLoadingDataPermintaanRadiologi, setIsLoadingDataPermintaanRadiologi] = useState(true);
+  const [dataPasien, setDataPasien] = useState({});
+  const [detailDataPasien, setDetailDataPasien] = useState({});
+  const [isLoadingDataPasien, setIsLoadingDataPasien] = useState(true);
   const [dataRadiologi, setDataRadiologi] = useState({});
   const [detailDataRadiologi, setDetailDataRadiologi] = useState({});
   const [isLoadingDataRadiologi, setIsLoadingDataRadiologi] = useState(true);
-  
+
   const [menuState, setMenuState] = useState(null);
   const { isActionPermitted } = useClientPermission();
   const openMenuPopover = Boolean(menuState);
@@ -74,6 +76,7 @@ const DetailRadiologi = () => {
     }
   ]
 
+ 
   const riwayatPemeriksaanTableHead = [
     {
       id: "tanggal_pemeriksaan",
@@ -120,33 +123,33 @@ const DetailRadiologi = () => {
           const response = await getDetailRadiologi({ id: slug[0] });
           const data = response.data.data;
           setDetailDataRadiologi(data);
-  
-          setIsLoadingDataRadiologi(false); 
-          setIsLoadingDataPermintaanRadiologi(true); 
-          fetchPermintaanRadiologi(); 
+          setIsLoadingDataRadiologi(false);
+          setIsLoadingDataPermintaanRadiologi(true);
+          fetchPermintaanRadiologi();
         } catch (error) {
           console.log(error);
           setIsLoadingDataRadiologi(false);
-          setIsLoadingDataPermintaanRadiologi(false); 
+          setIsLoadingDataPermintaanRadiologi(false);
         }
       })();
     }
   }, [router.isReady, slug]);
-  const dataPermintaanRadiologiFormatHandler = (payload) => {const result = payload.map((e) => {
-    return {
-      no_pemeriksaan: e.no_pemeriksaan || "null",
-      waktu_permintaan_pemeriksaan: e.waktu_permintaan_pemeriksaan || "null",
-      nama_pemeriksaan: e.nama_pemeriksaan || "null",
-      jenis_pemeriksaan: e.jenis_pemeriksaan || "null",
-      dokter_pengirim: e.dokter_pengirim || "null",
-      unit_pengirim: e.unit_pengirim || "null",
-      diagnosis_kerja: e.diagnosis_kerja || "null",
-      catatan_permintaan: e.catatan_permintaan || "null",
-    };
+
+  const dataPermintaanRadiologiFormatHandler = (payload) => {
+    const result = payload.map((e) => {
+      return {
+        no_pemeriksaan: e.no_pemeriksaan || "null",
+        waktu_permintaan_pemeriksaan: e.waktu_permintaan_pemeriksaan || "null",
+        nama_pemeriksaan: e.nama_pemeriksaan || "null",
+        jenis_pemeriksaan: e.jenis_pemeriksaan || "null",
+        dokter_pengirim: e.dokter_pengirim || "null",
+        unit_pengirim: e.unit_pengirim || "null",
+        diagnosis_kerja: e.diagnosis_kerja || "null",
+        catatan_permintaan: e.catatan_permintaan || "null",
+      };
     });
     return result;
   };
-    
 
   const dataFormatter = (data) => {
     let tempData = {
@@ -200,48 +203,25 @@ const DetailRadiologi = () => {
     setDetailDataRadiologi(data);
     setDataRadiologi(() => dataFormatter(data));
   };
-
-  
-  
-
   const menuItems = [
     {
       label: "Permintaan Radiologi",
-      content: isLoadingDataPermintaanRadiologi ? (
-        <div>Loading...</div>
-      ) : (
-        <div>
-          <h2>Permintaan Radiologi</h2>
-          <table>
-            <thead>
-              <tr>
-                {permintaanTableHead.map((column) => (
-                  <th key={column.id}>{column.label}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {dataPermintaanRadiologi.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.no_pemeriksaan}</td>
-                  <td>{item.waktu_permintaan_pemeriksaan}</td>
-                  <td>{item.nama_pemeriksaan}</td>
-                  <td>{item.jenis_pemeriksaan}</td>
-                  <td>{item.diagnosis_kerja}</td>
-                  <td>{item.catatan_permintaan}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ),
+      content: (
+        <>
+        <TableLayout
+        baseRoutePath={'${router.asPath}'}
+        tableHead={permintaanTableHead}
+        data={dataPermintaanRadiologi}>
+        </TableLayout>
+        </>
+      )
     },
-    { 
-      label: "Assessment Pemeriksaan", 
-      component: <Assessment 
-                    namaPemeriksaan={detailDataRadiologi.permintaan?.[0]?.nama_pemeriksaan}
-                    jenisPemeriksaan={detailDataRadiologi.permintaan?.[0]?.jenis_pemeriksaan} 
-                  /> 
+    {
+      label: "Assessment Pemeriksaan",
+      component: <Assessment
+        namaPemeriksaan={detailDataRadiologi.permintaan?.[0]?.nama_pemeriksaan}
+        jenisPemeriksaan={detailDataRadiologi.permintaan?.[0]?.jenis_pemeriksaan}
+      />
     },
     { label: "Hasil Pemeriksaan", component: <FormExpertise /> },
     { label: "Riwayat Pemeriksaan", component: <RiwayatPemeriksaanTable /> },
@@ -266,45 +246,40 @@ const DetailRadiologi = () => {
                     />
                     <p className="m-0 ml-8 font-14">Pasien Info</p>
                   </div>
+
                 </div>
                 <div className="flex justify-between items-start">
                   <div className="flex items-start">
                     <Avatar
-                      src={detailDataRadiologi?.picture}
+                      src={detailDataPasien?.picture}
                       variant="rounded"
-                      sx={{ width: 130, height: 130 }}
+                      sx={{ width: 120, height: 120 }}
                     />
                     <div className="ml-8 mt-8">
                       <div className="font-w-700">
-                        {dataRadiologi?.nama_pasien}
+                        {dataPasien?.nama_pasien}
                       </div>
-                      <div className="font-w-700">
-                        {dataRadiologi?.nik}
-                      </div>
-                      <div className="font-14">
-                        {detailDataRadiologi?.tanggal_lahir
-                          ? formatLabelDate(detailDataRadiologi.tanggal_lahir)
+                      <div>
+                        {detailDataPasien?.tanggal_lahir
+                          ? formatLabelDate(detailDataPasien.tanggal_lahir)
                           : ""}{" "}
-                        / {detailDataRadiologi?.umur} tahun
+                        / {detailDataPasien?.umur} tahun
                       </div>
-                      {/* <div className="font-14">
-                        {detailDataRadiologi?.agama.name}
-                      </div> */}
-                      <div className="font-14">
-                        {detailDataRadiologi?.jenis_kelamin
+                      <div>
+                        {detailDataPasien?.jenis_kelamin
                           ? "Laki-laki"
                           : "Perempuan"}{" "}
-                        / {detailDataRadiologi?.status}
+                        / {detailDataPasien?.status}
                       </div>
                     </div>
                   </div>
                   <div className="mt-8">
-                    <div>NO. RM</div>
+                    <div>NO REKAM MEDIS</div>
                     <div
                       className="font-28 font-w-700"
                       style={{ textAlign: "right" }}
                     >
-                      {detailDataRadiologi?.no_rm}
+                      {detailDataPasien?.no_rm}
                     </div>
                   </div>
                 </div>
