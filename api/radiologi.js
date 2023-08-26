@@ -25,10 +25,26 @@ export function getListBMHPRadiologi(params) {
   });
 }
 
+export function getDetailBMHPRadiologi(params) {
+  return request({
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/bmhpradiologi/show`,
+    method: "GET",
+    params,
+  });
+}
+
 export function createBMHPRadiologi(data) {
   return request({
     url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/bmhpradiologi`,
     method: "POST",
+    data,
+  });
+}
+
+export function updateBMHPRadiologi(data) {
+  return request({
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/bmhpradiologi`,
+    method: "PATCH",
     data,
   });
 }
