@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   Dialog,
   DialogActions,
@@ -14,29 +14,24 @@ import {
   FormControl,
 } from '@mui/material';
 import * as Yup from 'yup';
-import {stringSchema} from 'utils/yupSchema';
+import {formatGenToIso, formatIsoToGen} from 'utils/formatTime';
 import {parse} from 'date-fns';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
-import LocalizationProvider from '@mui/lab/LocalizationProvider';
-import DatePicker from '@mui/lab/DatePicker';
-import {
-  formatIsoToGen,
-  formatGenToIso,
-  formatReadable,
-  formatLabelDate,
-} from 'utils/formatTime';
+import {stringSchema} from 'utils/yupSchema';
 import {useFormik} from 'formik';
 import SelectAsync from 'components/SelectAsync';
+import {getListItem} from 'api/gudang/item';
+import {getSediaan} from 'api/gudang/sediaan';
+import {getSupplier} from 'api/supplier';
 import {FocusError} from 'focus-formik-error';
 import {LoadingButton} from '@mui/lab';
 import useClientPermission from 'custom-hooks/useClientPermission';
-import {getListItem} from 'api/gudang/item';
-import {getSediaan} from 'api/gudang/sediaan';
+import {DatePicker, LocalizationProvider} from '@mui/x-date-pickers';
+import {filterFalsyValue} from 'utils/helper';
 
-const DialogEditItem = ({
+const DialogAddItem = ({
   state,
   setState,
-  isPembelian = false,
   isEditType = false,
   prePopulatedDataForm = {},
   detailPrePopulatedData = {},
@@ -59,14 +54,14 @@ const DialogEditItem = ({
   const tableItemInitialValues = !isEditType
     ? {
         item: {id: '', kode: '', name: ''},
-        nomor_batch: null,
-        jumlah: null,
         sediaan: {id: '', name: ''},
+        nomor_batch: null,
+        stok: null,
         harga_beli_satuan: null,
         harga_jual_satuan: null,
         diskon: null,
         margin: null,
-        total_pembelian: null,
+        total_pembelian: '',
         tanggal_ed: null,
       }
     : prePopulatedDataForm;
@@ -75,15 +70,15 @@ const DialogEditItem = ({
     item: Yup.object({
       id: stringSchema('Kode Item', true),
     }),
-    nomor_batch: Yup.string()
-      .matches(/^[0-9]+$/, 'Wajib angka')
-      .required('Nomor batch wajib diisi'),
-    jumlah: Yup.string()
-      .matches(/^[0-9]+$/, 'Wajib angka')
-      .required('Jumlah wajib diisi'),
     sediaan: Yup.object({
       id: stringSchema('Sediaan', true),
     }),
+    nomor_batch: Yup.string()
+      .matches(/^[0-9]+$/, 'Wajib angka')
+      .required('Nomor batch wajib diisi'),
+    stok: Yup.string()
+      .matches(/^[0-9]+$/, 'Wajib angka')
+      .required('stok wajib diisi'),
     harga_beli_satuan: Yup.string()
       .matches(/^[0-9]+$/, 'Wajib angka')
       .required('Harga beli wajib diisi'),
@@ -107,9 +102,9 @@ const DialogEditItem = ({
         const result = parse(originalValue, 'dd/MM/yyyy', new Date());
         return result;
       })
-      .typeError('Expired Date tidak valid')
-      .min('2023-01-01', 'Expired Date tidak valid')
-      .required('Expired Date wajib diisi'),
+      .typeError('Expired date tidak valid')
+      .min('2023-01-01', 'Expired date tidak valid')
+      .required('Expired date wajib diisi'),
   });
 
   const createTableItemValidation = useFormik({
@@ -119,8 +114,14 @@ const DialogEditItem = ({
     onSubmit: async (values, {resetForm, setFieldError}) => {
       let messageContext = isEditType ? 'diperbarui' : 'ditambahkan';
       let data = {...values};
+      data = {
+        ...data,
+        tanggal_ed: formatIsoToGen(data.tanggal_ed),
+      };
+      console.log(data);
       try {
-        createData(data);
+        const formattedData = filterFalsyValue({...data});
+        createData(formattedData);
         resetForm();
         setState(false);
       } catch (error) {
@@ -138,6 +139,41 @@ const DialogEditItem = ({
     },
   });
 
+  useEffect(() => {
+    if (!isEditType) {
+      const total_pembelian = '';
+      if (
+        createTableItemValidation.values.harga_beli_satuan != null &&
+        createTableItemValidation.values.margin != null &&
+        createTableItemValidation.values.diskon != null
+      ) {
+        const harga_beli_satuan =
+          createTableItemValidation.values.harga_beli_satuan;
+        const margin = createTableItemValidation.values.margin;
+        const diskon = createTableItemValidation.values.diskon;
+
+        const marginProporsi = margin / 100;
+        const diskonProporsi = diskon / 100;
+
+        const totalSebelumDiskon = harga_beli_satuan * (1 + marginProporsi);
+        const totalSetelahDiskon = totalSebelumDiskon * (1 - diskonProporsi);
+
+        total_pembelian = totalSetelahDiskon.toFixed(2);
+
+        console.log(`Total Pembelian: ${total_pembelian}`);
+      }
+      createTableItemValidation.setFieldValue(
+        'total_pembelian',
+        parseInt(total_pembelian)
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    createTableItemValidation.values.harga_beli_satuan,
+    createTableItemValidation.values.margin,
+    createTableItemValidation.values.diskon,
+  ]);
+
   return (
     <>
       <Dialog
@@ -147,7 +183,7 @@ const DialogEditItem = ({
         fullWidth
       >
         <DialogTitle sx={{paddingLeft: 2, paddingBottom: 1}}>
-        {isPembelian ? "Tambah Item" : "Update Item"}
+          Tambah Item
         </DialogTitle>
         <Divider sx={{borderWidth: '1px'}} />
         <DialogContent sx={{paddingBottom: 2}}>
@@ -158,13 +194,13 @@ const DialogEditItem = ({
                 <Grid item xs={9} md={6} lg={6}>
                   <Grid container spacing={1}>
                     <Grid item xs={3.5}>
-                      <Typography variant='h1 font-w-600'>Kode Item</Typography>
+                      <Typography variant='h1 font-w-600'>Nama Item</Typography>
                     </Grid>
                     <Grid item xs={6}>
                       <div className='mb-16'>
                         <SelectAsync
                           id='item'
-                          labelField='Kode Item'
+                          labelField='Nama Item'
                           labelOptionRef='name'
                           valueOptionRef='id'
                           handlerRef={createTableItemValidation}
@@ -189,24 +225,24 @@ const DialogEditItem = ({
                   </Grid>
                   <Grid container spacing={1}>
                     <Grid item xs={3.5}>
-                      <Typography variant='h1 font-w-600'>Nama Item</Typography>
+                      <Typography variant='h1 font-w-600'>Kode Item</Typography>
                     </Grid>
                     <Grid item xs={6}>
                       <div className='mb-16'>
                         <TextField
                           fullWidth
-                          id='nama_item'
-                          name='nama_item'
-                          label='Nama Item'
+                          id='kode_item'
+                          name='kode_item'
+                          label='Kode Item'
                           value={createTableItemValidation.values.item.kode}
                           onChange={createTableItemValidation.handleChange}
                           error={
-                            createTableItemValidation.touched.nama_item &&
-                            Boolean(createTableItemValidation.errors.nama_item)
+                            createTableItemValidation.touched.kode_item &&
+                            Boolean(createTableItemValidation.errors.kode_item)
                           }
                           helperText={
-                            createTableItemValidation.touched.nama_item &&
-                            createTableItemValidation.errors.nama_item
+                            createTableItemValidation.touched.kode_item &&
+                            createTableItemValidation.errors.kode_item
                           }
                           disabled
                         />
@@ -245,24 +281,24 @@ const DialogEditItem = ({
                   </Grid>
                   <Grid container spacing={1}>
                     <Grid item xs={3.5}>
-                      <Typography variant='h1 font-w-600'>Jumlah</Typography>
+                      <Typography variant='h1 font-w-600'>stok</Typography>
                     </Grid>
                     <Grid item xs={6}>
                       <div className='mb-16'>
                         <TextField
                           fullWidth
-                          id='jumlah'
-                          name='jumlah'
-                          label='Jumlah'
-                          value={createTableItemValidation.values.jumlah}
+                          id='stok'
+                          name='stok'
+                          label='stok'
+                          value={createTableItemValidation.values.stok}
                           onChange={createTableItemValidation.handleChange}
                           error={
-                            createTableItemValidation.touched.jumlah &&
-                            Boolean(createTableItemValidation.errors.jumlah)
+                            createTableItemValidation.touched.stok &&
+                            Boolean(createTableItemValidation.errors.stok)
                           }
                           helperText={
-                            createTableItemValidation.touched.jumlah &&
-                            createTableItemValidation.errors.jumlah
+                            createTableItemValidation.touched.stok &&
+                            createTableItemValidation.errors.stok
                           }
                           disabled={isEditType && !isEditingMode}
                         />
@@ -452,7 +488,7 @@ const DialogEditItem = ({
                             createTableItemValidation.touched.total_pembelian &&
                             createTableItemValidation.errors.total_pembelian
                           }
-                          disabled={isEditType && !isEditingMode}
+                          disabled
                         />
                       </div>
                     </Grid>
@@ -475,7 +511,7 @@ const DialogEditItem = ({
                               mask='__-__-____'
                               value={
                                 createTableItemValidation.values.tanggal_ed
-                                  ? formatGenToIso(
+                                  ? formatIsoToGen(
                                       createTableItemValidation.values
                                         .tanggal_ed
                                     )
@@ -526,10 +562,10 @@ const DialogEditItem = ({
                 <LoadingButton
                   type='submit'
                   variant='contained'
-                  disabled={!isActionPermitted('pembelian:store')}
+                  disabled={!isActionPermitted('receive:store')}
                   loading={createTableItemValidation.isSubmitting}
                 >
-                  Simpan
+                  Tambah Item
                 </LoadingButton>
               </div>
             </div>
@@ -547,4 +583,4 @@ const DialogEditItem = ({
   );
 };
 
-export default DialogEditItem;
+export default DialogAddItem;

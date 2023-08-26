@@ -5,7 +5,7 @@ import TableLayoutGudang from 'components/TableLayoutGudang';
 import LoaderOnLayout from 'components/LoaderOnLayout';
 import Snackbar from 'components/SnackbarMui';
 import {Card, CardContent} from '@mui/material';
-import TableLayoutDetail from 'components/TableLayoutDetail';
+import TableLayoutDetail from 'components/TableLayoutDetailGudang';
 
 const daftarPembelianTableHead = [
   {
@@ -105,7 +105,7 @@ const PreRetur = () => {
     try {
       setIsLoadingDataItem(true);
       const params = {
-        id : 1
+        id: 1,
       };
       const response = await getDetailPembelian(params);
       const result = dataItemFormatHandler(response.data.data.gudang);
@@ -255,7 +255,7 @@ const PreRetur = () => {
                   dataPerPage={dataPembelianPerPage}
                   isUpdatingData={isUpdatingDataPembelian}
                   filterOptions={[
-                    {label: "Nomor Faktur", value: "nomor_faktur"},
+                    {label: 'Nomor Faktur', value: 'nomor_faktur'},
                     {label: 'Supplier', value: 'supplier'},
                   ]}
                   updateDataPerPage={(e, filter) => {

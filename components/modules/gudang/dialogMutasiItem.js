@@ -24,7 +24,7 @@ import {LoadingButton} from '@mui/lab';
 import useClientPermission from 'custom-hooks/useClientPermission';
 import {getListItem} from 'api/gudang/item';
 import {getSediaan} from 'api/gudang/sediaan';
-import TableLayoutDetail from 'components/TableLayoutDetail';
+import TableLayoutDetail from 'components/TableLayoutDetailGudang';
 
 const daftarItemTableHead = [
   {
@@ -247,194 +247,200 @@ const DialogMutasiItem = ({
         <Divider sx={{borderWidth: '1px'}} />
         <DialogContent sx={{paddingBottom: 2}}>
           <div style={{display: 'flex'}}>
-          <Card style={{flex: 1, padding: '20px', marginRight: '5px'}}>
-            <CardContent>
-              <form onSubmit={createTableItemValidation.handleSubmit}>
-                <FocusError formik={createTableItemValidation} />
-                <div className='mt-40'>
-                  <Grid item xs={9} md={6}>
-                    <Grid container spacing={1}>
-                      <Grid item xs={3.5}>
-                        <Typography variant='h1 font-w-600'>
-                          Kode Item
-                        </Typography>
+            <Card style={{flex: 1, padding: '20px', marginRight: '5px'}}>
+              <CardContent>
+                <form onSubmit={createTableItemValidation.handleSubmit}>
+                  <FocusError formik={createTableItemValidation} />
+                  <div className='mt-40'>
+                    <Grid item xs={9} md={6}>
+                      <Grid container spacing={1}>
+                        <Grid item xs={3.5}>
+                          <Typography variant='h1 font-w-600'>
+                            Kode Item
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <div className='mb-16'>
+                            <SelectAsync
+                              id='item'
+                              labelField='Kode Item'
+                              labelOptionRef='name'
+                              valueOptionRef='id'
+                              handlerRef={createTableItemValidation}
+                              handlerFetchData={getListItem}
+                              handlerOnChange={(value) => {
+                                if (value) {
+                                  createTableItemValidation.setFieldValue(
+                                    'item',
+                                    value
+                                  );
+                                } else {
+                                  createTableItemValidation.setFieldValue(
+                                    'item',
+                                    {
+                                      id: '',
+                                      name: '',
+                                    }
+                                  );
+                                }
+                              }}
+                              isDisabled
+                            />
+                          </div>
+                        </Grid>
                       </Grid>
-                      <Grid item xs={6}>
-                        <div className='mb-16'>
-                          <SelectAsync
-                            id='item'
-                            labelField='Kode Item'
-                            labelOptionRef='name'
-                            valueOptionRef='id'
-                            handlerRef={createTableItemValidation}
-                            handlerFetchData={getListItem}
-                            handlerOnChange={(value) => {
-                              if (value) {
-                                createTableItemValidation.setFieldValue(
-                                  'item',
-                                  value
-                                );
-                              } else {
-                                createTableItemValidation.setFieldValue(
-                                  'item',
-                                  {
-                                    id: '',
-                                    name: '',
-                                  }
-                                );
+                      <Grid container spacing={1}>
+                        <Grid item xs={3.5}>
+                          <Typography variant='h1 font-w-600'>
+                            Nama Item
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <div className='mb-16'>
+                            <TextField
+                              fullWidth
+                              id='nama_item'
+                              name='nama_item'
+                              label='Nama Item'
+                              value={createTableItemValidation.values.item.kode}
+                              onChange={createTableItemValidation.handleChange}
+                              error={
+                                createTableItemValidation.touched.nama_item &&
+                                Boolean(
+                                  createTableItemValidation.errors.nama_item
+                                )
                               }
-                            }}
-                            isDisabled
-                          />
-                        </div>
-                      </Grid>
-                    </Grid>
-                    <Grid container spacing={1}>
-                      <Grid item xs={3.5}>
-                        <Typography variant='h1 font-w-600'>
-                          Nama Item
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <div className='mb-16'>
-                          <TextField
-                            fullWidth
-                            id='nama_item'
-                            name='nama_item'
-                            label='Nama Item'
-                            value={createTableItemValidation.values.item.kode}
-                            onChange={createTableItemValidation.handleChange}
-                            error={
-                              createTableItemValidation.touched.nama_item &&
-                              Boolean(
+                              helperText={
+                                createTableItemValidation.touched.nama_item &&
                                 createTableItemValidation.errors.nama_item
-                              )
-                            }
-                            helperText={
-                              createTableItemValidation.touched.nama_item &&
-                              createTableItemValidation.errors.nama_item
-                            }
-                            disabled
-                          />
-                        </div>
-                      </Grid>
-                    </Grid>
-                    <Grid container spacing={1}>
-                      <Grid item xs={3.5}>
-                        <Typography variant='h1 font-w-600'>
-                          Nomor Batch
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <div className='mb-16'>
-                          <TextField
-                            fullWidth
-                            id='nomor_batch'
-                            name='nomor_batch'
-                            label='Nomor Batch'
-                            value={createTableItemValidation.values.nomor_batch}
-                            onChange={createTableItemValidation.handleChange}
-                            error={
-                              createTableItemValidation.touched.nomor_batch &&
-                              Boolean(
-                                createTableItemValidation.errors.nomor_batch
-                              )
-                            }
-                            helperText={
-                              createTableItemValidation.touched.nomor_batch &&
-                              createTableItemValidation.errors.nomor_batch
-                            }
-                            disabled
-                          />
-                        </div>
-                      </Grid>
-                    </Grid>
-                    <Grid container spacing={1}>
-                      <Grid item xs={3.5}>
-                        <Typography variant='h1 font-w-600'>Jumlah</Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <div className='mb-16'>
-                          <TextField
-                            fullWidth
-                            id='jumlah'
-                            name='jumlah'
-                            label='Jumlah'
-                            value={createTableItemValidation.values.jumlah}
-                            onChange={createTableItemValidation.handleChange}
-                            error={
-                              createTableItemValidation.touched.jumlah &&
-                              Boolean(createTableItemValidation.errors.jumlah)
-                            }
-                            helperText={
-                              createTableItemValidation.touched.jumlah &&
-                              createTableItemValidation.errors.jumlah
-                            }
-                            disabled={isEditType && !isEditingMode}
-                          />
-                        </div>
-                      </Grid>
-                    </Grid>
-                    <Grid container spacing={1}>
-                      <Grid item xs={3.5}>
-                        <Typography variant='h1 font-w-600'>Sediaan</Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <div className='mb-16'>
-                          <SelectAsync
-                            id='sediaan'
-                            labelField='Sediaan'
-                            labelOptionRef='sediaan'
-                            valueOptionRef='id'
-                            handlerRef={createTableItemValidation}
-                            handlerFetchData={getSediaan}
-                            handlerOnChange={(value) => {
-                              if (value) {
-                                createTableItemValidation.setFieldValue(
-                                  'sediaan',
-                                  value
-                                );
-                              } else {
-                                createTableItemValidation.setFieldValue(
-                                  'sediaan',
-                                  {
-                                    id: '',
-                                    name: '',
-                                  }
-                                );
                               }
-                            }}
-                            isDisabled
-                          />
-                        </div>
+                              disabled
+                            />
+                          </div>
+                        </Grid>
+                      </Grid>
+                      <Grid container spacing={1}>
+                        <Grid item xs={3.5}>
+                          <Typography variant='h1 font-w-600'>
+                            Nomor Batch
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <div className='mb-16'>
+                            <TextField
+                              fullWidth
+                              id='nomor_batch'
+                              name='nomor_batch'
+                              label='Nomor Batch'
+                              value={
+                                createTableItemValidation.values.nomor_batch
+                              }
+                              onChange={createTableItemValidation.handleChange}
+                              error={
+                                createTableItemValidation.touched.nomor_batch &&
+                                Boolean(
+                                  createTableItemValidation.errors.nomor_batch
+                                )
+                              }
+                              helperText={
+                                createTableItemValidation.touched.nomor_batch &&
+                                createTableItemValidation.errors.nomor_batch
+                              }
+                              disabled
+                            />
+                          </div>
+                        </Grid>
+                      </Grid>
+                      <Grid container spacing={1}>
+                        <Grid item xs={3.5}>
+                          <Typography variant='h1 font-w-600'>
+                            Jumlah
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <div className='mb-16'>
+                            <TextField
+                              fullWidth
+                              id='jumlah'
+                              name='jumlah'
+                              label='Jumlah'
+                              value={createTableItemValidation.values.jumlah}
+                              onChange={createTableItemValidation.handleChange}
+                              error={
+                                createTableItemValidation.touched.jumlah &&
+                                Boolean(createTableItemValidation.errors.jumlah)
+                              }
+                              helperText={
+                                createTableItemValidation.touched.jumlah &&
+                                createTableItemValidation.errors.jumlah
+                              }
+                              disabled={isEditType && !isEditingMode}
+                            />
+                          </div>
+                        </Grid>
+                      </Grid>
+                      <Grid container spacing={1}>
+                        <Grid item xs={3.5}>
+                          <Typography variant='h1 font-w-600'>
+                            Sediaan
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <div className='mb-16'>
+                            <SelectAsync
+                              id='sediaan'
+                              labelField='Sediaan'
+                              labelOptionRef='sediaan'
+                              valueOptionRef='id'
+                              handlerRef={createTableItemValidation}
+                              handlerFetchData={getSediaan}
+                              handlerOnChange={(value) => {
+                                if (value) {
+                                  createTableItemValidation.setFieldValue(
+                                    'sediaan',
+                                    value
+                                  );
+                                } else {
+                                  createTableItemValidation.setFieldValue(
+                                    'sediaan',
+                                    {
+                                      id: '',
+                                      name: '',
+                                    }
+                                  );
+                                }
+                              }}
+                              isDisabled
+                            />
+                          </div>
+                        </Grid>
                       </Grid>
                     </Grid>
-                  </Grid>
-                  <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-                    <Button
-                      onClick={() => setState(false)}
-                      variant='contained'
-                      color='error'
-                      sx={{marginRight: 1}}
-                    >
-                      Batal
-                    </Button>
-                    <LoadingButton
-                      type='submit'
-                      variant='contained'
-                      disabled={!isActionPermitted('pembelian:store')}
-                      loading={createTableItemValidation.isSubmitting}
-                    >
-                      Simpan
-                    </LoadingButton>
+                    <div style={{display: 'flex', justifyContent: 'flex-end'}}>
+                      <Button
+                        onClick={() => setState(false)}
+                        variant='contained'
+                        color='error'
+                        sx={{marginRight: 1}}
+                      >
+                        Batal
+                      </Button>
+                      <LoadingButton
+                        type='submit'
+                        variant='contained'
+                        disabled={!isActionPermitted('pembelian:store')}
+                        loading={createTableItemValidation.isSubmitting}
+                      >
+                        Simpan
+                      </LoadingButton>
+                    </div>
                   </div>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-          <Card style={{flex: 1, padding: '20px', marginRight: '5px'}}>
-            <CardContent>
-            <TableLayoutDetail
+                </form>
+              </CardContent>
+            </Card>
+            <Card style={{flex: 1, padding: '20px', marginRight: '5px'}}>
+              <CardContent>
+                <TableLayoutDetail
                   // baseRoutePath={`${router.asPath}`}
                   title='Daftar Item'
                   tableHead={daftarItemTableHead}
@@ -461,8 +467,8 @@ const DialogMutasiItem = ({
                   }
                   searchData={searchDataItemHandler}
                 />
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
           </div>
         </DialogContent>
       </Dialog>

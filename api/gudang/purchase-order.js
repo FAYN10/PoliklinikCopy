@@ -15,3 +15,19 @@ export function getDetailPurchaseOrder(params) {
     params,
   });
 }
+
+export function createPurchaseOrder(data) {
+  return request({
+    url: `${process.env.NEXT_PUBLIC_MOCK_BASE_URL}/purchase-order`,
+    method: "POST",
+    data,
+  });
+}
+
+export function deletePurchaseOrder(data) {
+  return request({
+    url: `${process.env.NEXT_PUBLIC_MOCK_BASE_URL}/purchase-order`,
+    method: "DELETE",
+    data,
+  });
+}

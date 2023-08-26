@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { getPurchaseOrder } from "api/gudang/purchase-order";
+import {
+  getPurchaseOrder,
+  deletePurchaseOrder,
+} from "api/gudang/purchase-order";
 import TableLayoutGudang from "components/TableLayoutGudang";
 import LoaderOnLayout from "components/LoaderOnLayout";
 import Snackbar from "components/SnackbarMui";
 import { formatReadable } from "utils/formatTime";
 
-const purchaseOrderTableHead = [
+const PurchaseOrderTableHead = [
   {
     id: "nomor_po",
     label: "Nomor PO",
@@ -59,8 +62,10 @@ const PurchaseOrder = () => {
   const [dataPurchaseOrder, setDataPurchaseOrder] = useState([]);
   const [dataMetaPurchaseOrder, setDataMetaPurchaseOrder] = useState({});
   const [dataPurchaseOrderPerPage, setDataPerPage] = useState(8);
-  const [isLoadingDataPurchaseOrder, setIsLoadingDataPurchaseOrder] = useState(false);
-  const [isUpdatingDataPurchaseOrder, setIsUpdatingDataPurchaseOrder] = useState(false);
+  const [isLoadingDataPurchaseOrder, setIsLoadingDataPurchaseOrder] =
+    useState(false);
+  const [isUpdatingDataPurchaseOrder, setIsUpdatingDataPurchaseOrder] =
+    useState(false);
 
   // PurchaseOrder --general handler
   const initDataPurchaseOrder = async () => {
@@ -69,7 +74,7 @@ const PurchaseOrder = () => {
       const params = {
         per_page: dataPurchaseOrderPerPage,
       };
-      const response = await getPurchaseOrder({params : params});
+      const response = await getPurchaseOrder(params);
       const result = dataPurchaseOrderFormatHandler(response.data.data);
       setDataPurchaseOrder(result);
       setDataMetaPurchaseOrder(response.data.meta);
@@ -119,17 +124,17 @@ const PurchaseOrder = () => {
       setIsUpdatingDataPurchaseOrder(false);
     }
   };
-  
+
   const searchDataPurchaseOrderHandler = async (payload) => {
-    let searchParams = payload.reduce((obj, e) => {
+    const searchParams = payload.reduce((obj, e) => {
       obj[e.type] = e.value;
       return obj;
     }, {});
-    
+
     try {
       setIsUpdatingDataPurchaseOrder(true);
       const response = await getPurchaseOrder({
-        search : searchParams,
+        search: searchParams,
         per_page: dataPurchaseOrderPerPage,
       });
       if (response.data.data.length !== 0) {
@@ -171,48 +176,50 @@ const PurchaseOrder = () => {
         <LoaderOnLayout />
       ) : (
         <>
-            <TableLayoutGudang
-              baseRoutePath={`${router.asPath}`}
-              title="Purchase Order"
-              isBtnAdd={true}
-              isTerima={true}
-              isDelete={true}
-              tableHead={purchaseOrderTableHead}
-              data={dataPurchaseOrder}
-              meta={dataMetaPurchaseOrder}
-              dataPerPage={dataPurchaseOrderPerPage}
-              isUpdatingData={isUpdatingDataPurchaseOrder}
-              filterOptions={[
-                { label: "Gudang", value: "gudang" },
-                { label: "Jenis Surat", value: "potype" },
-                { label: "Nomor PO", value: "nomor_po" },
-                { label: "Supplier", value: "supplier" },
-                { label: "Tanggal PO", value: "date" },
-              ]}
-              updateDataPerPage={(e, filter) => {
-                let searchParams = filter.reduce((obj, e) => {
-                  obj[e.type] = e.value;
-                  return obj;
-                }, {});
+          <TableLayoutGudang
+            baseRoutePath={`${router.asPath}`}
+            title="Purchase Order"
+            isBtnAdd={true}
+            isTerima={true}
+            isDelete={true}
+            tableHead={PurchaseOrderTableHead}
+            data={dataPurchaseOrder}
+            meta={dataMetaPurchaseOrder}
+            dataPerPage={dataPurchaseOrderPerPage}
+            isUpdatingData={isUpdatingDataPurchaseOrder}
+            filterOptions={[
+              { label: "Gudang", value: "gudang" },
+              { label: "Jenis Surat", value: "potype" },
+              { label: "Nomor PO", value: "nomor_po" },
+              { label: "Supplier", value: "supplier" },
+              { label: "Tanggal PO", value: "date" },
+            ]}
+            updateDataPerPage={(e, filter) => {
+              const searchParams = filter.reduce((obj, e) => {
+                obj[e.type] = e.value;
+                return obj;
+              }, {});
 
-                setDataPerPage(e.target.value);
-                updateDataPurchaseOrderHandler({
-                  per_page: e.target.value,
-                  search : searchParams,
-                });
-              }}
-              updateDataNavigate={(payload) =>
-                updateDataPurchaseOrderHandler({
-                  per_page: dataPurchaseOrderPerPage,
-                  cursor: payload,
-                })
-              }
-              refreshData={() =>
-                updateDataPurchaseOrderHandler({ per_page: dataPurchaseOrderPerPage })
-              }
-              deleteData={deleteDataPurchaseOrderHandler}
-              searchData={searchDataPurchaseOrderHandler}
-            />
+              setDataPerPage(e.target.value);
+              updateDataPurchaseOrderHandler({
+                per_page: e.target.value,
+                search: searchParams,
+              });
+            }}
+            updateDataNavigate={(payload) =>
+              updateDataPurchaseOrderHandler({
+                per_page: dataPurchaseOrderPerPage,
+                cursor: payload,
+              })
+            }
+            refreshData={() =>
+              updateDataPurchaseOrderHandler({
+                per_page: dataPurchaseOrderPerPage,
+              })
+            }
+            deleteData={deleteDataPurchaseOrderHandler}
+            searchData={searchDataPurchaseOrderHandler}
+          />
         </>
       )}
       <Snackbar

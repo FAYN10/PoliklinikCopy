@@ -31,22 +31,87 @@ import {
 import SelectAsync from 'components/SelectAsync';
 import {getPoType} from 'api/gudang/po-type';
 import {getSupplier} from 'api/supplier';
-import {getPurchaseOrder} from 'api/gudang/purchase-order';
-import {createPembelian} from 'api/gudang/pembelian';
 import {jenisGudang} from 'public/static/data';
 import PrintIcon from '@mui/icons-material/Print';
 import ReactToPrint from 'react-to-print';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import useClientPermission from 'custom-hooks/useClientPermission';
-import {convertDataDetail, filterFalsyValue} from 'utils/helper';
+import {filterFalsyValue, convertDataDetail} from 'utils/helper';
 import {Divider, Typography, Button, Paper} from '@mui/material';
 import {Add as AddIcon, Delete as DeleteIcon} from '@mui/icons-material';
-import DialogAddItem from './dialogAddItemPembelian';
+import DialogAddItem from './dialogAddItemMutasi';
 import TableLayoutDetail from 'components/TableLayoutDetailGudang';
-import DialogEditItem from './dialogEditItem';
+import {getUnit} from 'api/unit';
 
-const FormPembelian = ({
+const LabelToPrint = forwardRef(function LabelToPrint({data}, ref) {
+  return (
+    <div ref={ref} className='printableContent'>
+      {/* 1cm = 37.8px */}
+      {/* 1 mm: 3,78px  */}
+      {/* def - w: 189px. h: 75.6px */}
+      <div className='flex'>
+        <div
+          className='flex px-4 pb-6'
+          style={{
+            width: '189px',
+            height: '75.2px',
+            flexDirection: 'column',
+            fontSize: '9px',
+          }}
+        >
+          <div>
+            {data.nomor_po.length > 28
+              ? data.nomor_po.substring(0, 28) + '...'
+              : data.nomor_po}
+          </div>
+          <div className='mt-auto'>
+            <span className='font-w-600'>TGL PO: </span>
+            {formatLabelDate(data.tanggal_po) || '-'}
+          </div>
+        </div>
+        <div
+          className='font-10 flex px-4 pb-6'
+          style={{
+            width: '189px',
+            height: '75.2px',
+            flexDirection: 'column',
+            fontSize: '9px',
+            marginLeft: '7.56px',
+          }}
+        >
+          <div>
+            {data.nomor_po.length > 28
+              ? data.nomor_po.substring(0, 28) + '...'
+              : data.nomor_po}
+          </div>
+          <div className='mt-auto'>
+            <span className='font-w-600'>TGL PO: </span>
+            {formatLabelDate(data.tanggal_po) || '-'}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+const CheckupToPrint = forwardRef(function CheckupToPrint({data}, ref) {
+  return (
+    <div ref={ref} className='printableContent'>
+      <div className='m-8'>
+        <div className='font-w-600'>
+          <div className='font-18'>RSU MITRA PARAMEDIKA</div>
+          <div style={{maxWidth: '250px'}}>
+            Jl. Raya Ngemplak, Kemasan, Widodomartani, Ngemplak, Sleman
+          </div>
+        </div>
+        <div className='font-w-600 mt-24'>{data.jenis_po || '-'}</div>
+      </div>
+    </div>
+  );
+});
+
+const FormMutasi = ({
   isEditType = false,
   prePopulatedDataForm = {},
   detailPrePopulatedData = {},
@@ -66,7 +131,7 @@ const FormPembelian = ({
   const [dataDetail, setDataDetail] = useState([]);
   const [isDialogItem, setIsDialogItem] = useState(false);
 
-  const detailPembelianTableHead = [
+  const detailMutasiTableHead = [
     {
       id: 'kode_item',
       label: 'Kode Item',
@@ -81,35 +146,15 @@ const FormPembelian = ({
     },
     {
       id: 'jumlah',
-      label: 'Jumlah',
+      label: 'Jumlah Permintaan',
+    },
+    {
+      id: 'jumlah_pengadaan',
+      label: 'Jumlah Pengadaan',
     },
     {
       id: 'sediaan',
       label: 'Sediaan',
-    },
-    {
-      id: 'harga_beli_satuan',
-      label: 'Harga Beli',
-    },
-    {
-      id: 'harga_jual_satuan',
-      label: 'Harga Jual',
-    },
-    {
-      id: 'diskon',
-      label: 'Diskon',
-    },
-    {
-      id: 'margin',
-      label: 'Margin',
-    },
-    {
-      id: 'total_pembelian',
-      label: 'Total',
-    },
-    {
-      id: 'tanggal_ed',
-      label: 'Expired Date',
     },
   ];
 
@@ -117,16 +162,11 @@ const FormPembelian = ({
     const result = payload.map((e) => {
       return {
         kode_item: e.item.kode || 'null',
-        nama_item: e.item.name || 'null',
+        nama_item: e.item.name,
         nomor_batch: e.nomor_batch || 'null',
-        jumlah: e.stok || 'null',
+        jumlah: e.jumlah || 'null',
+        jumlah_pengadaan: e.jumlah_pengadaan || 'null',
         sediaan: e.sediaan.name || 'null',
-        harga_beli_satuan: e.harga_beli_satuan || 'null',
-        harga_jual_satuan: e.harga_jual_satuan || 'null',
-        diskon: e.diskon || 'null',
-        margin: e.margin || 'null',
-        total: e.total_pembelian || 'null',
-        tanggal_ed: e.tanggal_ed || 'null',
         id: e,
       };
     });
@@ -137,76 +177,61 @@ const FormPembelian = ({
     setIsEditingMode(e.target.checked);
   };
 
-  const pembelianInitialValues = !isEditType
+  const mutasiInitialValues = !isEditType
     ? {
-        nomor_faktur: null,
-        nomor_po: {id: '', nomor_po: ''},
-        tanggal_pembelian: null,
-        tanggal_jatuh_tempo: null,
-        ppn: null,
-        receive_detail: [],
+        tanggal_permintaan: null,
+        tanggal_mutasi: null,
+        unit: {id: '', name: ''},
+        mutation_detail: [],
       }
     : prePopulatedDataForm;
 
-  const createPembelianSchema = Yup.object({
-    nomor_faktur: stringSchema('Nomor faktur'),
-    nomor_po: Yup.object({
-      id: stringSchema('Nomor PO', true),
+  const createMutasiSchema = Yup.object({
+    tanggal_permintaan: Yup.date()
+      .transform(function (value, originalValue) {
+        if (this.isType(value)) {
+          return value;
+        }
+        const result = parse(originalValue, 'dd/MM/yyyy', new Date());
+        return result;
+      })
+      .typeError('Tanggal permintaan tidak valid')
+      .min('2023-01-01', 'Tanggal permintaan tidak valid')
+      .required('Tanggal permintaan wajib diisi'),
+    unit: Yup.object({
+      id: stringSchema('Unit', true),
     }),
-    tanggal_pembelian: Yup.date()
-      .transform(function (value, originalValue) {
-        if (this.isType(value)) {
-          return value;
-        }
-        const result = parse(originalValue, 'dd/MM/yyyy', new Date());
-        return result;
-      })
-      .typeError('Tanggal pembelian tidak valid')
-      .min('2023-01-01', 'Tanggal pembelian tidak valid')
-      .required('Tanggal pembelian wajib diisi'),
-    tanggal_jatuh_tempo: Yup.date()
-      .transform(function (value, originalValue) {
-        if (this.isType(value)) {
-          return value;
-        }
-        const result = parse(originalValue, 'dd/MM/yyyy', new Date());
-        return result;
-      })
-      .typeError('Tanggal jatuh tempo tidak valid')
-      .min('2023-01-01', 'Tanggal jatuh tempo tidak valid')
-      .required('Tanggal jatuh tempo wajib diisi'),
-    ppn: stringSchema('PPN'),
-    receive_detail: Yup.array(),
+    mutation_detail: Yup.array(),
   });
 
-  const createPembelianValidation = useFormik({
-    initialValues: pembelianInitialValues,
-    validationSchema: createPembelianSchema,
+  const createMutasiValidation = useFormik({
+    initialValues: mutasiInitialValues,
+    validationSchema: createMutasiSchema,
     enableReinitialize: true,
     onSubmit: async (values, {resetForm, setFieldError}) => {
       let messageContext = isEditType ? 'diperbarui' : 'ditambahkan';
       let data = {...values};
-      data.receive_detail = convertDataDetail(data.receive_detail);
+      data.mutation_detail = convertDataDetail(data.mutation_detail);
       data = {
         ...data,
-        purchase_order_id: data.nomor_po.id,
-        tanggal_pembelian: formatIsoToGen(data.tanggal_pembelian),
-        tanggal_jatuh_tempo: formatIsoToGen(data.tanggal_jatuh_tempo),
+        tanggal_permintaan: formatIsoToGen(data.tanggal_permintaan),
+        tanggal_mutasi: formatIsoToGen(data.tanggal_mutasi),
+        unit: data.unit.id,
       };
       console.log(data);
       try {
         let response;
         if (!isEditType) {
           const formattedData = filterFalsyValue({...data});
-          response = await createPembelian(formattedData);
+          response = await createMutasi(formattedData);
           resetForm();
-          router.push('/gudang/pembelian');
+          router.push('/gudang/mutasi');
         } else {
-          await updatePembelian({
+          await updateMutasi({
             ...formattedData,
             id: detailPrePopulatedData.id,
           });
-          response = await getDetailPembelian({
+          response = await getDetailMutasi({
             id: detailPrePopulatedData.id,
           });
           updatePrePopulatedData({...response.data.data});
@@ -214,7 +239,7 @@ const FormPembelian = ({
         setSnackbar({
           state: true,
           type: 'success',
-          message: `"${data.nomor_faktur}" berhasil ${messageContext}!`,
+          message: `"${data.nomor_po}" berhasil ${messageContext}!`,
         });
       } catch (error) {
         if (Object.keys(error.errorValidationObj).length >= 1) {
@@ -225,15 +250,14 @@ const FormPembelian = ({
         setSnackbar({
           state: true,
           type: 'error',
-          message: `Terjadi kesalahan, "${data.nomor_faktur}" gagal ${messageContext}!`,
+          message: `Terjadi kesalahan, "${data.unit.name}" gagal ${messageContext}!`,
         });
       }
     },
   });
 
   const createDetailDataHandler = (payload) => {
-    let tempData = [...createPembelianValidation.values.receive_detail];
-    console.log(tempData);
+    let tempData = [...createMutasiValidation.values.mutation_detail];
     const isAvailable = tempData.findIndex(
       (data) =>
         data.item.id === payload.item.id &&
@@ -244,15 +268,15 @@ const FormPembelian = ({
     } else {
       tempData.push(payload);
     }
-    createPembelianValidation.setFieldValue('receive_detail', tempData);
+    createMutasiValidation.setFieldValue('mutation_detail', tempData);
     setDataDetail(dataDetailFormatHandler(tempData));
   };
 
   const deleteDetailDataHandler = (index) => {
-    let tempData = [...createPembelianValidation.values.receive_detail];
+    let tempData = [...createMutasiValidation.values.mutation_detail];
     if (index >= 0 && index < tempData.length) {
       tempData.splice(index, 1);
-      createPembelianValidation.setFieldValue('receive_detail', tempData);
+      createMutasiValidation.setFieldValue('mutation_detail', tempData);
       setDataDetail(dataDetailFormatHandler(tempData));
     }
   };
@@ -275,210 +299,144 @@ const FormPembelian = ({
             />
           </div>
         ) : null}
-        <form onSubmit={createPembelianValidation.handleSubmit}>
-          <FocusError formik={createPembelianValidation} />
+        <form onSubmit={createMutasiValidation.handleSubmit}>
+          <FocusError formik={createMutasiValidation} />
           <div className='p-16'>
             <Grid container spacing={0}>
               <Grid item xs={12} md={6}>
                 <Grid container spacing={1}>
                   <Grid item xs={3}>
                     <Typography variant='h1 font-w-600'>
-                      Nomor Faktur
+                      Tanggal Permintaan
                     </Typography>
                   </Grid>
                   <Grid item xs={6}>
                     <div className='mb-16'>
-                      <TextField
-                        fullWidth
-                        id='nomor_faktur'
-                        name='nomor_faktur'
-                        label='Nomor Faktur'
-                        value={createPembelianValidation.values.nomor_faktur}
-                        onChange={createPembelianValidation.handleChange}
-                        error={
-                          createPembelianValidation.touched.nomor_faktur &&
-                          Boolean(createPembelianValidation.errors.nomor_faktur)
-                        }
-                        helperText={
-                          createPembelianValidation.touched.nomor_faktur &&
-                          createPembelianValidation.errors.nomor_faktur
-                        }
-                        disabled={isEditType && !isEditingMode}
-                      />
+                      <FormControl fullWidth>
+                        <LocalizationProvider dateAdapter={AdapterDateFns}>
+                          <DatePicker
+                            id='tanggal_permintaan'
+                            name='tanggal_permintaan'
+                            label='Tanggal Permintaan'
+                            inputFormat='dd-MM-yyyy'
+                            mask='__-__-____'
+                            value={
+                              createMutasiValidation.values.tanggal_permintaan
+                                ? formatGenToIso(
+                                    createMutasiValidation.values
+                                      .tanggal_permintaan
+                                  )
+                                : null
+                            }
+                            onChange={(newValue) => {
+                              createMutasiValidation.setFieldValue(
+                                'tanggal_permintaan',
+                                newValue
+                              );
+                            }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                error={
+                                  createMutasiValidation.touched
+                                    .tanggal_permintaan &&
+                                  Boolean(
+                                    createMutasiValidation.errors
+                                      .tanggal_permintaan
+                                  )
+                                }
+                                helperText={
+                                  createMutasiValidation.touched
+                                    .tanggal_permintaan &&
+                                  createMutasiValidation.errors
+                                    .tanggal_permintaan
+                                }
+                              />
+                            )}
+                            disabled={isEditType && !isEditingMode}
+                          />
+                        </LocalizationProvider>
+                      </FormControl>
                     </div>
                   </Grid>
                 </Grid>
                 <Grid container spacing={1}>
                   <Grid item xs={3}>
-                    <Typography variant='h1 font-w-600'>Nomor PO</Typography>
+                    <Typography variant='h1 font-w-600'>
+                      Tanggal Mutasi
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <div className='mb-16'>
+                      <FormControl fullWidth>
+                        <LocalizationProvider dateAdapter={AdapterDateFns}>
+                          <DatePicker
+                            id='tanggal_mutasi'
+                            name='tanggal_mutasi'
+                            label='Tanggal Mutasi'
+                            inputFormat='dd-MM-yyyy'
+                            mask='__-__-____'
+                            value={
+                              createMutasiValidation.values.tanggal_mutasi
+                                ? formatGenToIso(
+                                    createMutasiValidation.values.tanggal_mutasi
+                                  )
+                                : null
+                            }
+                            onChange={(newValue) => {
+                              createMutasiValidation.setFieldValue(
+                                'tanggal_mutasi',
+                                newValue
+                              );
+                            }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                error={
+                                  createMutasiValidation.touched
+                                    .tanggal_mutasi &&
+                                  Boolean(
+                                    createMutasiValidation.errors.tanggal_mutasi
+                                  )
+                                }
+                                helperText={
+                                  createMutasiValidation.touched
+                                    .tanggal_mutasi &&
+                                  createMutasiValidation.errors.tanggal_mutasi
+                                }
+                              />
+                            )}
+                            disabled
+                          />
+                        </LocalizationProvider>
+                      </FormControl>
+                    </div>
+                  </Grid>
+                </Grid>
+                <Grid container spacing={1}>
+                  <Grid item xs={3}>
+                    <Typography variant='h1 font-w-600'>Unit</Typography>
                   </Grid>
                   <Grid item xs={6}>
                     <div className='mb-16'>
                       <SelectAsync
-                        id='nomor_po'
-                        labelField='Nomor PO'
-                        labelOptionRef='nomor_po'
+                        id='unit'
+                        labelField='Unit'
+                        labelOptionRef='name'
                         valueOptionRef='id'
-                        handlerRef={createPembelianValidation}
-                        handlerFetchData={getPurchaseOrder}
+                        handlerRef={createMutasiValidation}
+                        handlerFetchData={getUnit}
                         handlerOnChange={(value) => {
                           if (value) {
-                            createPembelianValidation.setFieldValue(
-                              'nomor_po',
-                              value
-                            );
+                            createMutasiValidation.setFieldValue('unit', value);
                           } else {
-                            createPembelianValidation.setFieldValue(
-                              'nomor_po',
-                              {
-                                id: '',
-                                nomor_po: '',
-                              }
-                            );
+                            createMutasiValidation.setFieldValue('unit', {
+                              id: '',
+                              name: '',
+                            });
                           }
                         }}
                         isDisabled={isEditType && !isEditingMode}
-                      />
-                    </div>
-                  </Grid>
-                </Grid>
-                <Grid container spacing={1}>
-                  <Grid item xs={3}>
-                    <Typography variant='h1 font-w-600'>
-                      Tanggal Pembelian
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <div className='mb-16'>
-                      <FormControl fullWidth>
-                        <LocalizationProvider dateAdapter={AdapterDateFns}>
-                          <DatePicker
-                            id='tanggal_pembelian'
-                            name='tanggal_pembelian'
-                            label='Tanggal Pembelian'
-                            inputFormat='dd-MM-yyyy'
-                            mask='__-__-____'
-                            value={
-                              createPembelianValidation.values.tanggal_pembelian
-                                ? formatGenToIso(
-                                    createPembelianValidation.values
-                                      .tanggal_pembelian
-                                  )
-                                : null
-                            }
-                            onChange={(newValue) => {
-                              createPembelianValidation.setFieldValue(
-                                'tanggal_pembelian',
-                                newValue
-                              );
-                            }}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                error={
-                                  createPembelianValidation.touched
-                                    .tanggal_pembelian &&
-                                  Boolean(
-                                    createPembelianValidation.errors
-                                      .tanggal_pembelian
-                                  )
-                                }
-                                helperText={
-                                  createPembelianValidation.touched
-                                    .tanggal_pembelian &&
-                                  createPembelianValidation.errors
-                                    .tanggal_pembelian
-                                }
-                              />
-                            )}
-                            disabled={isEditType && !isEditingMode}
-                          />
-                        </LocalizationProvider>
-                      </FormControl>
-                    </div>
-                  </Grid>
-                </Grid>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Grid container spacing={1}>
-                  <Grid item xs={3}>
-                    <Typography variant='h1 font-w-600'>
-                      Jatuh Tempo Pembayaran
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <div className='mb-16'>
-                      <FormControl fullWidth>
-                        <LocalizationProvider dateAdapter={AdapterDateFns}>
-                          <DatePicker
-                            id='tanggal_jatuh_tempo'
-                            name='tanggal_jatuh_tempo'
-                            label='Jatuh Tempo Pembayaran'
-                            inputFormat='dd-MM-yyyy'
-                            mask='__-__-____'
-                            value={
-                              createPembelianValidation.values
-                                .tanggal_jatuh_tempo
-                                ? formatGenToIso(
-                                    createPembelianValidation.values
-                                      .tanggal_jatuh_tempo
-                                  )
-                                : null
-                            }
-                            onChange={(newValue) => {
-                              createPembelianValidation.setFieldValue(
-                                'tanggal_jatuh_tempo',
-                                newValue
-                              );
-                            }}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                error={
-                                  createPembelianValidation.touched
-                                    .tanggal_jatuh_tempo &&
-                                  Boolean(
-                                    createPembelianValidation.errors
-                                      .tanggal_jatuh_tempo
-                                  )
-                                }
-                                helperText={
-                                  createPembelianValidation.touched
-                                    .tanggal_jatuh_tempo &&
-                                  createPembelianValidation.errors
-                                    .tanggal_jatuh_tempo
-                                }
-                              />
-                            )}
-                            disabled={isEditType && !isEditingMode}
-                          />
-                        </LocalizationProvider>
-                      </FormControl>
-                    </div>
-                  </Grid>
-                </Grid>
-                <Grid container spacing={1}>
-                  <Grid item xs={3}>
-                    <Typography variant='h1 font-w-600'>PPN</Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <div className='mb-16'>
-                      <TextField
-                        fullWidth
-                        id='ppn'
-                        name='ppn'
-                        label='PPN'
-                        value={createPembelianValidation.values.ppn}
-                        onChange={createPembelianValidation.handleChange}
-                        error={
-                          createPembelianValidation.touched.ppn &&
-                          Boolean(createPembelianValidation.errors.ppn)
-                        }
-                        helperText={
-                          createPembelianValidation.touched.ppn &&
-                          createPembelianValidation.errors.ppn
-                        }
-                        disabled={isEditType && !isEditingMode}
                       />
                     </div>
                   </Grid>
@@ -496,7 +454,7 @@ const FormPembelian = ({
               isBtnAdd
               isDelete
               btnAddHandler={setIsDialogItem}
-              tableHead={detailPembelianTableHead}
+              tableHead={detailMutasiTableHead}
               data={dataDetail}
               // isUpdatingData={isUpdatingDataRawatJalan}
               deleteData={deleteDetailDataHandler}
@@ -510,12 +468,68 @@ const FormPembelian = ({
             />
 
             <div className='flex justify-end items-center mt-16'>
+              {isEditType && (
+                <>
+                  <div className='mr-auto text-grey-text'>
+                    <p className='font-14 font-w-600 m-0 p-0'>
+                      {detailPrePopulatedData?.nomor_po},{' '}
+                    </p>
+                    <p className='font-12 font-w-600 m-0 p-0'>
+                      Nomor PO:{' '}
+                      {detailPrePopulatedData?.nomor_po || 'Tidak tersedia'}
+                    </p>
+                    <p className='font-12 font-w-600 m-0 p-0'>
+                      Dibuat pada:
+                      {formatReadable(detailPrePopulatedData?.updated_at)}
+                    </p>
+                    <p className='font-12 font-w-600 m-0 p-0'>
+                      Perubahan terakhir:
+                      {formatReadable(detailPrePopulatedData?.updated_at)}
+                    </p>
+                  </div>
+                  <div className='mr-auto flex'>
+                    <div className='mr-8'>
+                      <ReactToPrint
+                        trigger={() => (
+                          <Button variant='outlined' startIcon={<PrintIcon />}>
+                            Cetak Label
+                          </Button>
+                        )}
+                        content={() => labelPrintRef.current}
+                      />
+                      <LabelToPrint
+                        data={{
+                          nomor_po: detailPrePopulatedData.nomor_po,
+                          tanggal_po: detailPrePopulatedData.tanggal_po,
+                        }}
+                        ref={labelPrintRef}
+                      />
+                    </div>
+                    <div>
+                      <ReactToPrint
+                        trigger={() => (
+                          <Button variant='outlined' startIcon={<PrintIcon />}>
+                            Cetak Kartu Periksa
+                          </Button>
+                        )}
+                        content={() => checkupPrintRef.current}
+                      />
+                      <CheckupToPrint
+                        data={{
+                          no_rm: detailPrePopulatedData.nomor_po,
+                        }}
+                        ref={checkupPrintRef}
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
               <Button
                 type='button'
                 variant='outlined'
                 startIcon={<BackIcon />}
                 sx={{marginRight: 2}}
-                onClick={() => router.push('/gudang/pembelian')}
+                onClick={() => router.push('/gudang/mutasi')}
               >
                 Kembali
               </Button>
@@ -525,14 +539,14 @@ const FormPembelian = ({
                   variant='contained'
                   sx={{marginBottom: 1, marginRight: 2}}
                   disabled={
-                    JSON.stringify(createPembelianValidation.initialValues) ===
-                      JSON.stringify(createPembelianValidation.values) ||
-                    !isActionPermitted('receive:update') ||
+                    JSON.stringify(createMutasiValidation.initialValues) ===
+                      JSON.stringify(createMutasiValidation.values) ||
+                    !isActionPermitted('mutation:update') ||
                     (isEditType && !isEditingMode)
                   }
                   startIcon={<SaveIcon />}
                   loadingPosition='start'
-                  loading={createPembelianValidation.isSubmitting}
+                  loading={createMutasiValidation.isSubmitting}
                 >
                   Simpan perubahan
                 </LoadingButton>
@@ -540,12 +554,12 @@ const FormPembelian = ({
                 <LoadingButton
                   type='submit'
                   variant='contained'
-                  disabled={!isActionPermitted('receive:store')}
+                  disabled={!isActionPermitted('mutation:store')}
                   startIcon={<DoneIcon />}
                   loadingPosition='start'
-                  loading={createPembelianValidation.isSubmitting}
+                  loading={createMutasiValidation.isSubmitting}
                 >
-                  Simpan Pembelian
+                  Simpan Mutasi
                 </LoadingButton>
               )}
             </div>
@@ -563,4 +577,4 @@ const FormPembelian = ({
   );
 };
 
-export default FormPembelian;
+export default FormMutasi;

@@ -168,11 +168,15 @@ const Inventory = () => {
   };
 
   const searchDataInventoryHandler = async (payload) => {
+    const searchParams = payload.reduce((obj, e) => {
+      obj[e.type] = e.value;
+      return obj;
+    }, {});
+
     try {
       setIsUpdatingDataInventory(true);
-      const response = await searchInventory({
-        search_text: payload.map((e) => e.value),
-        search_column: payload.map((e) => e.type),
+      const response = await getInventory({
+        search: searchParams,
         per_page: dataInventoryPerPage,
       });
       if (response.data.data.length !== 0) {
@@ -182,7 +186,7 @@ const Inventory = () => {
       } else {
         setSnackbarState({
           state: true,
-          type: 'warning',
+          type: "warning",
           message: `${payload} tidak ditemukan`,
         });
         const response = await getInventory({
@@ -195,7 +199,7 @@ const Inventory = () => {
     } catch (error) {
       setSnackbarState({
         state: true,
-        type: 'error',
+        type: "error",
         message: error.message,
       });
     } finally {
@@ -262,12 +266,16 @@ const Inventory = () => {
   };
 
   const searchDataPosInventoryHandler = async (payload) => {
+    const searchParams = payload.reduce((obj, e) => {
+      obj[e.type] = e.value;
+      return obj;
+    }, {});
+
     try {
       setIsUpdatingDataPosInventory(true);
-      const response = await searchInventory({
-        search_text: payload.map((e) => e.value),
-        search_column: payload.map((e) => e.type),
-        per_page: dataInventoryPerPage,
+      const response = await getPosInventory({
+        search: searchParams,
+        per_page: dataPosInventoryPerPage,
       });
       if (response.data.data.length !== 0) {
         const result = dataPosInventoryFormatHandler(response.data.data);
@@ -276,10 +284,10 @@ const Inventory = () => {
       } else {
         setSnackbarState({
           state: true,
-          type: 'warning',
+          type: "warning",
           message: `${payload} tidak ditemukan`,
         });
-        const response = await getInventory({
+        const response = await getPosInventory({
           per_page: dataPosInventoryPerPage,
         });
         const result = dataPosInventoryFormatHandler(response.data.data);
@@ -289,7 +297,7 @@ const Inventory = () => {
     } catch (error) {
       setSnackbarState({
         state: true,
-        type: 'error',
+        type: "error",
         message: error.message,
       });
     } finally {
@@ -344,11 +352,15 @@ const Inventory = () => {
                 {label: 'Unit', value: 'unit'},
               ]}
               updateDataPerPage={(e, filter) => {
-                setDataInventoryPerPage(e.target.value);
+                const searchParams = filter.reduce((obj, e) => {
+                  obj[e.type] = e.value;
+                  return obj;
+                }, {});
+  
+                setDataPerPage(e.target.value);
                 updateDataInventoryHandler({
                   per_page: e.target.value,
-                  search_text: filter.map((e) => e.value),
-                  search_column: filter.map((e) => e.type),
+                  search: searchParams,
                 });
               }}
               updateDataNavigate={(payload) =>
@@ -358,7 +370,9 @@ const Inventory = () => {
                 })
               }
               refreshData={() =>
-                updateDataInventoryHandler({per_page: dataInventoryPerPage})
+                updateDataInventoryHandler({
+                  per_page: dataInventoryPerPage,
+                })
               }
               deleteData={deleteDataInventoryHandler}
               searchData={searchDataInventoryHandler}
@@ -379,11 +393,15 @@ const Inventory = () => {
                 {label: 'Unit', value: 'unit'},
               ]}
               updateDataPerPage={(e, filter) => {
-                setDataPosInventoryPerPage(e.target.value);
+                const searchParams = filter.reduce((obj, e) => {
+                  obj[e.type] = e.value;
+                  return obj;
+                }, {});
+  
+                setDataPerPage(e.target.value);
                 updateDataPosInventoryHandler({
                   per_page: e.target.value,
-                  search_text: filter.map((e) => e.value),
-                  search_column: filter.map((e) => e.type),
+                  search: searchParams,
                 });
               }}
               updateDataNavigate={(payload) =>

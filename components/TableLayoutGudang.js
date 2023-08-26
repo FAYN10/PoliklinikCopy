@@ -39,6 +39,7 @@ import useClientPermission from 'custom-hooks/useClientPermission';
 import SelectAsync from 'components/SelectAsync';
 import {getSupplier} from 'api/supplier';
 import {getUnit} from 'api/unit';
+import {getListItem} from 'api/gudang/item';
 import {getPoType} from 'api/gudang/po-type';
 import {AdapterDateFns} from '@mui/x-date-pickers/AdapterDateFns';
 import {LocalizationProvider} from '@mui/x-date-pickers//LocalizationProvider';
@@ -82,7 +83,12 @@ const TableLayout = ({
   const {clientPermission} = useClientPermission();
   const [filter, setFilter] = useState(filterOptions[0].value);
   const [selectedFilter, setSelectedFilter] = useState([]);
-  const textFieldCategory = ['nomor_po', 'nomor_retur', 'nomor_faktur', 'nomor_batch', 'kode_item', 'nama_item'];
+  const textFieldCategory = [
+    'nomor_po',
+    'nomor_retur',
+    'nomor_faktur',
+    'nomor_batch',
+  ];
   const [jenisGudangRef, setJenisGudangRef] = useState({
     values: {
       id: '',
@@ -108,6 +114,14 @@ const TableLayout = ({
     errors: false,
   });
   const [unitRef, setUnitRef] = useState({
+    values: {
+      id: '',
+      name: '',
+    },
+    touched: false,
+    errors: false,
+  });
+  const [namaItemRef, setNamaItemRef] = useState({
     values: {
       id: '',
       name: '',
@@ -248,6 +262,13 @@ const TableLayout = ({
         name: '',
       },
     }));
+    setNamaItemRef((e) => ({
+      ...e,
+      values: {
+        id: '',
+        name: '',
+      },
+    }));
     setDate(null);
     setFilter(filterOptions[0].value);
     setSelectedFilter([]);
@@ -289,6 +310,13 @@ const TableLayout = ({
       },
     }));
     setUnitRef((e) => ({
+      ...e,
+      values: {
+        id: '',
+        name: '',
+      },
+    }));
+    setNamaItemRef((e) => ({
       ...e,
       values: {
         id: '',
@@ -446,6 +474,36 @@ const TableLayout = ({
     }
   };
 
+  const handleOnChangeNamaItem = (value) => {
+    if (value) {
+      setNamaItemRef((e) => ({
+        ...e,
+        values: {
+          ...value,
+        },
+      }));
+      let tempOptions = filterOptions.filter((e) => e.value === filter);
+      let tempFilterDisplay = [...selectedFilter];
+      tempFilterDisplay = tempFilterDisplay.filter((e) => e.type !== filter);
+      tempFilterDisplay.unshift({
+        type: filter,
+        label: tempOptions[0].label,
+        name: value.name,
+        value: value.name,
+      });
+      setSelectedFilter(tempFilterDisplay);
+      searchData(tempFilterDisplay);
+    } else {
+      setNamaItemRef((e) => ({
+        ...e,
+        values: {
+          id: '',
+          name: '',
+        },
+      }));
+    }
+  };
+
   const handleChangeDate = (newValue) => {
     setDate(newValue);
     // note: before send date
@@ -530,6 +588,17 @@ const TableLayout = ({
           handlerRef={unitRef}
           handlerFetchData={getUnit}
           handlerOnChange={(value) => handleOnChangeUnit(value)}
+        />
+      ) : null}
+      {filter === 'item' ? (
+        <SelectAsync
+          id='item'
+          labelField='Nama Item'
+          labelOptionRef='name'
+          valueOptionRef='id'
+          handlerRef={namaItemRef}
+          handlerFetchData={getListItem}
+          handlerOnChange={(value) => handleOnChangeNamaItem(value)}
         />
       ) : null}
       {filter === 'date' ? (
@@ -699,33 +768,33 @@ const TableLayout = ({
                                 ) : null}
                                 {isDelete ? (
                                   <TableCell
-                                  padding='none'
-                                  sx={{
-                                    paddingRight: 1,
-                                    paddingY: 0.8,
-                                  }}
-                                >
-                                  {isPermitted('destroy') ? (
-                                    <Tooltip title='Delete' arrow>
-                                      <IconButton
-                                        onClick={(event) => {
-                                          event.stopPropagation();
-                                          handleOpenConfirmationDelete(row);
-                                        }}
-                                      >
-                                        <DeleteIcon color='error' />
-                                      </IconButton>
-                                    </Tooltip>
-                                  ) : (
-                                    <Tooltip title="You don't have permission to do this">
-                                      <span>
-                                        <IconButton disabled>
-                                          <DeleteIcon />
+                                    padding='none'
+                                    sx={{
+                                      paddingRight: 1,
+                                      paddingY: 0.8,
+                                    }}
+                                  >
+                                    {isPermitted('destroy') ? (
+                                      <Tooltip title='Delete' arrow>
+                                        <IconButton
+                                          onClick={(event) => {
+                                            event.stopPropagation();
+                                            handleOpenConfirmationDelete(row);
+                                          }}
+                                        >
+                                          <DeleteIcon color='error' />
                                         </IconButton>
-                                      </span>
-                                    </Tooltip>
-                                  )}
-                                </TableCell>
+                                      </Tooltip>
+                                    ) : (
+                                      <Tooltip title="You don't have permission to do this">
+                                        <span>
+                                          <IconButton disabled>
+                                            <DeleteIcon />
+                                          </IconButton>
+                                        </span>
+                                      </Tooltip>
+                                    )}
+                                  </TableCell>
                                 ) : null}
                               </TableRow>
                             );

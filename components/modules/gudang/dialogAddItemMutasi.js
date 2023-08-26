@@ -13,12 +13,13 @@ import {
   Divider,
 } from '@mui/material';
 import * as Yup from 'yup';
-import { parse } from "date-fns";
+import {parse} from 'date-fns';
 import {stringSchema} from 'utils/yupSchema';
 import {useFormik} from 'formik';
 import SelectAsync from 'components/SelectAsync';
 import {getListItem} from 'api/gudang/item';
 import {getSediaan} from 'api/gudang/sediaan';
+import {getSupplier} from 'api/supplier';
 import {FocusError} from 'focus-formik-error';
 import {LoadingButton} from '@mui/lab';
 import useClientPermission from 'custom-hooks/useClientPermission';
@@ -27,7 +28,6 @@ const DialogAddItem = ({
   state,
   setState,
   isEditType = false,
-  isPembelian = false,
   prePopulatedDataForm = {},
   detailPrePopulatedData = {},
   updatePrePopulatedData = () => 'update data',
@@ -49,15 +49,10 @@ const DialogAddItem = ({
   const tableItemInitialValues = !isEditType
     ? {
         item: {id: '', kode: '', name: ''},
+        nomor_batch: null,
         jumlah: null,
+        jumlah_pengadaan: null,
         sediaan: {id: '', name: ''},
-        // nomor_batch: null,
-        // harga_beli_satuan: null,
-        // harga_jual_satuan: null,
-        // diskon: null,
-        // margin: null,
-        // total_pembelian: null,
-        // tanggal_ed: null,
       }
     : prePopulatedDataForm;
 
@@ -71,35 +66,6 @@ const DialogAddItem = ({
     sediaan: Yup.object({
       id: stringSchema('Sediaan', true),
     }),
-    // nomor_batch: Yup.string()
-    //   .matches(/^[0-9]+$/, 'Wajib angka')
-    //   .required('Nomor batch wajib diisi'),
-    // harga_beli_satuan: Yup.string()
-    //   .matches(/^[0-9]+$/, 'Wajib angka')
-    //   .required('Harga beli wajib diisi'),
-    // harga_jual_satuan: Yup.string()
-    //   .matches(/^[0-9]+$/, 'Wajib angka')
-    //   .required('Harga Jual wajib diisi'),
-    // diskon: Yup.string()
-    //   .matches(/^[0-9]+$/, 'Wajib angka')
-    //   .required('Diskon wajib diisi'),
-    // margin: Yup.string()
-    //   .matches(/^[0-9]+$/, 'Wajib angka')
-    //   .required('Margin wajib diisi'),
-    // total_pembelian: Yup.string()
-    //   .matches(/^[0-9]+$/, 'Wajib angka')
-    //   .required('Total pembelian wajib diisi'),
-    // tanggal_ed: Yup.date()
-    //   .transform(function (value, originalValue) {
-    //     if (this.isType(value)) {
-    //       return value;
-    //     }
-    //     const result = parse(originalValue, 'dd/MM/yyyy', new Date());
-    //     return result;
-    //   })
-    //   .typeError('Expired date tidak valid')
-    //   .min('2023-01-01', 'Expired date tidak valid')
-    //   .required('Expired date wajib diisi'),
   });
 
   const createTableItemValidation = useFormik({
@@ -199,7 +165,35 @@ const DialogAddItem = ({
                 </Grid>
                 <Grid container spacing={1}>
                   <Grid item xs={3}>
-                    <Typography variant='h1 font-w-600'>Jumlah</Typography>
+                    <Typography variant='h1 font-w-600'>Nomor Batch</Typography>
+                  </Grid>
+                  <Grid item xs={9}>
+                    <div className='mb-16'>
+                      <TextField
+                        fullWidth
+                        id='nomor_batch'
+                        name='nomor_batch'
+                        label='Nomor Batch'
+                        value={createTableItemValidation.values.nomor_batch}
+                        onChange={createTableItemValidation.handleChange}
+                        error={
+                          createTableItemValidation.touched.nomor_batch &&
+                          Boolean(createTableItemValidation.errors.nomor_batch)
+                        }
+                        helperText={
+                          createTableItemValidation.touched.nomor_batch &&
+                          createTableItemValidation.errors.nomor_batch
+                        }
+                        disabled
+                      />
+                    </div>
+                  </Grid>
+                </Grid>
+                <Grid container spacing={1}>
+                  <Grid item xs={3}>
+                    <Typography variant='h1 font-w-600'>
+                      Jumlah Permintaan
+                    </Typography>
                   </Grid>
                   <Grid item xs={9}>
                     <div className='mb-16'>
@@ -219,6 +213,38 @@ const DialogAddItem = ({
                           createTableItemValidation.errors.jumlah
                         }
                         disabled={isEditType && !isEditingMode}
+                      />
+                    </div>
+                  </Grid>
+                </Grid>
+                <Grid container spacing={1}>
+                  <Grid item xs={3}>
+                    <Typography variant='h1 font-w-600'>
+                      Jumlah Pengadaan
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={9}>
+                    <div className='mb-16'>
+                      <TextField
+                        fullWidth
+                        id='jumlah_pengadaan'
+                        name='jumlah_pengadaan'
+                        label='Jumlah'
+                        value={
+                          createTableItemValidation.values.jumlah_pengadaan
+                        }
+                        onChange={createTableItemValidation.handleChange}
+                        error={
+                          createTableItemValidation.touched.jumlah_pengadaan &&
+                          Boolean(
+                            createTableItemValidation.errors.jumlah_pengadaan
+                          )
+                        }
+                        helperText={
+                          createTableItemValidation.touched.jumlah_pengadaan &&
+                          createTableItemValidation.errors.jumlah_pengadaan
+                        }
+                        disabled
                       />
                     </div>
                   </Grid>
@@ -255,127 +281,7 @@ const DialogAddItem = ({
                   </Grid>
                 </Grid>
               </Grid>
-              {/* {isPembelian ? (
-                <Grid container spacing={1}>
-                  <Grid container spacing={1}>
-                    <Grid item xs={3}>
-                      <Typography variant='h1 font-w-600'>Kode Item</Typography>
-                    </Grid>
-                    <Grid item xs={9}>
-                      <div className='mb-16'>
-                        <SelectAsync
-                          id='item'
-                          labelField='Kode Item'
-                          labelOptionRef='name'
-                          valueOptionRef='id'
-                          handlerRef={createTableItemValidation}
-                          handlerFetchData={getListItem}
-                          handlerOnChange={(value) => {
-                            if (value) {
-                              createTableItemValidation.setFieldValue(
-                                'item',
-                                value
-                              );
-                            } else {
-                              createTableItemValidation.setFieldValue('item', {
-                                id: '',
-                                name: '',
-                              });
-                            }
-                          }}
-                          isDisabled={isEditType && !isEditingMode}
-                        />
-                      </div>
-                    </Grid>
-                  </Grid>
-                  <Grid container spacing={1}>
-                    <Grid item xs={3}>
-                      <Typography variant='h1 font-w-600'>Nama Item</Typography>
-                    </Grid>
-                    <Grid item xs={9}>
-                      <div className='mb-16'>
-                        <TextField
-                          fullWidth
-                          id='nama_item'
-                          name='nama_item'
-                          label='Nama Item'
-                          value={createTableItemValidation.values.item.kode}
-                          onChange={createTableItemValidation.handleChange}
-                          error={
-                            createTableItemValidation.touched.nama_item &&
-                            Boolean(createTableItemValidation.errors.nama_item)
-                          }
-                          helperText={
-                            createTableItemValidation.touched.nama_item &&
-                            createTableItemValidation.errors.nama_item
-                          }
-                          disabled
-                        />
-                      </div>
-                    </Grid>
-                  </Grid>
-                  <Grid container spacing={1}>
-                    <Grid item xs={3}>
-                      <Typography variant='h1 font-w-600'>Jumlah</Typography>
-                    </Grid>
-                    <Grid item xs={9}>
-                      <div className='mb-16'>
-                        <TextField
-                          fullWidth
-                          id='jumlah'
-                          name='jumlah'
-                          label='Jumlah'
-                          value={createTableItemValidation.values.jumlah}
-                          onChange={createTableItemValidation.handleChange}
-                          error={
-                            createTableItemValidation.touched.jumlah &&
-                            Boolean(createTableItemValidation.errors.jumlah)
-                          }
-                          helperText={
-                            createTableItemValidation.touched.jumlah &&
-                            createTableItemValidation.errors.jumlah
-                          }
-                          disabled={isEditType && !isEditingMode}
-                        />
-                      </div>
-                    </Grid>
-                  </Grid>
-                  <Grid container spacing={1}>
-                    <Grid item xs={3}>
-                      <Typography variant='h1 font-w-600'>Sediaan</Typography>
-                    </Grid>
-                    <Grid item xs={9}>
-                      <div className='mb-16'>
-                        <SelectAsync
-                          id='sediaan'
-                          labelField='Sediaan'
-                          labelOptionRef='name'
-                          valueOptionRef='id'
-                          handlerRef={createTableItemValidation}
-                          handlerFetchData={getSediaan}
-                          handlerOnChange={(value) => {
-                            if (value) {
-                              createTableItemValidation.setFieldValue(
-                                'sediaan',
-                                value
-                              );
-                            } else {
-                              createTableItemValidation.setFieldValue(
-                                'sediaan',
-                                {
-                                  id: '',
-                                  name: '',
-                                }
-                              );
-                            }
-                          }}
-                          isDisabled={isEditType && !isEditingMode}
-                        />
-                      </div>
-                    </Grid>
-                  </Grid>
-                </Grid>
-              ) : null} */}
+
               <div style={{display: 'flex', justifyContent: 'flex-end'}}>
                 <Button
                   onClick={() => setState(false)}
@@ -388,7 +294,7 @@ const DialogAddItem = ({
                 <LoadingButton
                   type='submit'
                   variant='contained'
-                  disabled={!isActionPermitted('purchaseOrder:store')}
+                  disabled={!isActionPermitted('mutation:store')}
                   loading={createTableItemValidation.isSubmitting}
                 >
                   Tambah Item

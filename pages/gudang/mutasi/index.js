@@ -57,7 +57,7 @@ const dataRiwayatMutasiFormatHandler = (payload) => {
     return {
       tanggal_mutasi: formatReadable(e.tanggal_mutasi) || 'null',
       tanggal_permintaan: formatReadable(e.tanggal_permintaan) || 'null',
-      unit: e.unit || 'null',
+      unit: e.unit.name || 'null',
       gudang: e.gudang || 'null',
       id: e.id,
     };
@@ -153,12 +153,16 @@ const Mutasi = () => {
   };
 
   const searchDataPermintaanMutasiHandler = async (payload) => {
+    const searchParams = payload.reduce((obj, e) => {
+      obj[e.type] = e.value;
+      return obj;
+    }, {});
+
     try {
       setIsUpdatingDataPermintaanMutasi(true);
-      const response = await searchMutasi({
-        search_text: payload.map((e) => e.value),
-        search_column: payload.map((e) => e.type),
-        per_page: dataMutasiPerPage,
+      const response = await getMutasi({
+        search: searchParams,
+        per_page: dataPermintaanMutasiPerPage,
       });
       if (response.data.data.length !== 0) {
         const result = dataPermintaanMutasiFormatHandler(response.data.data);
@@ -193,7 +197,7 @@ const Mutasi = () => {
     try {
       setIsLoadingDataRiwayatMutasi(true);
       const params = {
-        trashed: "true",
+        trashed: true,
         per_page: dataRiwayatMutasiPerPage,
       };
       const response = await getMutasi(params);
@@ -248,12 +252,16 @@ const Mutasi = () => {
   };
 
   const searchDataRiwayatMutasiHandler = async (payload) => {
+    const searchParams = payload.reduce((obj, e) => {
+      obj[e.type] = e.value;
+      return obj;
+    }, {});
+
     try {
       setIsUpdatingDataRiwayatMutasi(true);
-      const response = await searchMutasi({
-        search_text: payload.map((e) => e.value),
-        search_column: payload.map((e) => e.type),
-        per_page: dataMutasiPerPage,
+      const response = await getMutasi({
+        search: searchParams,
+        per_page: dataRiwayatMutasiPerPage,
       });
       if (response.data.data.length !== 0) {
         const result = dataRiwayatMutasiFormatHandler(response.data.data);
@@ -266,7 +274,7 @@ const Mutasi = () => {
           message: `${payload} tidak ditemukan`,
         });
         const response = await getMutasi({
-          per_page: dataMutasiPerPage,
+          per_page: dataRiwayatMutasiPerPage,
         });
         const result = dataRiwayatMutasiFormatHandler(response.data.data);
         setDataRiwayatMutasi(result);
@@ -318,8 +326,8 @@ const Mutasi = () => {
           {activeContent === 1 && (
             <TableLayoutGudang
               baseRoutePath={`${router.asPath}`}
-              title=''
-              isBtnAdd={false}
+              title='Mutasi'
+              isBtnAdd={true}
               tableHead={PermintaanMutasiTableHead}
               data={dataPermintaanMutasi}
               meta={dataMetaPermintaanMutasi}
@@ -330,11 +338,15 @@ const Mutasi = () => {
                 {label: 'Gudang', value: 'gudang'},
               ]}
               updateDataPerPage={(e, filter) => {
+                const searchParams = filter.reduce((obj, e) => {
+                  obj[e.type] = e.value;
+                  return obj;
+                }, {});
+
                 setDataPerPage(e.target.value);
                 updateDataPermintaanMutasiHandler({
                   per_page: e.target.value,
-                  search_text: filter.map((e) => e.value),
-                  search_column: filter.map((e) => e.type),
+                  search: searchParams,
                 });
               }}
               updateDataNavigate={(payload) =>
@@ -344,7 +356,9 @@ const Mutasi = () => {
                 })
               }
               refreshData={() =>
-                updateDataPermintaanMutasiHandler({per_page: dataPermintaanMutasiPerPage})
+                updateDataPermintaanMutasiHandler({
+                  per_page: dataPermintaanMutasiPerPage,
+                })
               }
               deleteData={deleteDataPermintaanMutasiHandler}
               searchData={searchDataPermintaanMutasiHandler}
@@ -365,11 +379,15 @@ const Mutasi = () => {
                 {label: 'Gudang', value: 'gudang'},
               ]}
               updateDataPerPage={(e, filter) => {
+                const searchParams = filter.reduce((obj, e) => {
+                  obj[e.type] = e.value;
+                  return obj;
+                }, {});
+
                 setDataPerPage(e.target.value);
                 updateDataRiwayatMutasiHandler({
                   per_page: e.target.value,
-                  search_text: filter.map((e) => e.value),
-                  search_column: filter.map((e) => e.type),
+                  search: searchParams,
                 });
               }}
               updateDataNavigate={(payload) =>
@@ -379,7 +397,9 @@ const Mutasi = () => {
                 })
               }
               refreshData={() =>
-                updateDataRiwayatMutasiHandler({per_page: dataRiwayatMutasiPerPage})
+                updateDataRiwayatMutasiHandler({
+                  per_page: dataRiwayatMutasiPerPage,
+                })
               }
               deleteData={deleteDataRiwayatMutasiHandler}
               searchData={searchDataRiwayatMutasiHandler}

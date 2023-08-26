@@ -5,7 +5,7 @@ import TableLayoutGudang from "components/TableLayoutGudang";
 import LoaderOnLayout from "components/LoaderOnLayout";
 import Snackbar from "components/SnackbarMui";
 
-const returTableHead = [
+const ReturTableHead = [
   {
     id: "nomor_retur",
     label: "Nomor Retur",
@@ -18,6 +18,10 @@ const returTableHead = [
     id: "supplier",
     label: "Supplier",
   },
+  {
+    id: "gudang",
+    label: "Gudang",
+  },
 ];
 
 const dataReturFormatHandler = (payload) => {
@@ -26,6 +30,7 @@ const dataReturFormatHandler = (payload) => {
       nomor_retur: e.nomor_retur || "null",
       nomor_faktur: e.receive.nomor_faktur || "null",
       supplier: e.receive.purchase_order.supplier.name || "null",
+      gudang: e.receive.purchase_order.gudang || "null",
       id: e.id,
     };
   });
@@ -106,11 +111,15 @@ const Retur = () => {
   };
   
   const searchDataReturHandler = async (payload) => {
+    const searchParams = payload.reduce((obj, e) => {
+      obj[e.type] = e.value;
+      return obj;
+    }, {});
+
     try {
       setIsUpdatingDataRetur(true);
-      const response = await searchRetur({
-        search_text: payload.map((e) => e.value),
-        search_column: payload.map((e) => e.type),
+      const response = await getRetur({
+        search: searchParams,
         per_page: dataReturPerPage,
       });
       if (response.data.data.length !== 0) {
@@ -156,7 +165,7 @@ const Retur = () => {
               baseRoutePath={`${router.asPath}`}
               title="Retur"
               isBtnAdd={true}
-              tableHead={returTableHead}
+              tableHead={ReturTableHead}
               data={dataRetur}
               meta={dataMetaRetur}
               dataPerPage={dataReturPerPage}
@@ -166,11 +175,15 @@ const Retur = () => {
                 { label: "Nomor Faktur", value: "nomor_faktur" },
               ]}
               updateDataPerPage={(e, filter) => {
+                const searchParams = filter.reduce((obj, e) => {
+                  obj[e.type] = e.value;
+                  return obj;
+                }, {});
+  
                 setDataPerPage(e.target.value);
                 updateDataReturHandler({
                   per_page: e.target.value,
-                  search_text: filter.map((e) => e.value),
-                  search_column: filter.map((e) => e.type),
+                  search: searchParams,
                 });
               }}
               updateDataNavigate={(payload) =>
@@ -180,7 +193,9 @@ const Retur = () => {
                 })
               }
               refreshData={() =>
-                updateDataReturHandler({ per_page: dataReturPerPage })
+                updateDataReturHandler({
+                  per_page: dataReturPerPage,
+                })
               }
               deleteData={deleteDataReturHandler}
               searchData={searchDataReturHandler}

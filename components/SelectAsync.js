@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import TextField from "@mui/material/TextField";
-import Autocomplete from "@mui/material/Autocomplete";
-import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
+import {useState, useEffect} from 'react';
+import TextField from '@mui/material/TextField';
+import Autocomplete from '@mui/material/Autocomplete';
+import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
 
 export default function SelectAsync({
   id,
@@ -17,7 +17,7 @@ export default function SelectAsync({
 }) {
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState([]);
-  const [inputText, setInputText] = useState("");
+  const [inputText, setInputText] = useState('');
   const loading = open && options.length === 0;
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export default function SelectAsync({
   }, [open]);
 
   useEffect(() => {
-    setInputText(handlerRef.values[`${id}`]?.[labelOptionRef] || "");
+    setInputText(handlerRef.values[`${id}`]?.[labelOptionRef] || '');
     // eslint-disable-next-line
   }, []);
 
@@ -61,7 +61,7 @@ export default function SelectAsync({
     <Autocomplete
       id={id}
       name={id}
-      sx={{ width: "100%" }}
+      sx={{width: '100%'}}
       open={open}
       onOpen={() => {
         setOpen(true);
@@ -81,7 +81,7 @@ export default function SelectAsync({
         setInputText(newInputValue);
       }}
       value={
-        handlerRef.values[`${id}`]?.[valueOptionRef] === ""
+        handlerRef.values[`${id}`]?.[valueOptionRef] === ''
           ? null
           : handlerRef.values[`${id}`]
       }
@@ -89,8 +89,8 @@ export default function SelectAsync({
         handlerOnChange(value);
       }}
       renderOption={(props, option) => (
-        <Box component="li" {...props} key={option[valueOptionRef]}>
-          {option[labelOptionRef]}{" "}
+        <Box component='li' {...props} key={option[valueOptionRef]}>
+          {option[labelOptionRef]}{' '}
           {labelOptionSecondRef && `- ${option[labelOptionSecondRef]}`}
         </Box>
       )}
@@ -102,7 +102,7 @@ export default function SelectAsync({
             endAdornment: (
               <>
                 {loading ? (
-                  <CircularProgress color="inherit" size={20} />
+                  <CircularProgress color='inherit' size={20} />
                 ) : null}
                 {params.InputProps.endAdornment}
               </>

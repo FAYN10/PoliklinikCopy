@@ -152,11 +152,15 @@ const Laporan = () => {
   };
 
   const searchDataLaporanHandler = async (payload) => {
+    const searchParams = payload.reduce((obj, e) => {
+      obj[e.type] = e.value;
+      return obj;
+    }, {});
+
     try {
       setIsUpdatingDataLaporan(true);
-      const response = await searchLaporan({
-        search_text: payload.map((e) => e.value),
-        search_column: payload.map((e) => e.type),
+      const response = await getGudang({
+        search: searchParams,
         per_page: dataLaporanPerPage,
       });
       if (response.data.data.length !== 0) {
@@ -166,10 +170,10 @@ const Laporan = () => {
       } else {
         setSnackbarState({
           state: true,
-          type: 'warning',
+          type: "warning",
           message: `${payload} tidak ditemukan`,
         });
-        const response = await getLaporan({
+        const response = await getGudang({
           per_page: dataLaporanPerPage,
         });
         const result = dataLaporanFormatHandler(response.data.data);
@@ -179,7 +183,7 @@ const Laporan = () => {
     } catch (error) {
       setSnackbarState({
         state: true,
-        type: 'error',
+        type: "error",
         message: error.message,
       });
     } finally {
@@ -208,18 +212,21 @@ const Laporan = () => {
             dataPerPage={dataLaporanPerPage}
             isUpdatingData={isUpdatingDataLaporan}
             filterOptions={[
-              {label: 'Kode Item', value: 'kode_item'},
-              {label: 'Nama Item', value: 'nama_item'},
+              {label: 'Nama Item', value: 'item'},
               {label: 'Gudang', value: 'gudang'},
               {label: 'Nomor Batch', value: 'nomor_batch'},
               {label: 'Tanggal ED', value: 'date'},
             ]}
             updateDataPerPage={(e, filter) => {
+              const searchParams = filter.reduce((obj, e) => {
+                obj[e.type] = e.value;
+                return obj;
+              }, {});
+
               setDataPerPage(e.target.value);
               updateDataLaporanHandler({
                 per_page: e.target.value,
-                search_text: filter.map((e) => e.value),
-                search_column: filter.map((e) => e.type),
+                search: searchParams,
               });
             }}
             updateDataNavigate={(payload) =>
@@ -229,7 +236,9 @@ const Laporan = () => {
               })
             }
             refreshData={() =>
-              updateDataLaporanHandler({per_page: dataLaporanPerPage})
+              updateDataLaporanHandler({
+                per_page: dataLaporanPerPage,
+              })
             }
             deleteData={deleteDataLaporanHandler}
             searchData={searchDataLaporanHandler}

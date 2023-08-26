@@ -15,3 +15,11 @@ export function getDetailPembelian(params) {
     params,
   });
 }
+
+export function createPembelian(data) {
+  return request({
+    url: `${process.env.NEXT_PUBLIC_MOCK_BASE_URL}/receive`,
+    method: "POST",
+    data,
+  });
+}

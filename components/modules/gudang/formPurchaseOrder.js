@@ -37,16 +37,11 @@ import ReactToPrint from 'react-to-print';
 import Switch from '@mui/material/Switch';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import useClientPermission from 'custom-hooks/useClientPermission';
-import {filterFalsyValue} from 'utils/helper';
-import {
-  Divider,
-  Typography,
-  Button,
-  Paper,
-} from '@mui/material';
+import {filterFalsyValue, convertDataDetail} from 'utils/helper';
+import {Divider, Typography, Button, Paper} from '@mui/material';
 import {Add as AddIcon, Delete as DeleteIcon} from '@mui/icons-material';
-import DialogAddItem from './dialogAddItem';
-import TableLayoutDetail from "components/TableLayoutDetail";
+import DialogAddItem from './dialogAddItemPurchaseOrder';
+import TableLayoutDetail from 'components/TableLayoutDetailGudang';
 
 const LabelToPrint = forwardRef(function LabelToPrint({data}, ref) {
   return (
@@ -137,36 +132,36 @@ const FormPurchaseOrder = ({
 
   const detailPoTableHead = [
     {
-      id: "kode_item",
-      label: "Kode Item",
+      id: 'kode_item',
+      label: 'Kode Item',
     },
     {
-      id: "nama_item",
-      label: "Nama Item",
+      id: 'nama_item',
+      label: 'Nama Item',
     },
     {
-      id: "jumlah",
-      label: "Jumlah",
+      id: 'jumlah',
+      label: 'Jumlah',
     },
     {
-      id: "sediaan",
-      label: "Sediaan",
+      id: 'sediaan',
+      label: 'Sediaan',
     },
   ];
 
   const dataDetailFormatHandler = (payload) => {
     const result = payload.map((e) => {
       return {
-        kode_item: e.item.kode || "null",
+        kode_item: e.item.kode || 'null',
         nama_item: e.item.name,
-        jumlah: e.jumlah || "null",
-        sediaan: e.sediaan.name || "null",
+        jumlah: e.jumlah || 'null',
+        sediaan: e.sediaan.name || 'null',
         id: e,
       };
     });
     return result;
   };
-  
+
   const handleIsEditingMode = (e) => {
     setIsEditingMode(e.target.checked);
   };
@@ -179,7 +174,7 @@ const FormPurchaseOrder = ({
         supplier: {id: '', name: ''},
         gudang: {id: '', name: ''},
         keterangan: '',
-        purchase_order_detail: []
+        purchase_order_detail: [],
       }
     : prePopulatedDataForm;
 
@@ -205,6 +200,7 @@ const FormPurchaseOrder = ({
     gudang: Yup.object({
       id: stringSchema('Gudang', true),
     }),
+    // keterangan: Yup.string(),
     purchase_order_detail: Yup.array(),
   });
 
@@ -215,6 +211,9 @@ const FormPurchaseOrder = ({
     onSubmit: async (values, {resetForm, setFieldError}) => {
       let messageContext = isEditType ? 'diperbarui' : 'ditambahkan';
       let data = {...values};
+      data.purchase_order_detail = convertDataDetail(
+        data.purchase_order_detail
+      );
       data = {
         ...data,
         potype: data.potype.kode,
@@ -222,12 +221,14 @@ const FormPurchaseOrder = ({
         supplier: data.supplier.id,
         gudang: data.gudang.name,
       };
+      console.log(data);
       try {
         let response;
         if (!isEditType) {
           const formattedData = filterFalsyValue({...data});
           response = await createPurchaseOrder(formattedData);
           resetForm();
+          router.push('/gudang/purchase-order');
         } else {
           await updatePurchaseOrder({
             ...formattedData,
@@ -259,40 +260,62 @@ const FormPurchaseOrder = ({
   });
 
   const createDetailDataHandler = (payload) => {
-    let tempData = [...createPurchaseOrderValidation.values.purchase_order_detail];
-    const isAvailable = tempData.some(data => data.item.id !== payload.item.id && data.sediaan.id !== payload.sediaan.id);
-    if (isAvailable) {
-      createPurchaseOrderValidation.setFieldValue(
-        "purchase_order_detail",
-        tempData.filter((e) => e.item.id !== payload.item.id)
-      );
+    let tempData = [
+      ...createPurchaseOrderValidation.values.purchase_order_detail,
+    ];
+    const isAvailable = tempData.findIndex(
+      (data) =>
+        data.item.id === payload.item.id &&
+        data.sediaan.id === payload.sediaan.id
+    );
+    if (isAvailable !== -1) {
+      tempData[isAvailable] = payload;
     } else {
-      createPurchaseOrderValidation.setFieldValue("purchase_order_detail", [...tempData, payload]);
+      tempData.push(payload);
     }
-    console.log(createPurchaseOrderValidation.values.purchase_order_detail);
-    setDataDetail(dataDetailFormatHandler(createPurchaseOrderValidation.values.purchase_order_detail));
+    createPurchaseOrderValidation.setFieldValue(
+      'purchase_order_detail',
+      tempData
+    );
+    setDataDetail(dataDetailFormatHandler(tempData));
   };
 
-  const deleteDetailDataHandler = (payload) => {
-    let tempData =dataDetail.filter(data => data.id == payload);
-    // const result = dataDetailFormatHandler(createPurchaseOrderValidation.values.purchase_order_detail);
-    // createPurchaseOrderValidation.setFieldValue("purchase_order_detail", ...tempData);
-    // console.log(result);
-    setDataDetail(tempData);
+  const deleteDetailDataHandler = (index) => {
+    let tempData = [
+      ...createPurchaseOrderValidation.values.purchase_order_detail,
+    ];
+    if (index >= 0 && index < tempData.length) {
+      tempData.splice(index, 1);
+      createPurchaseOrderValidation.setFieldValue(
+        'purchase_order_detail',
+        tempData
+      );
+      setDataDetail(dataDetailFormatHandler(tempData));
+    }
   };
 
   useEffect(() => {
     if (!isEditType) {
-      const nomor_po = "";
-      if(createPurchaseOrderValidation.values.potype.kode != "" && createPurchaseOrderValidation.values.tanggal_po != null){
-        const year = formatIsoToGen(createPurchaseOrderValidation.values.tanggal_po).substring(0,4);
+      const nomor_po = '';
+      if (
+        createPurchaseOrderValidation.values.potype.kode != '' &&
+        createPurchaseOrderValidation.values.tanggal_po != null
+      ) {
+        const year = formatIsoToGen(
+          createPurchaseOrderValidation.values.tanggal_po
+        ).substring(0, 4);
         const potype = createPurchaseOrderValidation.values.potype;
-        nomor_po = `${potype.kode}${year}${String(potype.state_number + 1).padStart(6, '0')}`;
+        nomor_po = `${potype.kode}${year}${String(
+          potype.state_number + 1
+        ).padStart(6, '0')}`;
       }
       createPurchaseOrderValidation.setFieldValue('nomor_po', nomor_po);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [createPurchaseOrderValidation.values.potype, createPurchaseOrderValidation.values.tanggal_po]);
+  }, [
+    createPurchaseOrderValidation.values.potype,
+    createPurchaseOrderValidation.values.tanggal_po,
+  ]);
 
   return (
     <>
@@ -536,13 +559,13 @@ const FormPurchaseOrder = ({
           </div>
 
           <Divider sx={{borderWidth: '1px'}} />
-                        
-          <div className='p-16'>
 
-          <TableLayoutDetail
+          <div className='p-16'>
+            <TableLayoutDetail
               baseRoutePath={`${router.asPath}`}
-              title="Item"
+              title='Item'
               isBtnAdd
+              isDelete
               btnAddHandler={setIsDialogItem}
               tableHead={detailPoTableHead}
               data={dataDetail}
@@ -551,109 +574,109 @@ const FormPurchaseOrder = ({
               // createData={createDetailDataHandler}
             />
 
-          <DialogAddItem
+            <DialogAddItem
               state={isDialogItem}
               setState={setIsDialogItem}
               createData={createDetailDataHandler}
             />
 
-          <div className='flex justify-end items-center mt-16'>
-            {isEditType && (
-              <>
-                <div className='mr-auto text-grey-text'>
-                  <p className='font-14 font-w-600 m-0 p-0'>
-                    {detailPrePopulatedData?.nomor_po},{' '}
-                  </p>
-                  <p className='font-12 font-w-600 m-0 p-0'>
-                    Nomor PO:{' '}
-                    {detailPrePopulatedData?.nomor_po || 'Tidak tersedia'}
-                  </p>
-                  <p className='font-12 font-w-600 m-0 p-0'>
-                    Dibuat pada:
-                    {formatReadable(detailPrePopulatedData?.updated_at)}
-                  </p>
-                  <p className='font-12 font-w-600 m-0 p-0'>
-                    Perubahan terakhir:
-                    {formatReadable(detailPrePopulatedData?.updated_at)}
-                  </p>
-                </div>
-                <div className='mr-auto flex'>
-                  <div className='mr-8'>
-                    <ReactToPrint
-                      trigger={() => (
-                        <Button variant='outlined' startIcon={<PrintIcon />}>
-                          Cetak Label
-                        </Button>
-                      )}
-                      content={() => labelPrintRef.current}
-                    />
-                    <LabelToPrint
-                      data={{
-                        nomor_po: detailPrePopulatedData.nomor_po,
-                        tanggal_po: detailPrePopulatedData.tanggal_po,
-                      }}
-                      ref={labelPrintRef}
-                    />
+            <div className='flex justify-end items-center mt-16'>
+              {isEditType && (
+                <>
+                  <div className='mr-auto text-grey-text'>
+                    <p className='font-14 font-w-600 m-0 p-0'>
+                      {detailPrePopulatedData?.nomor_po},{' '}
+                    </p>
+                    <p className='font-12 font-w-600 m-0 p-0'>
+                      Nomor PO:{' '}
+                      {detailPrePopulatedData?.nomor_po || 'Tidak tersedia'}
+                    </p>
+                    <p className='font-12 font-w-600 m-0 p-0'>
+                      Dibuat pada:
+                      {formatReadable(detailPrePopulatedData?.updated_at)}
+                    </p>
+                    <p className='font-12 font-w-600 m-0 p-0'>
+                      Perubahan terakhir:
+                      {formatReadable(detailPrePopulatedData?.updated_at)}
+                    </p>
                   </div>
-                  <div>
-                    <ReactToPrint
-                      trigger={() => (
-                        <Button variant='outlined' startIcon={<PrintIcon />}>
-                          Cetak Kartu Periksa
-                        </Button>
-                      )}
-                      content={() => checkupPrintRef.current}
-                    />
-                    <CheckupToPrint
-                      data={{
-                        no_rm: detailPrePopulatedData.nomor_po,
-                      }}
-                      ref={checkupPrintRef}
-                    />
+                  <div className='mr-auto flex'>
+                    <div className='mr-8'>
+                      <ReactToPrint
+                        trigger={() => (
+                          <Button variant='outlined' startIcon={<PrintIcon />}>
+                            Cetak Label
+                          </Button>
+                        )}
+                        content={() => labelPrintRef.current}
+                      />
+                      <LabelToPrint
+                        data={{
+                          nomor_po: detailPrePopulatedData.nomor_po,
+                          tanggal_po: detailPrePopulatedData.tanggal_po,
+                        }}
+                        ref={labelPrintRef}
+                      />
+                    </div>
+                    <div>
+                      <ReactToPrint
+                        trigger={() => (
+                          <Button variant='outlined' startIcon={<PrintIcon />}>
+                            Cetak Kartu Periksa
+                          </Button>
+                        )}
+                        content={() => checkupPrintRef.current}
+                      />
+                      <CheckupToPrint
+                        data={{
+                          no_rm: detailPrePopulatedData.nomor_po,
+                        }}
+                        ref={checkupPrintRef}
+                      />
+                    </div>
                   </div>
-                </div>
-              </>
-            )}
-            <Button
-              type='button'
-              variant='outlined'
-              startIcon={<BackIcon />}
-              sx={{marginRight: 2}}
-              onClick={() => router.push('/gudang/purchase-order')}
-            >
-              Kembali
-            </Button>
-            {isEditType ? (
-              <LoadingButton
-                type='submit'
-                variant='contained'
-                sx={{marginBottom: 1, marginRight: 2}}
-                disabled={
-                  JSON.stringify(
-                    createPurchaseOrderValidation.initialValues
-                  ) === JSON.stringify(createPurchaseOrderValidation.values) ||
-                  !isActionPermitted('pasien:update') ||
-                  (isEditType && !isEditingMode)
-                }
-                startIcon={<SaveIcon />}
-                loadingPosition='start'
-                loading={createPurchaseOrderValidation.isSubmitting}
+                </>
+              )}
+              <Button
+                type='button'
+                variant='outlined'
+                startIcon={<BackIcon />}
+                sx={{marginRight: 2}}
+                onClick={() => router.push('/gudang/purchase-order')}
               >
-                Simpan perubahan
-              </LoadingButton>
-            ) : (
-              <LoadingButton
-                type="submit"
-                variant="contained"
-                disabled={!isActionPermitted('pasien:store')}
-                startIcon={<DoneIcon />}
-                loadingPosition="start"
-                loading={createPurchaseOrderValidation.isSubmitting}
-              >
-                Simpan Purchase Order
-              </LoadingButton>
-            )}
-
+                Kembali
+              </Button>
+              {isEditType ? (
+                <LoadingButton
+                  type='submit'
+                  variant='contained'
+                  sx={{marginBottom: 1, marginRight: 2}}
+                  disabled={
+                    JSON.stringify(
+                      createPurchaseOrderValidation.initialValues
+                    ) ===
+                      JSON.stringify(createPurchaseOrderValidation.values) ||
+                    !isActionPermitted('purchaseOrder:update') ||
+                    (isEditType && !isEditingMode)
+                  }
+                  startIcon={<SaveIcon />}
+                  loadingPosition='start'
+                  loading={createPurchaseOrderValidation.isSubmitting}
+                >
+                  Simpan perubahan
+                </LoadingButton>
+              ) : (
+                <LoadingButton
+                  type='submit'
+                  variant='contained'
+                  disabled={!isActionPermitted('purchaseOrder:store')}
+                  startIcon={<DoneIcon />}
+                  loadingPosition='start'
+                  loading={createPurchaseOrderValidation.isSubmitting}
+                >
+                  Simpan Purchase Order
+                </LoadingButton>
+              )}
             </div>
           </div>
         </form>

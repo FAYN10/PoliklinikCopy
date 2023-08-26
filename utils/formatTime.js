@@ -44,3 +44,11 @@ export const formatLabelDate = (payload) => {
   }
   return null;
 };
+
+export const formatSuratDate = (payload) => {
+  if (payload) {
+    const temp = formatGenToIso(payload);
+    return formatFns(new Date(temp), "dd MMMM yyyy", { locale: id });
+  }
+  return null;
+};
