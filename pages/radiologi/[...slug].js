@@ -76,7 +76,6 @@ const DetailRadiologi = () => {
     }
   ]
 
- 
   const riwayatPemeriksaanTableHead = [
     {
       id: "tanggal_pemeriksaan",
@@ -104,22 +103,54 @@ const DetailRadiologi = () => {
     }
 
   ]
-  const fetchPermintaanRadiologi = async () => {
-    try {
-      const response = await getListPermintaanPemeriksaanRadiologi(detailDataRadiologi.id);
-      const permintaanData = response.data;
-      setDataPermintaanRadiologi(permintaanData);
-    } catch (error) {
-      console.error("Error fetching permintaan radiologi:", error);
-    } finally {
-      setIsLoadingDataPermintaanRadiologi(false);
-    }
+  const dataPermintaanRadiologiFormatHandler = (payload) => {
+    const result = payload.map((e) => {
+      return {
+        no_pemeriksaan: e.no_pemeriksaan || "null",
+        waktu_permintaan_pemeriksaan: e.waktu_permintaan_pemeriksaan || "null",
+        nama_pemeriksaan: e.nama_pemeriksaan || "null",
+        jenis_pemeriksaan: e.jenis_pemeriksaan || "null",
+        dokter_pengirim: e.dokter_pengirim || "null",
+        unit_pengirim: e.unit_pengirim || "null",
+        diagnosis_kerja: e.diagnosis_kerja || "null",
+        catatan_permintaan: e.catatan_permintaan || "null",
+        id: e.id,
+      };
+    });
+    return result;
   };
+  const permintaanRadiologi = () => {
+    const [dataPermintaanRadiologi, setDataPermintaanRadiologi] = useState([]);
+    const [dataMetaPermintaanRadiologi, setDataMetaPermintaanRadiologi] = useState({});
+    const [dataPermintaanRadiologiPerPage, setDataPerPage] = useState(8);
+    const [isLoadingDataPermintaanRadiologi, setIsLoadingDataPermintaanRadiologi] = useState(false);
+    const [isUpdatingDataPermintaanRadiologi, setIsUpdatingDataPermintaanRadiologi] = useState(false);
+  };
+
+  const initDataPermintaanRadiologi = async () => {
+    try {
+        setIsLoadingDataPermintaanRadiologi(true);
+        const params = {
+            per_page: dataPermintaanRadiologiPerPage,
+        };
+        const response = await getListPermintaanRadiologi(params);
+        const result = dataPermintaanRadiologiFormatHandler(response.data.data);
+        setDataPermintaanRadiologi(result);
+        setDataMetaPermintaanRadiologi(response.data.meta);
+    } catch (error) {
+        console.log(error);
+    } finally {
+        setIsLoadingDataPermintaanRadiologi(false);
+    }
+};
+
 
   useEffect(() => {
     if (router.isReady) {
       (async () => {
         try {
+          initDataPermintaanRadiologi();
+          initDataPasien();
           const response = await getDetailRadiologi({ id: slug[0] });
           const data = response.data.data;
           setDetailDataRadiologi(data);
@@ -135,21 +166,7 @@ const DetailRadiologi = () => {
     }
   }, [router.isReady, slug]);
 
-  const dataPermintaanRadiologiFormatHandler = (payload) => {
-    const result = payload.map((e) => {
-      return {
-        no_pemeriksaan: e.no_pemeriksaan || "null",
-        waktu_permintaan_pemeriksaan: e.waktu_permintaan_pemeriksaan || "null",
-        nama_pemeriksaan: e.nama_pemeriksaan || "null",
-        jenis_pemeriksaan: e.jenis_pemeriksaan || "null",
-        dokter_pengirim: e.dokter_pengirim || "null",
-        unit_pengirim: e.unit_pengirim || "null",
-        diagnosis_kerja: e.diagnosis_kerja || "null",
-        catatan_permintaan: e.catatan_permintaan || "null",
-      };
-    });
-    return result;
-  };
+
 
   const dataFormatter = (data) => {
     let tempData = {
@@ -208,11 +225,15 @@ const DetailRadiologi = () => {
       label: "Permintaan Radiologi",
       content: (
         <>
-        <TableLayout
-        baseRoutePath={'${router.asPath}'}
-        tableHead={permintaanTableHead}
-        data={dataPermintaanRadiologi}>
-        </TableLayout>
+          <TableLayout
+            baseRoutePath={'${router.asPath}'}
+            tableHead={permintaanTableHead}
+            data={dataPermintaanRadiologi}
+            meta={dataMetaPermintaanRadiologi}
+            refreshData={() =>
+              updateDataPermintaanRadiologiHandler({ per_page: dataPermintaanRadiologiPerPage })
+          }>
+          </TableLayout>
         </>
       )
     },
