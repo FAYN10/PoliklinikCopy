@@ -1,6 +1,7 @@
 // utils/api/radiologi.js
 import request from "utils/request";
 
+//Antrian Radiologi
 export function getListRadiologi(params) {
   return request({
     url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/antrianradiologi`,
@@ -17,6 +18,7 @@ export function searchRadiologi(params) {
   });
 }
 
+//BMHP Radiologi
 export function getListBMHPRadiologi(params) {
   return request({
     url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/bmhpradiologi`,
@@ -65,6 +67,7 @@ export function searchBmhpRadiologi(params) {
   });
 }
 
+//Permintaan Pemeriksaan Radiologi
 export function getListPermintaanPemeriksaanRadiologi(params) {
   return request({
     url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/permintaanpemeriksaanradiologi`,
@@ -73,6 +76,7 @@ export function getListPermintaanPemeriksaanRadiologi(params) {
   });
 }
 
+//Hasil Pemeriksaan Radiologi
 export function getListHasilPemeriksaanRadiologi(params) {
   return request({
     url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/hasilpemeriksaanradiologi`,
@@ -81,6 +85,7 @@ export function getListHasilPemeriksaanRadiologi(params) {
   });
 }
 
+//Asesmen Pasien Radiologi
 export function getListAsesmenPasienRadiologi(params) {
   return request({
     url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/asesmenpasienradiologi`,
@@ -89,9 +94,19 @@ export function getListAsesmenPasienRadiologi(params) {
   });
 }
 
+//Asesmen Pemeriksaan Radiologi
 export function getListAsesmenPemeriksaanRadiologi(params) {
   return request({
     url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/asesmenpemeriksaanradiologi`,
+    method: "GET",
+    params,
+  });
+}
+
+//Prioritas Pemeriksaan Radiologi
+export function getListOptionPrioritas(params) {
+  return request({
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/prioritaspemeriksaanradiologi/list`,
     method: "GET",
     params,
   });

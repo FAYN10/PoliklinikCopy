@@ -42,6 +42,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers//LocalizationProvider";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 import { formatIsoToGen } from "utils/formatTime";
+import { getListOptionPrioritas } from "api/radiologi";
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -85,6 +86,14 @@ const TableLayoutV3 = ({
     values: {
       id: "",
       name: "",
+    },
+    touched: false,
+    errors: false,
+  });
+  const [prioritasRef, setPrioritasRef] = useState({
+    values: {
+      id: "",
+      prioritas: "",
     },
     touched: false,
     errors: false,
@@ -187,6 +196,13 @@ const TableLayoutV3 = ({
         name: "",
       },
     }));
+    setPrioritasRef((e) => ({
+      ...e,
+      values: {
+        id: "",
+        prioritas: "",
+      },
+    }));
     setDate(null);
     setFilter(filterOptions[0].value);
     setSelectedFilter([]);
@@ -218,6 +234,13 @@ const TableLayoutV3 = ({
       values: {
         id: "",
         name: "",
+      },
+    }));
+    setPrioritasRef((e) => ({
+      ...e,
+      values: {
+        id: "",
+        prioritas: "",
       },
     }));
     setDate(null);
@@ -299,6 +322,34 @@ const TableLayoutV3 = ({
       }));
     }
   };
+  const handleOnChangePrioritas = (value) => {
+    if (value) {
+      setPrioritasRef((e) => ({
+        ...e,
+        values: {
+          ...value,
+        },
+      }));
+      let tempOptions = filterOptions.filter((e) => e.value === filter);
+      let tempFilterDisplay = [...selectedFilter];
+      tempFilterDisplay = tempFilterDisplay.filter((e) => e.type !== filter);
+      tempFilterDisplay.unshift({
+        type: filter,
+        label: tempOptions[0].label,
+        value: value.PRIORITAS,
+      });
+      setSelectedFilter(tempFilterDisplay);
+      searchData(tempFilterDisplay);
+    } else {
+      setPrioritasRef((e) => ({
+        ...e,
+        values: {
+          id: "",
+          prioritas: "",
+        },
+      }));
+    }
+  };
 
   const handleChangeDate = (newValue) => {
     setDate(newValue);
@@ -361,6 +412,17 @@ const TableLayoutV3 = ({
           handlerRef={asuransiRef}
           handlerFetchData={getOptionInsurance}
           handlerOnChange={(value) => handleOnChangeAsuransi(value)}
+        />
+      ) : null}
+      {filter === "prioritas" ? (
+        <SelectAsync
+          id="prioritas"
+          labelField="Prioritas"
+          labelOptionRef="prioritas"
+          valueOptionRef="id"
+          handlerRef={prioritasRef}
+          handlerFetchData={getListOptionPrioritas}
+          handlerOnChange={(value) => handleOnChangePrioritas(value)}
         />
       ) : null}
       {filter === "date" ? (
