@@ -31,9 +31,63 @@ import EditIcon from "@material-ui/icons/Edit";
 import PrintIcon from "@mui/icons-material/Print";
 import ReactToPrint from "react-to-print";
 
-const FormExpertise = () => {
+const CheckupToPrint = forwardRef(function CheckupToPrint({ data }, ref) {
+  return (
+    <div ref={ref} className="printableContent">
+      <div className="w-full">
+        <div className="flex items-center">
+          <img src="/icons/logo.png" alt="logo-rsmp" width={80}
+            height={80} className="w-full" />
+          <div> <center><div className="font-w-700">RSU MITRA PARAMEDIKA</div>
+            <div className="font-12">
+              Jl. Raya Ngemplak, Kemasan, Widodomartani, Ngemplak, Sleman, Yogyakarta
+            </div>
+            <div className="font-12">Telp: (0274) 4461098. Email: rsumitraparamedika@yahoo.co.id</div>
+            <div className="font-12">Website: rsumitraparamedika.co.id</div></center>
+          </div>
+
+          <img src="/icons/kars.jpg" alt="logo-kars" width={80}
+            height={80} className="w-full" />
+        </div>
+      </div>
+      <hr></hr>
+      <center><div className="font-w-600">HASIL PEMERIKSAAN RADIOLOGI</div></center>
+      <div className="flex p-4" style={{ display: "flex", justifyContent: "space-between" }}>
+        <div className="column">
+          <div>No. Pemeriksaan: {data.no_pemeriksaan || "-"}</div>
+          <div>No. RM: {data.no_rm || "-"}</div>
+          <div>Nama Pasien: {data.nama_pasien || "-"}</div>
+          <div>Tanggal Lahir: {data.tanggal_lahir || "-"}</div>
+          <div>Umur: {data.umur || "-"}</div>
+        </div>
+        <div className="column">
+          <div>Tanggal Pemeriksaan: {data.tanggal_pemeriksaan || "-"}</div>
+          <div>Diagnosa: {data.diagnosis_kerja || "-"}</div>
+          <div>Nama Pemeriksaan: {data.namaPemeriksaan || "-"}</div>
+          <div>Jenis Pemeriksaan: {data.jenis_pemeriksaan || "-"}</div>
+          <div>Dokter Pengirim: {data.dokter || "-"}</div>
+          <div>Pelayanan: {data.poli || "-"}</div>
+        </div>
+      </div>
+      <div>Hasil Expertise: {data.hasil_expertise || "-"}</div>
+
+    </div>
+
+  );
+});
+
+const FormExpertise = ({ isEditType = false,
+  prePopulatedDataForm = {},
+  detailPrePopulatedData = {},
+  updatePrePopulatedData = () => "update data",
+}) => {
   const labelPrintRef = useRef();
   const checkupPrintRef = useRef();
+  const [snackbar, setSnackbar] = useState({
+    state: false,
+    type: null,
+    message: "",
+  });
   const [isCardMinimized, setIsCardMinimized] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
@@ -51,48 +105,7 @@ const FormExpertise = () => {
     }
   };
 
-  const LabelToPrint = forwardRef(function LabelToPrint({ data }, ref) {
-    return (
-      <div ref={ref} className="printableContent">
-        <div className="flex p-4" style={{ display: "flex", justifyContent: "space-between" }}>
-          <div className="column">
-            <div className="font-w-600">No. Pemeriksaan: {data.no_pemeriksaan || "-"}</div>
-            <div className="font-w-600">No. RM: {data.no_rm || "-"}</div>
-            <div className="font-w-600">Nama Pasien: {data.nama_pasien || "-"}</div>
-            <div className="font-w-600">Tanggal Lahir: {data.tanggal_lahir || "-"}</div>
-            <div className="font-w-600">Umur: {data.umur || "-"}</div>
-          </div>
-          <div className="column">
-            <div className="font-w-600">Tanggal Pemeriksaan: {data.tanggal_pemeriksaan || "-"}</div>
-            <div className="font-w-600">Diagnosa: {data.diagnosis_kerja || "-"}</div>
-            <div className="font-w-600">Nama Pemeriksaan: {data.namaPemeriksaan || "-"}</div>
-            <div className="font-w-600">Jenis Pemeriksaan: {data.jenis_pemeriksaan || "-"}</div>
-            <div className="font-w-600">Dokter Pengirim: {data.dokter || "-"}</div>
-            <div className="font-w-600">Pelayanan: {data.poli || "-"}</div>
-          </div>
-        </div>
-        <div className="font-w-600">Hasil Expertise: {data.hasil_expertise || "-"}</div>
-      </div>
 
-
-    );
-  });
-
-  const CheckupToPrint = forwardRef(function CheckupToPrint({ data }, ref) {
-    return (
-      <div ref={ref} className="printableContent">
-        <div className="m-8">
-          <div className="font-w-600">
-            <div className="font-18">RSU MITRA PARAMEDIKA</div>
-            <div style={{ maxWidth: "250px" }}>
-              Jl. Raya Ngemplak, Kemasan, Widodomartani, Ngemplak, Sleman
-            </div>
-          </div>
-          <div className="font-w-600 mt-24">{data.no_rm || "-"}</div>
-        </div>
-      </div>
-    );
-  });
 
   const initialValues = {
     images: [],
@@ -121,7 +134,7 @@ const FormExpertise = () => {
       expertise: "",
     });
     formik.setFieldValue("images", images);
-    setSelectedImageIndex(images.length - 1); 
+    setSelectedImageIndex(images.length - 1);
     setIsEditing(true);
   };
 
@@ -251,7 +264,7 @@ const FormExpertise = () => {
                           <IconButton onClick={() => setDeleteConfirmationIndex(index)}>
                             <DeleteIcon />
                           </IconButton>
-                          
+
                           {isEditing && selectedImageIndex === index ? (
                             <IconButton onClick={() => handleSaveRow(index)}>
                               <SaveIcon />
@@ -307,19 +320,34 @@ const FormExpertise = () => {
               </label>
 
               <ReactToPrint
-                      trigger={() => (
-                        <Button variant="outlined" startIcon={<PrintIcon />}>
-                          Cetak Kartu Periksa
-                        </Button>
-                      )}
-                      content={() => checkupPrintRef.current}
-                    />
-                    <CheckupToPrint
+                trigger={() => (
+                  <Button variant="outlined" startIcon={<PrintIcon />}>
+                    EXPORT HASIL
+                  </Button>
+                )}
+                content={() => checkupPrintRef.current}
+              /><CheckupToPrint
+                data={{
+                  no_pemeriksaan: detailPrePopulatedData.no_pemeriksaan,
+                  no_rm: detailPrePopulatedData.no_rm,
+                  nama_pasien: detailPrePopulatedData.nama_pasien,
+                  tanggal_lahir: detailPrePopulatedData.tanggal_lahir,
+                  umur: detailPrePopulatedData.umur,
+                  tanggal_pemeriksaan: detailPrePopulatedData.tanggal_pemeriksaan,
+                  diagnosis_kerja: detailPrePopulatedData.diagnosis_kerja,
+                  nama_pemeriksaan: detailPrePopulatedData.nama_pemeriksaan,
+                  jenis_pemeriksaan: detailPrePopulatedData.jenis_pemeriksaan,
+                  dokter_pengirim: detailPrePopulatedData.dokter_pengirim,
+                  poli: detailPrePopulatedData.poli,
+                }}
+                ref={checkupPrintRef}
+              />
+              {/* <CheckupToPrint
                       data={{
                         no_rm: detailPrePopulatedData.no_rm,
                       }}
                       ref={checkupPrintRef}
-                    />
+                    /> */}
             </div>
 
           </Collapse>
@@ -327,7 +355,6 @@ const FormExpertise = () => {
       </Grid>
 
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-        <DialogTitle>Hasil Scan</DialogTitle>
         <DialogContent>
           {selectedImage && <img src={selectedImage} alt="expertise" style={{ width: "100%" }} />}
         </DialogContent>

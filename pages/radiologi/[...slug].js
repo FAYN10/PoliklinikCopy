@@ -24,6 +24,7 @@ const DetailRadiologi = () => {
   const router = useRouter();
   const { slug } = router.query;
   const [dataPermintaanRadiologi, setDataPermintaanRadiologi] = useState([]);
+  const [dataMetaPermintaanRadiologi, setDataMetaPermintaanRadiologi] = useState({});
   const [isLoadingDataPermintaanRadiologi, setIsLoadingDataPermintaanRadiologi] = useState(true);
   const [dataPasien, setDataPasien] = useState({});
   const [detailDataPasien, setDetailDataPasien] = useState({});
