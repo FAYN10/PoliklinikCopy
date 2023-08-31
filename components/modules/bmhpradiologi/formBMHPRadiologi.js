@@ -36,7 +36,7 @@ const FormBMHPRadiologi = ({
     ? {
       nama_barang: "",
       jumlah_barang: "",
-      waktu_pemakaian: "",
+      waktu_pemakaian: null,
     }
     : prePopulatedDataForm;
 

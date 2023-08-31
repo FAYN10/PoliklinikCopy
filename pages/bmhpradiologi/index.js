@@ -26,11 +26,10 @@ const BMHPRadiologiTableHead = [
 const dataBMHPRadiologiFormatHandler = (payload) => {
     const result = payload.map((e) => {
         return {
-            namaBarang: e.nama_barang || "null",
-            jumlahBarang: e.jumlah_barang || "null",
-            waktuPemakaian: e.waktu_pemakaian || "null",
+            nama_barang: e.nama_barang || "null",
+            jumlah_barang: e.jumlah_barang || "null",
+            waktu_pemakaian: e.waktu_pemakaian || "null",
             id: e.id,
-
         };
     });
    

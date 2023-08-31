@@ -4,6 +4,7 @@ import LoaderOnLayout from "components/LoaderOnLayout";
 import FormBMHPRadiologi from "components/modules/bmhpradiologi/formBMHPRadiologi";
 import { formatGenToIso } from "utils/formatTime";
 import getStaticData from "utils/getStaticData";
+import { getDetailBMHPRadiologi } from "api/radiologi";
 
 const DetailBMHPRadiologi = () => {
   const router = useRouter();
@@ -14,9 +15,9 @@ const DetailBMHPRadiologi = () => {
 
   const dataFormatter = (data) => {
     let tempData = {
-      namaBarang: data.nama_barang || "",
-      jumlahBarang: data.jumlah_barang || "",
-      waktuPemakaian: data.waktu_pemakaian || "",
+      nama_barang: data.nama_barang || "",
+      jumlah_barang: data.jumlah_barang || "",
+      waktu_pemakaian: data.waktu_pemakaian || "",
     };
     return { ...tempData };
   };
