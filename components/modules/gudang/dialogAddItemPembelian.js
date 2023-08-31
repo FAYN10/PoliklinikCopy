@@ -58,9 +58,9 @@ const DialogAddItem = ({
         nomor_batch: null,
         stok: null,
         harga_beli_satuan: null,
-        harga_jual_satuan: null,
+        harga_jual_satuan: '',
         diskon: null,
-        margin: null,
+        margin: '',
         total_pembelian: '',
         tanggal_ed: null,
       }
@@ -78,7 +78,7 @@ const DialogAddItem = ({
       .required('Nomor batch wajib diisi'),
     stok: Yup.string()
       .matches(/^[0-9]+$/, 'Wajib angka')
-      .required('stok wajib diisi'),
+      .required('jumlah wajib diisi'),
     harga_beli_satuan: Yup.string()
       .matches(/^[0-9]+$/, 'Wajib angka')
       .required('Harga beli wajib diisi'),
@@ -141,27 +141,44 @@ const DialogAddItem = ({
 
   useEffect(() => {
     if (!isEditType) {
+      const margin = '';
+      const harga_jual_satuan = '';
       const total_pembelian = '';
       if (
+        createTableItemValidation.values.stok != null &&
         createTableItemValidation.values.harga_beli_satuan != null &&
-        createTableItemValidation.values.margin != null &&
         createTableItemValidation.values.diskon != null
       ) {
+        const stok = createTableItemValidation.values.stok;
         const harga_beli_satuan =
           createTableItemValidation.values.harga_beli_satuan;
-        const margin = createTableItemValidation.values.margin;
         const diskon = createTableItemValidation.values.diskon;
 
-        const marginProporsi = margin / 100;
-        const diskonProporsi = diskon / 100;
+        const total = stok * harga_beli_satuan;
+        console.log(`Total: ${total}`);
 
-        const totalSebelumDiskon = harga_beli_satuan * (1 + marginProporsi);
-        const totalSetelahDiskon = totalSebelumDiskon * (1 - diskonProporsi);
+        const afterDiskon = total * (diskon / 100);
 
-        total_pembelian = totalSetelahDiskon.toFixed(2);
+        const ppn = total * (11 / 100);
+        console.log(`PPN: ${ppn}`);
 
+        const total_pembelian = total - afterDiskon + ppn;
         console.log(`Total Pembelian: ${total_pembelian}`);
+
+        const margin = total_pembelian * (20 / 100);
+        console.log(`Margin: ${margin}`);
+
+        const harga_jual_satuan = margin / stok;
+        console.log(`Harga Jual Satuan: ${harga_jual_satuan}`);
+
+        total_pembelian = total_pembelian.toFixed(2);
+        console.log(`Total Pembelian Fixed: ${total_pembelian}`);
       }
+      createTableItemValidation.setFieldValue('margin', parseInt(margin));
+      createTableItemValidation.setFieldValue(
+        'harga_jual_satuan',
+        parseInt(harga_jual_satuan)
+      );
       createTableItemValidation.setFieldValue(
         'total_pembelian',
         parseInt(total_pembelian)
@@ -169,8 +186,8 @@ const DialogAddItem = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    createTableItemValidation.values.stok,
     createTableItemValidation.values.harga_beli_satuan,
-    createTableItemValidation.values.margin,
     createTableItemValidation.values.diskon,
   ]);
 
@@ -281,7 +298,7 @@ const DialogAddItem = ({
                   </Grid>
                   <Grid container spacing={1}>
                     <Grid item xs={3.5}>
-                      <Typography variant='h1 font-w-600'>stok</Typography>
+                      <Typography variant='h1 font-w-600'>Jumlah</Typography>
                     </Grid>
                     <Grid item xs={6}>
                       <div className='mb-16'>
@@ -289,7 +306,7 @@ const DialogAddItem = ({
                           fullWidth
                           id='stok'
                           name='stok'
-                          label='stok'
+                          label='Jumlah'
                           value={createTableItemValidation.values.stok}
                           onChange={createTableItemValidation.handleChange}
                           error={
@@ -404,7 +421,7 @@ const DialogAddItem = ({
                               .harga_jual_satuan &&
                             createTableItemValidation.errors.harga_jual_satuan
                           }
-                          disabled={isEditType && !isEditingMode}
+                          disabled
                         />
                       </div>
                     </Grid>
@@ -456,7 +473,7 @@ const DialogAddItem = ({
                             createTableItemValidation.touched.margin &&
                             createTableItemValidation.errors.margin
                           }
-                          disabled={isEditType && !isEditingMode}
+                          disabled
                         />
                       </div>
                     </Grid>

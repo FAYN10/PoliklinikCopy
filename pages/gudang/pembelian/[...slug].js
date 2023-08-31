@@ -94,7 +94,7 @@ const Detail = () => {
         nama_item: e.item.name || 'null',
         nomor_batch: e.nomor_batch || 'null',
         jumlah: e.stok || 'null',
-        sediaan: e.sediaan.name || 'null',
+        sediaan: e.item.sediaan.name || 'null',
         harga_beli_satuan: e.harga_beli_satuan || 'null',
         harga_jual_satuan: e.harga_jual_satuan || 'null',
         diskon: e.diskon || 'null',

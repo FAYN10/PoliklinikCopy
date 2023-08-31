@@ -33,10 +33,10 @@ const dataPembelianFormatHandler = (payload) => {
   const result = payload.map((e) => {
     return {
       nomor_faktur: e.nomor_faktur || 'null',
-      nomor_po: e.purchase_order.nomor_po || 'null',
+      nomor_po: e.nomor_po || 'null',
       tanggal_pembelian: formatReadable(e.tanggal_pembelian) || 'null',
       tanggal_jatuh_tempo: formatReadable(e.tanggal_jatuh_tempo) || 'null',
-      supplier: e.purchase_order.supplier.name || 'null',
+      supplier: e.supplier || 'null',
       id: e.id,
     };
   });

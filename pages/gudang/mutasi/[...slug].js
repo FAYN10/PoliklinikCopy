@@ -91,7 +91,7 @@ const Detail = () => {
         nomor_batch: e.nomor_batch || 'null',
         jumlah: e.jumlah || 'null',
         jumlah_pengadaan: e.jumlah_pengadaan || 'null',
-        sediaan: e.sediaan.name || 'null',
+        sediaan: e.item.sediaan.name || 'null',
         id: e,
       };
     });

@@ -8,6 +8,10 @@ import {formatReadable} from 'utils/formatTime';
 
 const PermintaanMutasiTableHead = [
   {
+    id: 'nomor_mutasi',
+    label: 'Nomor Mutasi',
+  },
+  {
     id: 'tanggal_permintaan',
     label: 'Tanggal Permintaan',
   },
@@ -24,8 +28,9 @@ const PermintaanMutasiTableHead = [
 const dataPermintaanMutasiFormatHandler = (payload) => {
   const result = payload.map((e) => {
     return {
+      nomor_mutasi: e.nomor_mutasi || 'null',
       tanggal_permintaan: formatReadable(e.tanggal_permintaan) || 'null',
-      unit: e.unit.name || 'null',
+      unit: e.unit || 'null',
       gudang: e.gudang || 'null',
       id: e.id,
     };
@@ -34,6 +39,10 @@ const dataPermintaanMutasiFormatHandler = (payload) => {
 };
 
 const RiwayatMutasiTableHead = [
+  {
+    id: 'nomor_mutasi',
+    label: 'Nomor Mutasi',
+  },
   {
     id: 'tanggal_mutasi',
     label: 'Tanggal Mutasi',
@@ -55,9 +64,10 @@ const RiwayatMutasiTableHead = [
 const dataRiwayatMutasiFormatHandler = (payload) => {
   const result = payload.map((e) => {
     return {
+      nomor_mutasi: e.nomor_mutasi || 'null',
       tanggal_mutasi: formatReadable(e.tanggal_mutasi) || 'null',
       tanggal_permintaan: formatReadable(e.tanggal_permintaan) || 'null',
-      unit: e.unit.name || 'null',
+      unit: e.unit || 'null',
       gudang: e.gudang || 'null',
       id: e.id,
     };
@@ -83,6 +93,7 @@ const Mutasi = () => {
     useState(false);
   const [isUpdatingDataPermintaanMutasi, setIsUpdatingDataPermintaanMutasi] =
     useState(false);
+
   // Riwayat Mutasi --general state
   const [dataRiwayatMutasi, setDataRiwayatMutasi] = useState([]);
   const [dataMetaRiwayatMutasi, setDataMetaRiwayatMutasi] = useState({});
@@ -261,6 +272,7 @@ const Mutasi = () => {
       setIsUpdatingDataRiwayatMutasi(true);
       const response = await getMutasi({
         search: searchParams,
+        trashed: true,
         per_page: dataRiwayatMutasiPerPage,
       });
       if (response.data.data.length !== 0) {
@@ -386,18 +398,21 @@ const Mutasi = () => {
 
                 setDataPerPage(e.target.value);
                 updateDataRiwayatMutasiHandler({
+                  trashed: true,
                   per_page: e.target.value,
                   search: searchParams,
                 });
               }}
               updateDataNavigate={(payload) =>
                 updateDataRiwayatMutasiHandler({
+                  trashed: true,
                   per_page: dataRiwayatMutasiPerPage,
                   cursor: payload,
                 })
               }
               refreshData={() =>
                 updateDataRiwayatMutasiHandler({
+                  trashed: true,
                   per_page: dataRiwayatMutasiPerPage,
                 })
               }

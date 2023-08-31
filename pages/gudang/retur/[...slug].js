@@ -74,7 +74,7 @@ const Detail = () => {
         nama_item: e.gudang.item.name || 'null',
         jumlah_stok: e.gudang.stok || 'null',
         jumlah_retur: e.jumlah || 'null',
-        sediaan: e.gudang.sediaan.name || 'null',
+        sediaan: e.gudang.item.sediaan.name || 'null',
         alasan: e.alasan || 'null',
         id: e,
       };
@@ -140,7 +140,7 @@ const Detail = () => {
                       <Grid item md={7} sm={12}>
                         <div>
                           {' : '}
-                          {dataRetur?.nomor_faktur}
+                          {dataRetur?.receive.nomor_faktur}
                         </div>
                       </Grid>
                       <Grid item xs={4}>
@@ -199,13 +199,6 @@ const Detail = () => {
                   onClick={() => router.push('/gudang/retur')}
                 >
                   Kembali
-                </Button>
-                <Button
-                  variant='contained'
-                  // disabled={!isPermitted('store')}
-                  onClick={() => router.push(`/gudang/retur/create/create`)}
-                >
-                  Klik
                 </Button>
               </div>
             </Card>

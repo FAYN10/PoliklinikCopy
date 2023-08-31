@@ -6,50 +6,150 @@ import LoaderOnLayout from 'components/LoaderOnLayout';
 import Snackbar from 'components/SnackbarMui';
 import {formatReadable} from 'utils/formatTime';
 
-const LaporanTableHead = [
+const LaporanStokOpnameTableHead = [
   {
-    id: 'kode_item',
-    label: 'Kode Item',
+    id: 'no',
+    label: 'No',
   },
   {
-    id: 'nama_item',
-    label: 'Nama Item',
+    id: 'kategori',
+    label: 'Kategori',
   },
   {
-    id: 'nomor_batch',
-    label: 'Nomor Batch',
+    id: 'total_stok',
+    label: 'Total Stok',
   },
   {
-    id: 'gudang',
-    label: 'Gudang',
+    id: 'total_pembelian',
+    label: 'Total Pembelian',
+  },
+];
+
+const dataLaporanStokOpnameFormatHandler = (payload) => {
+  let index = 0;
+  const result = payload.map((e) => {
+    return {
+      no: (index += 1),
+      kategori: e.kategori || 'null',
+      total_stok: e.total_stok || 'null',
+      total_pembelian: e.total_pembelian || 'null',
+      id: e.id,
+    };
+  });
+  return result;
+};
+
+const LaporanPembelianTableHead = [
+  {
+    id: 'no',
+    label: 'No',
   },
   {
-    id: 'stok',
-    label: 'Stok',
+    id: 'supplier',
+    label: 'Supplier',
   },
   {
-    id: 'sediaan',
-    label: 'Sediaan',
+    id: 'nomor_faktur',
+    label: 'Nomor Faktur',
+  },
+  {
+    id: 'tanggal_pembelian',
+    label: 'Tanggal Pembelian',
+  },
+  {
+    id: 'tanggal_jatuh_tempo',
+    label: 'Jatuh Tempo Pembayaran',
   },
   {
     id: 'harga_beli_satuan',
     label: 'Harga Beli',
   },
   {
-    id: 'harga_jual_satuan',
-    label: 'Harga Jual',
-  },
-  {
     id: 'diskon',
     label: 'Diskon',
   },
   {
-    id: 'margin',
-    label: 'Margin',
+    id: 'ppn',
+    label: 'PPN',
   },
   {
     id: 'total_pembelian',
     label: 'Total Pembelian',
+  },
+];
+
+const dataLaporanPembelianFormatHandler = (payload) => {
+  let index = 0;
+  const result = payload.map((e) => {
+    return {
+      no: (index += 1),
+      supplier: e.supplier || 'null',
+      nomor_faktur: e.nomor_faktur || 'null',
+      tanggal_pembelian: formatReadable(e.tanggal_pembelian) || 'null',
+      tanggal_jatuh_tempo: formatReadable(e.tanggal_jatuh_tempo) || 'null',
+      harga_beli_satuan: e.harga_beli_satuan || 'null',
+      diskon: e.diskon || 'null',
+      ppn: e.ppn || 'null',
+      total_pembelian: e.total_pembelian || 'null',
+      id: e.id,
+    };
+  });
+  return result;
+};
+
+const LaporanPembelianKategoriTableHead = [
+  {
+    id: 'no',
+    label: 'No',
+  },
+  {
+    id: 'kategori',
+    label: 'Kategori',
+  },
+  {
+    id: 'total_stok',
+    label: 'Total Stok',
+  },
+  {
+    id: 'total_pembelian',
+    label: 'Total Pembelian',
+  },
+];
+
+const dataLaporanPembelianKategoriFormatHandler = (payload) => {
+  let index = 0;
+  const result = payload.map((e) => {
+    return {
+      no: (index += 1),
+      kategori: e.kategori || 'null',
+      total_stok: e.total_stok || 'null',
+      total_pembelian: e.total_pembelian || 'null',
+      id: e.id,
+    };
+  });
+  return result;
+};
+
+const LaporanStokEdTableHead = [
+  {
+    id: 'no',
+    label: 'No',
+  },
+  {
+    id: 'nama_item',
+    label: 'Nama Item',
+  },
+  {
+    id: 'harga_beli',
+    label: 'Harga Beli',
+  },
+  {
+    id: 'jumlah',
+    label: 'Jumlah',
+  },
+  {
+    id: 'total',
+    label: 'Total',
   },
   {
     id: 'tanggal_ed',
@@ -57,20 +157,48 @@ const LaporanTableHead = [
   },
 ];
 
-const dataLaporanFormatHandler = (payload) => {
+const dataLaporanStokEdFormatHandler = (payload) => {
+  let index = 0;
   const result = payload.map((e) => {
     return {
-      kode_item: e.item.kode || 'null',
-      nama_item: e.item.name || 'null',
-      nomor_batch: e.nomor_batch || 'null',
-      gudang: e.gudang || 'null',
+      no: (index += 1),
+      nama_item: e.item || 'null',
+      harga_beli: e.harga_beli || 'null',
+      jumlah: e.jumlah || 'null',
+      total: e.total || 'null',
+      tanggal_ed: formatReadable(e.tanggal_ed) || 'null',
+      id: e.id,
+    };
+  });
+  return result;
+};
+
+const LaporanStokMatiTableHead = [
+  {
+    id: 'no',
+    label: 'No',
+  },
+  {
+    id: 'nama_item',
+    label: 'Nama Item',
+  },
+  {
+    id: 'stok',
+    label: 'Jumlah',
+  },
+  {
+    id: 'tanggal_ed',
+    label: 'Expired Date',
+  },
+];
+
+const dataLaporanStokMatiFormatHandler = (payload) => {
+  let index = 0;
+  const result = payload.map((e) => {
+    return {
+      no: (index += 1),
+      nama_item: e.item || 'null',
       stok: e.stok || 'null',
-      sediaan: e.sediaan.name || 'null',
-      harga_beli_satuan: e.harga_beli_satuan || 'null',
-      harga_jual_satuan: e.harga_jual_satuan || 'null',
-      diskon: e.diskon || 'null',
-      margin: e.margin || 'null',
-      total_pembelian: e.total_pembelian || 'null',
       tanggal_ed: formatReadable(e.tanggal_ed) || 'null',
       id: e.id,
     };
@@ -85,39 +213,95 @@ const Laporan = () => {
     type: null,
     message: '',
   });
+  const [activeContent, setActiveContent] = useState(1);
 
-  // Laporan --general state
-  const [dataLaporan, setDataLaporan] = useState([]);
-  const [dataMetaLaporan, setDataMetaLaporan] = useState({});
-  const [dataLaporanPerPage, setDataPerPage] = useState(8);
-  const [isLoadingDataLaporan, setIsLoadingDataLaporan] = useState(false);
-  const [isUpdatingDataLaporan, setIsUpdatingDataLaporan] = useState(false);
+  // Laporan Stok Opname --general state
+  const [dataLaporanStokOpname, setDataLaporanStokOpname] = useState([]);
+  const [dataMetaLaporanStokOpname, setDataMetaLaporanStokOpname] = useState(
+    {}
+  );
+  const [dataLaporanStokOpnamePerPage, setDataLaporanStokOpnamePerPage] =
+    useState(8);
+  const [isLoadingDataLaporanStokOpname, setIsLoadingDataLaporanStokOpname] =
+    useState(false);
+  const [isUpdatingDataLaporanStokOpname, setIsUpdatingDataLaporanStokOpname] =
+    useState(false);
 
-  // Laporan --general handler
-  const initDataLaporan = async () => {
+  // Laporan Pembelian --general state
+  const [dataLaporanPembelian, setDataLaporanPembelian] = useState([]);
+  const [dataMetaLaporanPembelian, setDataMetaLaporanPembelian] = useState({});
+  const [dataLaporanPembelianPerPage, setDataLaporanPembelianPerPage] =
+    useState(8);
+  const [isLoadingDataLaporanPembelian, setIsLoadingDataLaporanPembelian] =
+    useState(false);
+  const [isUpdatingDataLaporanPembelian, setIsUpdatingDataLaporanPembelian] =
+    useState(false);
+
+  // Laporan Pembelian --general state
+  const [dataLaporanPembelianKategori, setDataLaporanPembelianKategori] =
+    useState([]);
+  const [
+    dataMetaLaporanPembelianKategori,
+    setDataMetaLaporanPembelianKategori,
+  ] = useState({});
+  const [
+    dataLaporanPembelianKategoriPerPage,
+    setDataLaporanPembelianKategoriPerPage,
+  ] = useState(8);
+  const [
+    isLoadingDataLaporanPembelianKategori,
+    setIsLoadingDataLaporanPembelianKategori,
+  ] = useState(false);
+  const [
+    isUpdatingDataLaporanPembelianKategori,
+    setIsUpdatingDataLaporanPembelianKategori,
+  ] = useState(false);
+
+  // Laporan Stok ED --general state
+  const [dataLaporanStokEd, setDataLaporanStokEd] = useState([]);
+  const [dataMetaLaporanStokEd, setDataMetaLaporanStokEd] = useState({});
+  const [dataLaporanStokEdPerPage, setDataLaporanStokEdPerPage] = useState(8);
+  const [isLoadingDataLaporanStokEd, setIsLoadingDataLaporanStokEd] =
+    useState(false);
+  const [isUpdatingDataLaporanStokEd, setIsUpdatingDataLaporanStokEd] =
+    useState(false);
+
+  // Laporan Stok Mati --general state
+  const [dataLaporanStokMati, setDataLaporanStokMati] = useState([]);
+  const [dataMetaLaporanStokMati, setDataMetaLaporanStokMati] = useState({});
+  const [dataLaporanStokMatiPerPage, setDataLaporanStokMatiPerPage] =
+    useState(8);
+  const [isLoadingDataLaporanStokMati, setIsLoadingDataLaporanStokMati] =
+    useState(false);
+  const [isUpdatingDataLaporanStokMati, setIsUpdatingDataLaporanStokMati] =
+    useState(false);
+
+  // Laporan Stok Opname --general handler
+  const initDataLaporanStokOpname = async () => {
     try {
-      setIsLoadingDataLaporan(true);
+      setIsLoadingDataLaporanStokOpname(true);
       const params = {
-        per_page: dataLaporanPerPage,
+        laporan: 'opname',
+        per_page: dataLaporanStokOpnamePerPage,
       };
       const response = await getGudang(params);
-      const result = dataLaporanFormatHandler(response.data.data);
-      setDataLaporan(result);
-      setDataMetaLaporan(response.data.meta);
+      const result = dataLaporanStokOpnameFormatHandler(response.data.data);
+      setDataLaporanStokOpname(result);
+      setDataMetaLaporanStokOpname(response.data.meta);
     } catch (error) {
       console.log(error);
     } finally {
-      setIsLoadingDataLaporan(false);
+      setIsLoadingDataLaporanStokOpname(false);
     }
   };
 
-  const updateDataLaporanHandler = async (payload) => {
+  const updateDataLaporanStokOpnameHandler = async (payload) => {
     try {
-      setIsUpdatingDataLaporan(true);
+      setIsUpdatingDataLaporanStokOpname(true);
       const response = await getGudang(payload);
-      const result = dataLaporanFormatHandler(response.data.data);
-      setDataLaporan(result);
-      setDataMetaLaporan(response.data.meta);
+      const result = dataLaporanStokOpnameFormatHandler(response.data.data);
+      setDataLaporanStokOpname(result);
+      setDataMetaLaporanStokOpname(response.data.meta);
     } catch (error) {
       console.log(error);
       setSnackbarState({
@@ -126,123 +310,642 @@ const Laporan = () => {
         message: error.message,
       });
     } finally {
-      setIsUpdatingDataLaporan(false);
+      setIsUpdatingDataLaporanStokOpname(false);
     }
   };
 
-  const deleteDataLaporanHandler = async (payload) => {
-    try {
-      setIsUpdatingDataLaporan(true);
-      const response = await deleteLaporan({id: payload});
-      setSnackbarState({
-        state: true,
-        type: 'success',
-        message: response.data.message,
-      });
-      updateDataLaporanHandler({per_page: dataLaporanPerPage});
-    } catch (error) {
-      setSnackbarState({
-        state: true,
-        type: 'error',
-        message: error.message,
-      });
-    } finally {
-      setIsUpdatingDataLaporan(false);
-    }
-  };
-
-  const searchDataLaporanHandler = async (payload) => {
+  const searchDataLaporanStokOpnameHandler = async (payload) => {
     const searchParams = payload.reduce((obj, e) => {
       obj[e.type] = e.value;
       return obj;
     }, {});
 
     try {
-      setIsUpdatingDataLaporan(true);
+      setIsUpdatingDataLaporanStokOpname(true);
       const response = await getGudang({
         search: searchParams,
-        per_page: dataLaporanPerPage,
+        laporan: 'opname',
+        per_page: dataLaporanStokOpnamePerPage,
       });
       if (response.data.data.length !== 0) {
-        const result = dataLaporanFormatHandler(response.data.data);
-        setDataLaporan(result);
-        setDataMetaLaporan(response.data.meta);
+        const result = dataLaporanStokOpnameFormatHandler(response.data.data);
+        setDataLaporanStokOpname(result);
+        setDataMetaLaporanStokOpname(response.data.meta);
       } else {
         setSnackbarState({
           state: true,
-          type: "warning",
+          type: 'warning',
           message: `${payload} tidak ditemukan`,
         });
         const response = await getGudang({
-          per_page: dataLaporanPerPage,
+          per_page: dataLaporanStokOpnamePerPage,
         });
-        const result = dataLaporanFormatHandler(response.data.data);
-        setDataLaporan(result);
-        setDataMetaLaporan(response.data.meta);
+        const result = dataLaporanStokOpnameFormatHandler(response.data.data);
+        setDataLaporanStokOpname(result);
+        setDataMetaLaporanStokOpname(response.data.meta);
       }
     } catch (error) {
       setSnackbarState({
         state: true,
-        type: "error",
+        type: 'error',
         message: error.message,
       });
     } finally {
-      setIsUpdatingDataLaporan(false);
+      setIsUpdatingDataLaporanStokOpname(false);
+    }
+  };
+
+  // Laporan Pembelian --general handler
+  const initDataLaporanPembelian = async () => {
+    try {
+      setIsLoadingDataLaporanPembelian(true);
+      const params = {
+        laporan: 'pembelian',
+        per_page: dataLaporanPembelianPerPage,
+      };
+      const response = await getGudang(params);
+      const result = dataLaporanPembelianFormatHandler(response.data.data);
+      setDataLaporanPembelian(result);
+      setDataMetaLaporanPembelian(response.data.meta);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoadingDataLaporanPembelian(false);
+    }
+  };
+
+  const updateDataLaporanPembelianHandler = async (payload) => {
+    try {
+      setIsUpdatingDataLaporanPembelian(true);
+      const response = await getGudang(payload);
+      const result = dataLaporanPembelianFormatHandler(response.data.data);
+      setDataLaporanPembelian(result);
+      setDataMetaLaporanPembelian(response.data.meta);
+    } catch (error) {
+      console.log(error);
+      setSnackbarState({
+        state: true,
+        type: 'error',
+        message: error.message,
+      });
+    } finally {
+      setIsUpdatingDataLaporanPembelian(false);
+    }
+  };
+
+  const searchDataLaporanPembelianHandler = async (payload) => {
+    const searchParams = payload.reduce((obj, e) => {
+      obj[e.type] = e.value;
+      return obj;
+    }, {});
+
+    try {
+      setIsUpdatingDataLaporanPembelian(true);
+      const response = await getGudang({
+        search: searchParams,
+        laporan: 'pembelian',
+        per_page: dataLaporanPembelianPerPage,
+      });
+      if (response.data.data.length !== 0) {
+        const result = dataLaporanPembelianFormatHandler(response.data.data);
+        setDataLaporanPembelian(result);
+        setDataMetaLaporanPembelian(response.data.meta);
+      } else {
+        setSnackbarState({
+          state: true,
+          type: 'warning',
+          message: `${payload} tidak ditemukan`,
+        });
+        const response = await getGudang({
+          per_page: dataLaporanPembelianPerPage,
+        });
+        const result = dataLaporanPembelianFormatHandler(response.data.data);
+        setDataLaporanPembelian(result);
+        setDataMetaLaporanPembelian(response.data.meta);
+      }
+    } catch (error) {
+      setSnackbarState({
+        state: true,
+        type: 'error',
+        message: error.message,
+      });
+    } finally {
+      setIsUpdatingDataLaporanPembelian(false);
+    }
+  };
+
+  // Laporan Pembelian Kategori --general handler
+  const initDataLaporanPembelianKategori = async () => {
+    try {
+      setIsLoadingDataLaporanPembelianKategori(true);
+      const params = {
+        laporan: 'pembelian_kategori',
+        per_page: dataLaporanPembelianPerPage,
+      };
+      const response = await getGudang(params);
+      const result = dataLaporanPembelianKategoriFormatHandler(
+        response.data.data
+      );
+      setDataLaporanPembelianKategori(result);
+      setDataMetaLaporanPembelianKategori(response.data.meta);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoadingDataLaporanPembelianKategori(false);
+    }
+  };
+
+  const updateDataLaporanPembelianKategoriHandler = async (payload) => {
+    try {
+      setIsUpdatingDataLaporanPembelianKategori(true);
+      const response = await getGudang(payload);
+      const result = dataLaporanPembelianKategoriFormatHandler(
+        response.data.data
+      );
+      setDataLaporanPembelianKategori(result);
+      setDataMetaLaporanPembelianKategori(response.data.meta);
+    } catch (error) {
+      console.log(error);
+      setSnackbarState({
+        state: true,
+        type: 'error',
+        message: error.message,
+      });
+    } finally {
+      setIsUpdatingDataLaporanPembelianKategori(false);
+    }
+  };
+
+  const searchDataLaporanPembelianKategoriHandler = async (payload) => {
+    const searchParams = payload.reduce((obj, e) => {
+      obj[e.type] = e.value;
+      return obj;
+    }, {});
+
+    try {
+      setIsUpdatingDataLaporanPembelian(true);
+      const response = await getGudang({
+        search: searchParams,
+        laporan: 'pembelian_kategori',
+        per_page: dataLaporanPembelianPerPage,
+      });
+      if (response.data.data.length !== 0) {
+        const result = dataLaporanPembelianKategoriFormatHandler(
+          response.data.data
+        );
+        setDataLaporanPembelianKategori(result);
+        setDataMetaLaporanPembelianKategori(response.data.meta);
+      } else {
+        setSnackbarState({
+          state: true,
+          type: 'warning',
+          message: `${payload} tidak ditemukan`,
+        });
+        const response = await getGudang({
+          per_page: dataLaporanPembelianPerPage,
+        });
+        const result = dataLaporanPembelianKategoriFormatHandler(
+          response.data.data
+        );
+        setDataLaporanPembelianKategori(result);
+        setDataMetaLaporanPembelianKategori(response.data.meta);
+      }
+    } catch (error) {
+      setSnackbarState({
+        state: true,
+        type: 'error',
+        message: error.message,
+      });
+    } finally {
+      setIsUpdatingDataLaporanPembelianKategori(false);
+    }
+  };
+
+  // Laporan Stok ED --general handler
+  const initDataLaporanStokEd = async () => {
+    try {
+      setIsLoadingDataLaporanStokEd(true);
+      const params = {
+        laporan: 'expired',
+        per_page: dataLaporanStokEdPerPage,
+      };
+      const response = await getGudang(params);
+      const result = dataLaporanStokEdFormatHandler(response.data.data);
+      setDataLaporanStokEd(result);
+      setDataMetaLaporanStokEd(response.data.meta);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoadingDataLaporanStokEd(false);
+    }
+  };
+
+  const updateDataLaporanStokEdHandler = async (payload) => {
+    try {
+      setIsUpdatingDataLaporanStokEd(true);
+      const response = await getGudang(payload);
+      const result = dataLaporanStokEdFormatHandler(response.data.data);
+      setDataLaporanStokEd(result);
+      setDataMetaLaporanStokEd(response.data.meta);
+    } catch (error) {
+      console.log(error);
+      setSnackbarState({
+        state: true,
+        type: 'error',
+        message: error.message,
+      });
+    } finally {
+      setIsUpdatingDataLaporanStokEd(false);
+    }
+  };
+
+  const searchDataLaporanStokEdHandler = async (payload) => {
+    const searchParams = payload.reduce((obj, e) => {
+      obj[e.type] = e.value;
+      return obj;
+    }, {});
+
+    try {
+      setIsUpdatingDataLaporanStokEd(true);
+      const response = await getGudang({
+        search: searchParams,
+        laporan: 'expired',
+        per_page: dataLaporanStokEdPerPage,
+      });
+      if (response.data.data.length !== 0) {
+        const result = dataLaporanStokEdFormatHandler(response.data.data);
+        setDataLaporanStokEd(result);
+        setDataMetaLaporanStokEd(response.data.meta);
+      } else {
+        setSnackbarState({
+          state: true,
+          type: 'warning',
+          message: `${payload} tidak ditemukan`,
+        });
+        const response = await getGudang({
+          per_page: dataLaporanStokEdPerPage,
+        });
+        const result = dataLaporanStokEdFormatHandler(response.data.data);
+        setDataLaporanStokEd(result);
+        setDataMetaLaporanStokEd(response.data.meta);
+      }
+    } catch (error) {
+      setSnackbarState({
+        state: true,
+        type: 'error',
+        message: error.message,
+      });
+    } finally {
+      setIsUpdatingDataLaporanStokEd(false);
+    }
+  };
+
+  // Laporan Stok Mati --general handler
+  const initDataLaporanStokMati = async () => {
+    try {
+      setIsLoadingDataLaporanStokMati(true);
+      const params = {
+        laporan: 'mati',
+        per_page: dataLaporanStokMatiPerPage,
+      };
+      const response = await getGudang(params);
+      const result = dataLaporanStokMatiFormatHandler(response.data.data);
+      setDataLaporanStokMati(result);
+      setDataMetaLaporanStokMati(response.data.meta);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoadingDataLaporanStokMati(false);
+    }
+  };
+
+  const updateDataLaporanStokMatiHandler = async (payload) => {
+    try {
+      setIsUpdatingDataLaporanStokMati(true);
+      const response = await getGudang(payload);
+      const result = dataLaporanStokMatiFormatHandler(response.data.data);
+      setDataLaporanStokMati(result);
+      setDataMetaLaporanStokMati(response.data.meta);
+    } catch (error) {
+      console.log(error);
+      setSnackbarState({
+        state: true,
+        type: 'error',
+        message: error.message,
+      });
+    } finally {
+      setIsUpdatingDataLaporanStokMati(false);
+    }
+  };
+
+  const searchDataLaporanStokMatiHandler = async (payload) => {
+    const searchParams = payload.reduce((obj, e) => {
+      obj[e.type] = e.value;
+      return obj;
+    }, {});
+
+    try {
+      setIsUpdatingDataLaporanStokMati(true);
+      const response = await getGudang({
+        search: searchParams,
+        laporan: 'mati',
+        per_page: dataLaporanStokMatiPerPage,
+      });
+      if (response.data.data.length !== 0) {
+        const result = dataLaporanStokMatiFormatHandler(response.data.data);
+        setDataLaporanStokMati(result);
+        setDataMetaLaporanStokMati(response.data.meta);
+      } else {
+        setSnackbarState({
+          state: true,
+          type: 'warning',
+          message: `${payload} tidak ditemukan`,
+        });
+        const response = await getGudang({
+          per_page: dataLaporanStokMatiPerPage,
+        });
+        const result = dataLaporanStokMatiFormatHandler(response.data.data);
+        setDataLaporanStokMati(result);
+        setDataMetaLaporanStokMati(response.data.meta);
+      }
+    } catch (error) {
+      setSnackbarState({
+        state: true,
+        type: 'error',
+        message: error.message,
+      });
+    } finally {
+      setIsUpdatingDataLaporanStokMati(false);
     }
   };
 
   useEffect(() => {
-    initDataLaporan();
+    if (Object.keys(router.query).length !== 0) {
+      setActiveContent(parseInt(router.query.active_content));
+    }
+  }, [router]);
+
+  useEffect(() => {
+    initDataLaporanStokOpname();
+    initDataLaporanPembelian();
+    initDataLaporanStokEd();
+    initDataLaporanStokMati();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <>
-      {isLoadingDataLaporan ? (
+      {isLoadingDataLaporanStokOpname ||
+      isLoadingDataLaporanPembelian ||
+      isLoadingDataLaporanPembelianKategori ||
+      isLoadingDataLaporanStokEd ||
+      isLoadingDataLaporanStokMati ? (
         <LoaderOnLayout />
       ) : (
         <>
-          <TableLayoutGudang
-            baseRoutePath={`${router.asPath}`}
-            title='Laporan'
-            isBtnAdd={false}
-            tableHead={LaporanTableHead}
-            data={dataLaporan}
-            meta={dataMetaLaporan}
-            dataPerPage={dataLaporanPerPage}
-            isUpdatingData={isUpdatingDataLaporan}
-            filterOptions={[
-              {label: 'Nama Item', value: 'item'},
-              {label: 'Gudang', value: 'gudang'},
-              {label: 'Nomor Batch', value: 'nomor_batch'},
-              {label: 'Tanggal ED', value: 'date'},
-            ]}
-            updateDataPerPage={(e, filter) => {
-              const searchParams = filter.reduce((obj, e) => {
-                obj[e.type] = e.value;
-                return obj;
-              }, {});
+          <div className='tab-list flex mb-24'>
+            <div
+              className={activeContent === 1 ? 'pointer active' : 'pointer'}
+              onClick={() => setActiveContent(1)}
+            >
+              Laporan Stok Opname
+            </div>
+            <div
+              className={activeContent === 2 ? 'pointer active' : 'pointer'}
+              onClick={() => setActiveContent(2)}
+            >
+              Laporan Pembelian
+            </div>
+            <div
+              className={activeContent === 3 ? 'pointer active' : 'pointer'}
+              onClick={() => setActiveContent(3)}
+            >
+              Laporan Pembelian Kategori
+            </div>
+            <div
+              className={activeContent === 4 ? 'pointer active' : 'pointer'}
+              onClick={() => setActiveContent(4)}
+            >
+              Laporan Stok ED
+            </div>
+            <div
+              className={activeContent === 5 ? 'pointer active' : 'pointer'}
+              onClick={() => setActiveContent(5)}
+            >
+              Laporan Stok Mati
+            </div>
+          </div>
+          {activeContent === 1 && (
+            <TableLayoutGudang
+              baseRoutePath={`${router.asPath}`}
+              title=''
+              isBtnAdd={false}
+              tableHead={LaporanStokOpnameTableHead}
+              data={dataLaporanStokOpname}
+              meta={dataMetaLaporanStokOpname}
+              dataPerPage={dataLaporanStokOpnamePerPage}
+              isUpdatingData={isUpdatingDataLaporanStokOpname}
+              filterOptions={[{label: 'Nama Item', value: 'item'}]}
+              updateDataPerPage={(e, filter) => {
+                const searchParams = filter.reduce((obj, e) => {
+                  obj[e.type] = e.value;
+                  return obj;
+                }, {});
 
-              setDataPerPage(e.target.value);
-              updateDataLaporanHandler({
-                per_page: e.target.value,
-                search: searchParams,
-              });
-            }}
-            updateDataNavigate={(payload) =>
-              updateDataLaporanHandler({
-                per_page: dataLaporanPerPage,
-                cursor: payload,
-              })
-            }
-            refreshData={() =>
-              updateDataLaporanHandler({
-                per_page: dataLaporanPerPage,
-              })
-            }
-            deleteData={deleteDataLaporanHandler}
-            searchData={searchDataLaporanHandler}
-          />
+                setDataPerPage(e.target.value);
+                updateDataLaporanStokOpnameHandler({
+                  laporan: 'opname',
+                  per_page: e.target.value,
+                  search: searchParams,
+                });
+              }}
+              updateDataNavigate={(payload) =>
+                updateDataLaporanStokOpnameHandler({
+                  laporan: 'opname',
+                  per_page: dataLaporanStokOpnamePerPage,
+                  cursor: payload,
+                })
+              }
+              refreshData={() =>
+                updateDataLaporanStokOpnameHandler({
+                  laporan: 'opname',
+                  per_page: dataLaporanStokOpnamePerPage,
+                })
+              }
+              searchData={searchDataLaporanStokOpnameHandler}
+            />
+          )}
+          {activeContent === 2 && (
+            <TableLayoutGudang
+              baseRoutePath={`${router.asPath}`}
+              title=''
+              isBtnAdd={false}
+              tableHead={LaporanPembelianTableHead}
+              data={dataLaporanPembelian}
+              meta={dataMetaLaporanPembelian}
+              dataPerPage={dataLaporanPembelianPerPage}
+              isUpdatingData={isUpdatingDataLaporanPembelian}
+              filterOptions={[
+                {label: 'Supplier', value: 'supplier'},
+                {label: 'Nomor Faktur', value: 'nomor_faktur'},
+                {label: 'Tanggal Pembelian', value: 'date'},
+              ]}
+              updateDataPerPage={(e, filter) => {
+                const searchParams = filter.reduce((obj, e) => {
+                  obj[e.type] = e.value;
+                  return obj;
+                }, {});
+
+                setDataPerPage(e.target.value);
+                updateDataLaporanPembelianHandler({
+                  laporan: 'pembelian',
+                  per_page: e.target.value,
+                  search: searchParams,
+                });
+              }}
+              updateDataNavigate={(payload) =>
+                updateDataLaporanPembelianHandler({
+                  laporan: 'pembelian',
+                  per_page: dataLaporanPembelianPerPage,
+                  cursor: payload,
+                })
+              }
+              refreshData={() =>
+                updateDataLaporanPembelianHandler({
+                  laporan: 'pembelian',
+                  per_page: dataLaporanPembelianPerPage,
+                })
+              }
+              searchData={searchDataLaporanPembelianHandler}
+            />
+          )}
+          {activeContent === 3 && (
+            <TableLayoutGudang
+              baseRoutePath={`${router.asPath}`}
+              title=''
+              isBtnAdd={false}
+              tableHead={LaporanPembelianKategoriTableHead}
+              data={dataLaporanPembelianKategori}
+              meta={dataMetaLaporanPembelianKategori}
+              dataPerPage={dataLaporanPembelianKategoriPerPage}
+              isUpdatingData={isUpdatingDataLaporanPembelianKategori}
+              filterOptions={[{label: 'Tahun', value: 'date'}]}
+              updateDataPerPage={(e, filter) => {
+                const searchParams = filter.reduce((obj, e) => {
+                  obj[e.type] = e.value;
+                  return obj;
+                }, {});
+
+                setDataPerPage(e.target.value);
+                updateDataLaporanPembelianKategoriHandler({
+                  laporan: 'pembelian_kategori',
+                  per_page: e.target.value,
+                  search: searchParams,
+                });
+              }}
+              updateDataNavigate={(payload) =>
+                updateDataLaporanPembelianKategoriHandler({
+                  laporan: 'pembelian_kategori',
+                  per_page: dataLaporanPembelianKategoriPerPage,
+                  cursor: payload,
+                })
+              }
+              refreshData={() =>
+                updateDataLaporanPembelianKategoriHandler({
+                  laporan: 'pembelian_kategori',
+                  per_page: dataLaporanPembelianKategoriPerPage,
+                })
+              }
+              searchData={searchDataLaporanPembelianKategoriHandler}
+            />
+          )}
+          {activeContent === 4 && (
+            <TableLayoutGudang
+              baseRoutePath={`${router.asPath}`}
+              title=''
+              isBtnAdd={false}
+              tableHead={LaporanStokEdTableHead}
+              data={dataLaporanStokEd}
+              meta={dataMetaLaporanStokEd}
+              dataPerPage={dataLaporanStokEdPerPage}
+              isUpdatingData={isUpdatingDataLaporanStokEd}
+              filterOptions={[
+                {label: 'Nama Item', value: 'item'},
+                {label: 'Tanggal ED', value: 'date'},
+                // {label: 'Gudang', value: 'gudang'},
+              ]}
+              updateDataPerPage={(e, filter) => {
+                const searchParams = filter.reduce((obj, e) => {
+                  obj[e.type] = e.value;
+                  return obj;
+                }, {});
+
+                setDataPerPage(e.target.value);
+                updateDataLaporanStokEdHandler({
+                  laporan: 'expired',
+                  per_page: e.target.value,
+                  search: searchParams,
+                });
+              }}
+              updateDataNavigate={(payload) =>
+                updateDataLaporanStokEdHandler({
+                  laporan: 'expired',
+                  per_page: dataLaporanStokEdPerPage,
+                  cursor: payload,
+                })
+              }
+              refreshData={() =>
+                updateDataLaporanStokEdHandler({
+                  laporan: 'expired',
+                  per_page: dataLaporanStokEdPerPage,
+                })
+              }
+              searchData={searchDataLaporanStokEdHandler}
+            />
+          )}
+          {activeContent === 5 && (
+            <TableLayoutGudang
+              baseRoutePath={`${router.asPath}`}
+              title=''
+              isBtnAdd={false}
+              tableHead={LaporanStokMatiTableHead}
+              data={dataLaporanStokMati}
+              meta={dataMetaLaporanStokMati}
+              dataPerPage={dataLaporanStokMatiPerPage}
+              isUpdatingData={isUpdatingDataLaporanStokMati}
+              filterOptions={[
+                {label: 'Nama Item', value: 'item'},
+                // {label: 'Gudang', value: 'gudang'},
+              ]}
+              updateDataPerPage={(e, filter) => {
+                const searchParams = filter.reduce((obj, e) => {
+                  obj[e.type] = e.value;
+                  return obj;
+                }, {});
+
+                setDataPerPage(e.target.value);
+                updateDataLaporanStokMatiHandler({
+                  laporan: 'mati',
+                  per_page: e.target.value,
+                  search: searchParams,
+                });
+              }}
+              updateDataNavigate={(payload) =>
+                updateDataLaporanStokMatiHandler({
+                  laporan: 'mati',
+                  per_page: dataLaporanStokMatiPerPage,
+                  cursor: payload,
+                })
+              }
+              refreshData={() =>
+                updateDataLaporanStokMatiHandler({
+                  laporan: 'mati',
+                  per_page: dataLaporanStokMatiPerPage,
+                })
+              }
+              searchData={searchDataLaporanStokMatiHandler}
+            />
+          )}
         </>
       )}
       <Snackbar

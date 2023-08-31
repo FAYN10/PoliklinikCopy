@@ -227,8 +227,6 @@ const FormPurchaseOrder = ({
         if (!isEditType) {
           const formattedData = filterFalsyValue({...data});
           response = await createPurchaseOrder(formattedData);
-          resetForm();
-          router.push('/gudang/purchase-order');
         } else {
           await updatePurchaseOrder({
             ...formattedData,
@@ -244,6 +242,9 @@ const FormPurchaseOrder = ({
           type: 'success',
           message: `"${data.nomor_po}" berhasil ${messageContext}!`,
         });
+
+        resetForm();
+        router.push('/gudang/purchase-order');
       } catch (error) {
         if (Object.keys(error.errorValidationObj).length >= 1) {
           for (let key in error.errorValidationObj) {

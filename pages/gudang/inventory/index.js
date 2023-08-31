@@ -16,10 +16,6 @@ const InventoryTableHead = [
     label: 'Gudang',
   },
   {
-    id: 'kode_item',
-    label: 'Kode Item',
-  },
-  {
     id: 'nama_item',
     label: 'Nama Item',
   },
@@ -48,15 +44,14 @@ const InventoryTableHead = [
 const dataInventoryFormatHandler = (payload) => {
   const result = payload.map((e) => {
     return {
-      unit: e.pos_inventory.unit.name || 'null',
-      gudang: e.pos_inventory.gudang || 'null',
-      kode_item: e.gudang.item.kode || 'null',
-      nama_item: e.gudang.item.name || 'null',
-      nomor_batch: e.gudang.nomor_batch || 'null',
+      unit: e.unit || 'null',
+      gudang: e.gudang || 'null',
+      kode_item: e.item || 'null',
+      nomor_batch: e.nomor_batch || 'null',
       stok: e.stok || 'null',
-      sediaan: e.gudang.sediaan.name || 'null',
-      harga_jual_satuan: e.gudang.harga_jual_satuan || 'null',
-      tanggal_ed: formatReadable(e.gudang.tanggal_ed) || 'null',
+      sediaan: e.sediaan || 'null',
+      harga_jual_satuan: e.harga_jual_satuan || 'null',
+      tanggal_ed: formatReadable(e.tanggal_ed) || 'null',
       id: e.id,
     };
   });
@@ -100,6 +95,7 @@ const Inventory = () => {
   const [dataInventoryPerPage, setDataInventoryPerPage] = useState(8);
   const [isLoadingDataInventory, setIsLoadingDataInventory] = useState(false);
   const [isUpdatingDataInventory, setIsUpdatingDataInventory] = useState(false);
+
   // Pos Inventory --general state
   const [dataPosInventory, setDataPosInventory] = useState([]);
   const [dataMetaPosInventory, setDataMetaPosInventory] = useState({});
@@ -186,7 +182,7 @@ const Inventory = () => {
       } else {
         setSnackbarState({
           state: true,
-          type: "warning",
+          type: 'warning',
           message: `${payload} tidak ditemukan`,
         });
         const response = await getInventory({
@@ -199,7 +195,7 @@ const Inventory = () => {
     } catch (error) {
       setSnackbarState({
         state: true,
-        type: "error",
+        type: 'error',
         message: error.message,
       });
     } finally {
@@ -228,7 +224,7 @@ const Inventory = () => {
   const updateDataPosInventoryHandler = async (payload) => {
     try {
       setIsUpdatingDataPosInventory(true);
-      const response = await getInventory(payload);
+      const response = await getPosInventory(payload);
       const result = dataPosInventoryFormatHandler(response.data.data);
       setDataPosInventory(result);
       setDataMetaPosInventory(response.data.meta);
@@ -284,7 +280,7 @@ const Inventory = () => {
       } else {
         setSnackbarState({
           state: true,
-          type: "warning",
+          type: 'warning',
           message: `${payload} tidak ditemukan`,
         });
         const response = await getPosInventory({
@@ -297,7 +293,7 @@ const Inventory = () => {
     } catch (error) {
       setSnackbarState({
         state: true,
-        type: "error",
+        type: 'error',
         message: error.message,
       });
     } finally {
@@ -356,7 +352,7 @@ const Inventory = () => {
                   obj[e.type] = e.value;
                   return obj;
                 }, {});
-  
+
                 setDataPerPage(e.target.value);
                 updateDataInventoryHandler({
                   per_page: e.target.value,
@@ -397,7 +393,7 @@ const Inventory = () => {
                   obj[e.type] = e.value;
                   return obj;
                 }, {});
-  
+
                 setDataPerPage(e.target.value);
                 updateDataPosInventoryHandler({
                   per_page: e.target.value,
