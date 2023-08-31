@@ -76,6 +76,14 @@ export function getListPermintaanPemeriksaanRadiologi(params) {
   });
 }
 
+export function getDetailPermintaanPemeriksaanRadiologi(params) {
+  return request({
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/permintaanpemeriksaanradiologi/show`,
+    method: "GET",
+    params,
+  });
+}
+
 //Hasil Pemeriksaan Radiologi
 export function getListHasilPemeriksaanRadiologi(params) {
   return request({

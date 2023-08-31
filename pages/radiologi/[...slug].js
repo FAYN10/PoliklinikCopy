@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { getDetailPasien } from "api/pasien";
-import { getListPermintaanPemeriksaanRadiologi } from "api/radiologi";
+import {
+  getDetailPermintaanPemeriksaanRadiologi,
+  getListPermintaanPemeriksaanRadiologi,
+} from "api/radiologi";
 import LoaderOnLayout from "components/LoaderOnLayout";
 import FormPasien from "components/modules/pasien/form";
 import { formatGenToIso } from "utils/formatTime";
@@ -19,19 +22,95 @@ import RiwayatPemeriksaanTable from "components/modules/radiologi/riwayatPemerik
 import Assessment from "components/modules/radiologi/assessment";
 import PermintaanRadiologiTableLayout from "components/modules/radiologi/permintaanRadiologiTableLayout";
 
+const permintaanTableHead = [
+  {
+    id: "no_pemeriksaan",
+    label: "No. Pemeriksaan",
+  },
+  {
+    id: "waktu_permintaan_pemeriksaan",
+    label: "Waktu Permintaan",
+  },
+  {
+    id: "nama_pemeriksaan",
+    label: "Nama Pemeriksaan",
+  },
+  {
+    id: "jenis_pemeriksaan",
+    label: "Jenis Pemeriksaan",
+  },
+  {
+    id: "dokter_pengirim",
+    label: "Dokter Pengirim",
+  },
+  {
+    id: "unit_pengirim",
+    label: "Unit Pengirim",
+  },
+  {
+    id: "diagnosis_kerja",
+    label: "Diagnosis Kerja",
+  },
+  {
+    id: "catatan_permintaan",
+    label: "Catatan Permintaan",
+  },
+];
+const dataPermintaanRadiologiFormatHandler = (payload) => {
+  const result = payload.map((e) => {
+    return {
+      no_pemeriksaan: e.no_pemeriksaan || "null",
+      waktu_permintaan_pemeriksaan: e.waktu_permintaan_pemeriksaan || "null",
+      nama_pemeriksaan: e.nama_pemeriksaan || "null",
+      jenis_pemeriksaan: e.jenis_pemeriksaan || "null",
+      dokter_pengirim: e.dokter_pengirim || "null",
+      unit_pengirim: e.unit_pengirim || "null",
+      diagnosis_kerja: e.diagnosis_kerja || "null",
+      catatan_permintaan: e.catatan_permintaan || "null",
+      id: e.id,
+    };
+  });
+  return result;
+};
+
+const riwayatPemeriksaanTableHead = [
+  {
+    id: "tanggal_pemeriksaan",
+    label: "Tanggal Pemeriksaan",
+  },
+  {
+    id: "no_pemeriksaan",
+    label: "No. Pemeriksaan",
+  },
+  {
+    id: "nama_pemeriksaan",
+    label: "Nama Pemeriksaan",
+  },
+  {
+    id: "jenis_pemeriksaan",
+    label: "Jenis Pemeriksaan",
+  },
+  {
+    id: "dokter_pengirim",
+    label: "Dokter Pengirim",
+  },
+  {
+    id: "diagnosis_kerja",
+    label: "Diagnosis Kerja",
+  },
+];
+
 const DetailRadiologi = () => {
-  const [isEditingMode, setIsEditingMode] = useState(false);
   const router = useRouter();
   const { slug } = router.query;
-  const [dataPermintaanRadiologi, setDataPermintaanRadiologi] = useState([]);
-  const [dataMetaPermintaanRadiologi, setDataMetaPermintaanRadiologi] = useState({});
-  const [isLoadingDataPermintaanRadiologi, setIsLoadingDataPermintaanRadiologi] = useState(true);
+  // const [isEditingMode, setIsEditingMode] = useState(false);
   const [dataPasien, setDataPasien] = useState({});
   const [detailDataPasien, setDetailDataPasien] = useState({});
   const [isLoadingDataPasien, setIsLoadingDataPasien] = useState(true);
-  const [dataRadiologi, setDataRadiologi] = useState({});
-  const [detailDataRadiologi, setDetailDataRadiologi] = useState({});
-  const [isLoadingDataRadiologi, setIsLoadingDataRadiologi] = useState(true);
+  
+  const [dataPermintaanRadiologiPerPage, setPermintaanRadiologiPerPage] = useState(8);
+  const [isLoadingDataPermintaanRadiologi, setIsLoadingDataPermintaanRadiologi] = useState(false);
+  const [isUpdatingDataPermintaanRadiologi, setIsUpdatingDataPermintaanRadiologi] = useState(false);
 
   const [menuState, setMenuState] = useState(null);
   const { isActionPermitted } = useClientPermission();
@@ -42,134 +121,52 @@ const DetailRadiologi = () => {
     setIsEditingMode(e.target.checked);
   };
 
-  const permintaanTableHead = [
-    {
-      id: "no_pemeriksaan",
-      label: "No. Pemeriksaan"
-    },
-    {
-      id: "waktu_permintaan_pemeriksaan",
-      label: "Waktu Permintaan"
-    },
-    {
-      id: "nama_pemeriksaan",
-      label: "Nama Pemeriksaan"
-    },
-    {
-      id: "jenis_pemeriksaan",
-      label: "Jenis Pemeriksaan"
-    },
-    {
-      id: "dokter_pengirim",
-      label: "Dokter Pengirim"
-    },
-    {
-      id: "unit_pengirim",
-      label: "Unit Pengirim"
-    },
-    {
-      id: "diagnosis_kerja",
-      label: "Diagnosis Kerja",
-    },
-    {
-      id: "catatan_permintaan",
-      label: "Catatan Permintaan"
-    }
-  ]
-
-  const riwayatPemeriksaanTableHead = [
-    {
-      id: "tanggal_pemeriksaan",
-      label: "Tanggal Pemeriksaan"
-    },
-    {
-      id: "no_pemeriksaan",
-      label: "No. Pemeriksaan"
-    },
-    {
-      id: "nama_pemeriksaan",
-      label: "Nama Pemeriksaan"
-    },
-    {
-      id: "jenis_pemeriksaan",
-      label: "Jenis Pemeriksaan"
-    },
-    {
-      id: "dokter_pengirim",
-      label: "Dokter Pengirim"
-    },
-    {
-      id: "diagnosis_kerja",
-      label: "Diagnosis Kerja"
-    }
-
-  ]
-  const dataPermintaanRadiologiFormatHandler = (payload) => {
-    const result = payload.map((e) => {
-      return {
-        no_pemeriksaan: e.no_pemeriksaan || "null",
-        waktu_permintaan_pemeriksaan: e.waktu_permintaan_pemeriksaan || "null",
-        nama_pemeriksaan: e.nama_pemeriksaan || "null",
-        jenis_pemeriksaan: e.jenis_pemeriksaan || "null",
-        dokter_pengirim: e.dokter_pengirim || "null",
-        unit_pengirim: e.unit_pengirim || "null",
-        diagnosis_kerja: e.diagnosis_kerja || "null",
-        catatan_permintaan: e.catatan_permintaan || "null",
-        id: e.id,
-      };
-    });
-    return result;
-  };
-  const permintaanRadiologi = () => {
-    const [dataPermintaanRadiologi, setDataPermintaanRadiologi] = useState([]);
-    const [dataMetaPermintaanRadiologi, setDataMetaPermintaanRadiologi] = useState({});
-    const [dataPermintaanRadiologiPerPage, setDataPerPage] = useState(8);
-    const [isLoadingDataPermintaanRadiologi, setIsLoadingDataPermintaanRadiologi] = useState(false);
-    const [isUpdatingDataPermintaanRadiologi, setIsUpdatingDataPermintaanRadiologi] = useState(false);
-  };
-
   const initDataPermintaanRadiologi = async () => {
     try {
-        setIsLoadingDataPermintaanRadiologi(true);
-        const params = {
-            per_page: dataPermintaanRadiologiPerPage,
-        };
-        const response = await getListPermintaanRadiologi(params);
-        const result = dataPermintaanRadiologiFormatHandler(response.data.data);
-        setDataPermintaanRadiologi(result);
-        setDataMetaPermintaanRadiologi(response.data.meta);
+      setIsLoadingDataPermintaanRadiologi(true);
+      const params = {
+        per_page: dataPermintaanRadiologiPerPage,
+      };
+      const response = await getListPermintaanRadiologi(params);
+      const result = dataPermintaanRadiologiFormatHandler(response.data.data);
+      setDataPermintaanRadiologi(result);
+      setDataMetaPermintaanRadiologi(response.data.meta);
     } catch (error) {
-        console.log(error);
+      console.log(error);
     } finally {
-        setIsLoadingDataPermintaanRadiologi(false);
+      setIsLoadingDataPermintaanRadiologi(false);
     }
-};
+  };  
 
-
-  useEffect(() => {
-    if (router.isReady) {
-      (async () => {
-        try {
-          initDataPermintaanRadiologi();
-          initDataPasien();
-          const response = await getDetailRadiologi({ id: slug[0] });
-          const data = response.data.data;
-          setDetailDataRadiologi(data);
-          setIsLoadingDataRadiologi(false);
-          setIsLoadingDataPermintaanRadiologi(true);
-          fetchPermintaanRadiologi();
-        } catch (error) {
-          console.log(error);
-          setIsLoadingDataRadiologi(false);
-          setIsLoadingDataPermintaanRadiologi(false);
-        }
-      })();
+  const updateDataRoleHandler = async (payload) => {
+    try {
+      setIsUpdatingDataPermintaanRadiologi(true);
+      const response = await getListEmployee(payload);
+      const result = dataPermintaanRadiologiFormatHandler(response.data.data);
+      setDataPermintaanRadiologi(result);
+      setDataMetaPermintaanRadiologi(response.data.meta);
+    } catch (error) {
+      console.log(error);
+      setSnackbarState({
+        state: true,
+        type: "error",
+        message: error.message,
+      });
+    } finally {
+      setIsUpdatingDataPermintaanRadiologi(false);
     }
-  }, [router.isReady, slug]);
+  };
 
+  const [dataPermintaanRadiologi, setDataPermintaanRadiologi] = useState({});
+  // const [detailDataPermintaanRadiologi, setDetailDataPermintaanRadiologi] =
+  //   useState({});
+  const [dataMetaPermintaanRadiologi, setDataMetaPermintaanRadiologi] =
+    useState({});
+  // const [dataRadiologi, setDataRadiologi] = useState({});
+  const [detailDataRadiologi, setDetailDataRadiologi] = useState({});
+  // const [isLoadingDataRadiologi, setIsLoadingDataRadiologi] = useState(true);
 
-
-  const dataFormatter = (data) => {
+  const dataFormatterPasien = (data) => {
     let tempData = {
       nama_pasien: data.nama_pasien || "",
       jenis_kelamin:
@@ -217,33 +214,66 @@ const DetailRadiologi = () => {
     return { ...tempData };
   };
 
-  const updateData = (data) => {
-    setDetailDataRadiologi(data);
-    setDataRadiologi(() => dataFormatter(data));
-  };
+  // const updateData = (data) => {
+  //   setDetailDataRadiologi(data);
+  //   setDataRadiologi(() => dataFormatter(data));
+  // };
+
+  useEffect(() => {
+    initDataPermintaanRadiologi();
+    if (router.isReady) {
+      (async () => {
+        try {
+          // initDataPermintaanRadiologi();
+          // initDataPasien();
+          const responsePasien = await getDetailPasien({ id: slug[0] });
+          const dataPasien = responsePasien.data.data;
+          const formattedDataPasien = dataFormatterPasien(dataPasien);
+          setDataPasien(formattedDataPasien);
+          setDetailDataPasien(dataPasien);
+
+          const responsePermintaan =
+            await getDetailPermintaanPemeriksaanRadiologi({ id: slug[0] });
+          const dataPermintaan = responsePermintaan.data.data;
+          setDetailDataRadiologi(dataPermintaan);
+        } catch (error) {
+          console.log(error);
+        } finally {
+          setIsLoadingDataPasien(false);
+          setIsLoadingDataPermintaanRadiologi(false);
+        }
+      })();
+    }
+  }, [router.isReady, slug]);
+
   const menuItems = [
     {
       label: "Permintaan Radiologi",
       content: (
         <>
-          <TableLayout
-            baseRoutePath={'${router.asPath}'}
+          <PermintaanRadiologiTableLayout
             tableHead={permintaanTableHead}
             data={dataPermintaanRadiologi}
-            meta={dataMetaPermintaanRadiologi}
-            refreshData={() =>
-              updateDataPermintaanRadiologiHandler({ per_page: dataPermintaanRadiologiPerPage })
-          }>
-          </TableLayout>
+            page={dataPermintaanRadiologiPerPage}
+            rowsPerPage={dataMetaPermintaanRadiologi.per_page}
+            totalRows={dataMetaPermintaanRadiologi.total}
+            onPageChange={(e, newPage) => {}}
+          ></PermintaanRadiologiTableLayout>
         </>
-      )
+      ),
     },
     {
       label: "Assessment Pemeriksaan",
-      component: <Assessment
-        namaPemeriksaan={detailDataRadiologi.permintaan?.[0]?.nama_pemeriksaan}
-        jenisPemeriksaan={detailDataRadiologi.permintaan?.[0]?.jenis_pemeriksaan}
-      />
+      component: (
+        <Assessment
+          namaPemeriksaan={
+            detailDataRadiologi.permintaan?.[0]?.nama_pemeriksaan
+          }
+          jenisPemeriksaan={
+            detailDataRadiologi.permintaan?.[0]?.jenis_pemeriksaan
+          }
+        />
+      ),
     },
     { label: "Hasil Pemeriksaan", component: <FormExpertise /> },
     { label: "Riwayat Pemeriksaan", component: <RiwayatPemeriksaanTable /> },
@@ -253,7 +283,7 @@ const DetailRadiologi = () => {
 
   return (
     <>
-      {isLoadingDataRadiologi ? (
+      {isLoadingDataPasien ? (
         <LoaderOnLayout />
       ) : (
         <>
@@ -268,7 +298,6 @@ const DetailRadiologi = () => {
                     />
                     <p className="m-0 ml-8 font-14">Pasien Info</p>
                   </div>
-
                 </div>
                 <div className="flex justify-between items-start">
                   <div className="flex items-start">
@@ -306,9 +335,7 @@ const DetailRadiologi = () => {
                   </div>
                 </div>
               </Card>
-
             </Grid>
-
           </Grid>
           <Tabs
             value={selectedTab}
@@ -323,7 +350,8 @@ const DetailRadiologi = () => {
                 key={index}
                 label={item.label}
                 sx={{
-                  borderBottom: selectedTab === index ? "2px solid #3f51b5" : "none",
+                  borderBottom:
+                    selectedTab === index ? "2px solid #3f51b5" : "none",
                   marginRight: "16px", // Add spacing between tabs
                 }}
               />
