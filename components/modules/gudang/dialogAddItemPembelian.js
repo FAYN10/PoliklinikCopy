@@ -149,26 +149,28 @@ const DialogAddItem = ({
         createTableItemValidation.values.harga_beli_satuan != null &&
         createTableItemValidation.values.diskon != null
       ) {
-        const stok = createTableItemValidation.values.stok;
-        const harga_beli_satuan =
-          createTableItemValidation.values.harga_beli_satuan;
-        const diskon = createTableItemValidation.values.diskon;
+        const stok = parseInt(createTableItemValidation.values.stok);
+        const harga_beli_satuan = parseInt(
+          createTableItemValidation.values.harga_beli_satuan
+        );
+        const diskon = parseInt(createTableItemValidation.values.diskon);
 
         const total = stok * harga_beli_satuan;
         console.log(`Total: ${total}`);
 
         const afterDiskon = total * (diskon / 100);
+        console.log(`Diskon: ${afterDiskon}`);
 
         const ppn = total * (11 / 100);
         console.log(`PPN: ${ppn}`);
 
-        const total_pembelian = total - afterDiskon + ppn;
+        total_pembelian = total - afterDiskon + ppn;
         console.log(`Total Pembelian: ${total_pembelian}`);
 
-        const margin = total_pembelian * (20 / 100);
+        margin = total_pembelian * (20 / 100);
         console.log(`Margin: ${margin}`);
 
-        const harga_jual_satuan = margin / stok;
+        harga_jual_satuan = margin / stok + harga_beli_satuan;
         console.log(`Harga Jual Satuan: ${harga_jual_satuan}`);
 
         total_pembelian = total_pembelian.toFixed(2);

@@ -240,7 +240,7 @@ const FormPurchaseOrder = ({
         setSnackbar({
           state: true,
           type: 'success',
-          message: `"${data.nomor_po}" berhasil ${messageContext}!`,
+          message: `"Pesanan ${data.potype.name}" berhasil ${messageContext}!`,
         });
 
         resetForm();
@@ -254,7 +254,7 @@ const FormPurchaseOrder = ({
         setSnackbar({
           state: true,
           type: 'error',
-          message: `Terjadi kesalahan, "${data.nomor_po}" gagal ${messageContext}!`,
+          message: `Terjadi kesalahan, "Pesanan ${data.potype.name}" gagal ${messageContext}!`,
         });
       }
     },

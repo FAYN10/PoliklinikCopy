@@ -55,8 +55,6 @@ const FormPembelian = ({
 }) => {
   const router = useRouter();
   const {isActionPermitted} = useClientPermission();
-  const labelPrintRef = useRef();
-  const checkupPrintRef = useRef();
   const [snackbar, setSnackbar] = useState({
     state: false,
     type: null,
@@ -140,19 +138,19 @@ const FormPembelian = ({
   const pembelianInitialValues = !isEditType
     ? {
         nomor_faktur: null,
-        nomor_po: {id: '', nomor_po: ''},
         tanggal_pembelian: null,
         tanggal_jatuh_tempo: null,
         ppn: null,
+        nomor_po: {id: '', nomor_po: ''},
+        potype: {kode: '', name: ''},
+        supplier: {id: '', name: ''},
+        gudang: {id: '', name: ''},
         receive_detail: [],
       }
     : prePopulatedDataForm;
 
   const createPembelianSchema = Yup.object({
     nomor_faktur: stringSchema('Nomor faktur'),
-    nomor_po: Yup.object({
-      id: stringSchema('Nomor PO', true),
-    }),
     tanggal_pembelian: Yup.date()
       .transform(function (value, originalValue) {
         if (this.isType(value)) {
@@ -176,6 +174,18 @@ const FormPembelian = ({
       .min('2023-01-01', 'Tanggal jatuh tempo tidak valid')
       .required('Tanggal jatuh tempo wajib diisi'),
     ppn: stringSchema('PPN'),
+    nomor_po: Yup.object({
+      id: stringSchema('Nomor PO', true),
+    }),
+    potype: Yup.object({
+      kode: stringSchema('Jenis Surat', true),
+    }),
+    supplier: Yup.object({
+      id: stringSchema('Supplier', true),
+    }),
+    gudang: Yup.object({
+      id: stringSchema('Gudang', true),
+    }),
     receive_detail: Yup.array(),
   });
 
@@ -192,6 +202,9 @@ const FormPembelian = ({
         purchase_order_id: data.nomor_po.id,
         tanggal_pembelian: formatIsoToGen(data.tanggal_pembelian),
         tanggal_jatuh_tempo: formatIsoToGen(data.tanggal_jatuh_tempo),
+        potype: data.potype.kode,
+        supplier: data.supplier.id,
+        gudang: data.gudang.name,
       };
       console.log(data);
       try {
@@ -199,8 +212,6 @@ const FormPembelian = ({
         if (!isEditType) {
           const formattedData = filterFalsyValue({...data});
           response = await createPembelian(formattedData);
-          resetForm();
-          router.push('/gudang/pembelian');
         } else {
           await updatePembelian({
             ...formattedData,
@@ -216,6 +227,9 @@ const FormPembelian = ({
           type: 'success',
           message: `"${data.nomor_faktur}" berhasil ${messageContext}!`,
         });
+
+        resetForm();
+        router.push('/gudang/pembelian');
       } catch (error) {
         if (Object.keys(error.errorValidationObj).length >= 1) {
           for (let key in error.errorValidationObj) {
@@ -233,7 +247,6 @@ const FormPembelian = ({
 
   const createDetailDataHandler = (payload) => {
     let tempData = [...createPembelianValidation.values.receive_detail];
-    console.log(tempData);
     const isAvailable = tempData.findIndex(
       (data) =>
         data.item.id === payload.item.id &&
@@ -310,40 +323,6 @@ const FormPembelian = ({
                 </Grid>
                 <Grid container spacing={1}>
                   <Grid item xs={3}>
-                    <Typography variant='h1 font-w-600'>Nomor PO</Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <div className='mb-16'>
-                      <SelectAsync
-                        id='nomor_po'
-                        labelField='Nomor PO'
-                        labelOptionRef='nomor_po'
-                        valueOptionRef='id'
-                        handlerRef={createPembelianValidation}
-                        handlerFetchData={getPurchaseOrder}
-                        handlerOnChange={(value) => {
-                          if (value) {
-                            createPembelianValidation.setFieldValue(
-                              'nomor_po',
-                              value
-                            );
-                          } else {
-                            createPembelianValidation.setFieldValue(
-                              'nomor_po',
-                              {
-                                id: '',
-                                nomor_po: '',
-                              }
-                            );
-                          }
-                        }}
-                        isDisabled={isEditType && !isEditingMode}
-                      />
-                    </div>
-                  </Grid>
-                </Grid>
-                <Grid container spacing={1}>
-                  <Grid item xs={3}>
                     <Typography variant='h1 font-w-600'>
                       Tanggal Pembelian
                     </Typography>
@@ -398,8 +377,6 @@ const FormPembelian = ({
                     </div>
                   </Grid>
                 </Grid>
-              </Grid>
-              <Grid item xs={12} md={6}>
                 <Grid container spacing={1}>
                   <Grid item xs={3}>
                     <Typography variant='h1 font-w-600'>
@@ -479,6 +456,138 @@ const FormPembelian = ({
                           createPembelianValidation.errors.ppn
                         }
                         disabled={isEditType && !isEditingMode}
+                      />
+                    </div>
+                  </Grid>
+                </Grid>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Grid container spacing={1}>
+                  <Grid item xs={3}>
+                    <Typography variant='h1 font-w-600'>Nomor PO</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <div className='mb-16'>
+                      <SelectAsync
+                        id='nomor_po'
+                        labelField='Nomor PO'
+                        labelOptionRef='nomor_po'
+                        valueOptionRef='id'
+                        handlerRef={createPembelianValidation}
+                        handlerFetchData={getPurchaseOrder}
+                        handlerOnChange={(value) => {
+                          if (value) {
+                            createPembelianValidation.setFieldValue(
+                              'nomor_po',
+                              value
+                            );
+                          } else {
+                            createPembelianValidation.setFieldValue(
+                              'nomor_po',
+                              {
+                                id: '',
+                                nomor_po: '',
+                              }
+                            );
+                          }
+                        }}
+                        isDisabled={isEditType && !isEditingMode}
+                      />
+                    </div>
+                  </Grid>
+                </Grid>
+                <Grid container spacing={1}>
+                  <Grid item xs={3}>
+                    <Typography variant='h1 font-w-600'>Jenis Surat</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <div className='mb-16'>
+                      <SelectAsync
+                        id='potype'
+                        labelField='Jenis Surat'
+                        labelOptionRef='name'
+                        valueOptionRef='kode'
+                        handlerRef={createPembelianValidation}
+                        handlerFetchData={getPoType}
+                        handlerOnChange={(value) => {
+                          if (value) {
+                            createPembelianValidation.setFieldValue(
+                              'potype',
+                              value
+                            );
+                          } else {
+                            createPembelianValidation.setFieldValue('potype', {
+                              kode: '',
+                              name: '',
+                            });
+                          }
+                        }}
+                        isDisabled={isEditType && !isEditingMode}
+                      />
+                    </div>
+                  </Grid>
+                </Grid>
+                <Grid container spacing={1}>
+                  <Grid item xs={3}>
+                    <Typography variant='h1 font-w-600'>Supplier</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <div className='mb-16'>
+                      <SelectAsync
+                        id='supplier'
+                        labelField='Supplier'
+                        labelOptionRef='name'
+                        valueOptionRef='id'
+                        handlerRef={createPembelianValidation}
+                        handlerFetchData={getSupplier}
+                        handlerOnChange={(value) => {
+                          if (value) {
+                            createPembelianValidation.setFieldValue(
+                              'supplier',
+                              value
+                            );
+                          } else {
+                            createPembelianValidation.setFieldValue(
+                              'supplier',
+                              {
+                                id: '',
+                                name: '',
+                              }
+                            );
+                          }
+                        }}
+                        isDisabled={isEditType && !isEditingMode}
+                      />
+                    </div>
+                  </Grid>
+                </Grid>
+                <Grid container spacing={1}>
+                  <Grid item xs={3}>
+                    <Typography variant='h1 font-w-600'>Gudang</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <div className='mb-16'>
+                      <SelectAsync
+                        id='gudang'
+                        labelField='Gudang'
+                        labelOptionRef='name'
+                        valueOptionRef='id'
+                        handlerRef={createPembelianValidation}
+                        handlerFetchData={jenisGudang}
+                        handlerOnChange={(value) => {
+                          if (value) {
+                            createPembelianValidation.setFieldValue(
+                              'gudang',
+                              value
+                            );
+                          } else {
+                            createPembelianValidation.setFieldValue('gudang', {
+                              id: '',
+                              name: '',
+                            });
+                          }
+                        }}
+                        isDisabled={isEditType && !isEditingMode}
                       />
                     </div>
                   </Grid>

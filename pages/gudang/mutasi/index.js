@@ -310,8 +310,20 @@ const Mutasi = () => {
   }, [router]);
 
   useEffect(() => {
-    initDataPermintaanMutasi();
-    initDataRiwayatMutasi();
+    (async () => {
+      try {
+        await initDataPermintaanMutasi();
+        await initDataRiwayatMutasi();
+      } catch (error) {
+        setSnackbarState({
+          state: true,
+          type: 'error',
+          message: error.message,
+        });
+      } finally {
+        setIsLoadingDataPermintaanMutasi(false);
+      }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
