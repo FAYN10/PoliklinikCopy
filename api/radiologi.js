@@ -127,3 +127,12 @@ export function getListOptionPrioritas(params) {
     params,
   });
 }
+
+//Grouping Pemeriksaan Radiologi
+export function getDetailGroupingPemeriksaanRadiologi(params) {
+  return request({
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/groupingpemeriksaanradiologi/show`,
+    method: "GET",
+    params,
+  });
+}
