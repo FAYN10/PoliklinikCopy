@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import {
   Grid, Paper, TextField, Button, MenuItem, Dialog,
   DialogTitle,
-  DialogContent, DialogActions
+  DialogContent, DialogActions, FormControlLabel
 } from "@mui/material";
 import DateTimePickerComp from "components/DateTimePicker";
 import { useFormik } from "formik";
@@ -12,12 +13,41 @@ import CancelIcon from "@material-ui/icons/Cancel";
 import SaveIcon from "@material-ui/icons/Save";
 import EditIcon from "@material-ui/icons/Edit";
 import Switch from "@mui/material/Switch";
+import useClientPermission from "custom-hooks/useClientPermission";
+import Snackbar from "components/SnackbarMui";
 
-const FormAssessmentPasien = () => {
+const FormAssessmentPasien = ({  isEditType = false,
+  prePopulatedDataForm = {},
+  detailPrePopulatedData = {},
+  updatePrePopulatedData = () => "update data",}) => {
+    const router = useRouter();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
-
+  const { isActionPermitted } = useClientPermission();
+  const [isEditingMode, setIsEditingMode] = useState(false);
+  const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const handleConfirm = () => {
+    if (confirmAction === "save") {
+      formik.handleSubmit()
+        .then(() => {
+          // Submission was successful
+          setSnackbarMessage("Data berhasil disimpan.");
+          setIsSnackbarOpen(true);
+        })
+        .catch((error) => {
+          // Handle submission error
+          setSnackbarMessage("Gagal menyimpan data. Coba lagi nanti.");
+          setIsSnackbarOpen(true);
+        });
+    } else if (confirmAction === "cancel") {
+      console.log("Canceling action...");
+    }
+    handleCloseDialog();
+  };
+  const handleIsEditingMode = (e) => {
+    setIsEditingMode(e.target.checked);
+  };
   const handleOpenDialog = (action) => {
     setIsDialogOpen(true);
     setConfirmAction(action);
@@ -28,17 +58,17 @@ const FormAssessmentPasien = () => {
     setConfirmAction(null);
   };
 
-  const handleConfirm = () => {
-    if (confirmAction === "save") {
+  // const handleConfirm = () => {
+  //   if (confirmAction === "save") {
 
-      console.log("Saving data...");
-      formik.handleSubmit();
-    } else if (confirmAction === "cancel") {
+  //     console.log("Saving data...");
+  //     formik.handleSubmit();
+  //   } else if (confirmAction === "cancel") {
 
-      console.log("Canceling action...");
-    }
-    handleCloseDialog();
-  };
+  //     console.log("Canceling action...");
+  //   }
+  //   handleCloseDialog();
+  // };
 
   const initialValues = {
     metodePenyampaianHasil: "",
@@ -70,7 +100,6 @@ const FormAssessmentPasien = () => {
     }),
     statusAlergi: Yup.string().required("Status alergi wajib dipilih"),
     statusKehamilan: Yup.string().required("Status kehamilan wajib dipilih"),
-
     waktuPemeriksaan: Yup.date().required("Waktu pemeriksaan wajib diisi"),
   });
 
@@ -90,16 +119,19 @@ const FormAssessmentPasien = () => {
   return (
     <Grid container spacing={2}>
       <Grid container justifyContent="flex-end" spacing={2} sx={{ marginTop: "12px", marginRight: "12px" }}>
-        <Grid item>
+        <FormControlLabel control={ <Grid item>
           <Switch
-            variant="outlined"
-            color="primary"
-            startIcon={<EditIcon />}
-            onClick={() => setIsEditing(true)}
+            checked={isEditingMode}
+            onChange={handleIsEditingMode}
+            inputProps={{ "aria-label": "controlled" }}
+            disabled={!isActionPermitted("asesmenpasienradiologi:update")}
           >
             Edit Data
           </Switch>
-        </Grid>
+        </Grid>}>
+
+        </FormControlLabel>
+       
       </Grid>
       <Grid item xs={12} md={6}>
         <Paper
@@ -108,7 +140,7 @@ const FormAssessmentPasien = () => {
             padding: "16px",
             mb: "16px",
             mt: "16px",
-            opacity: isEditing ? 1 : 0.5,
+            opacity: isEditingMode ? 1 : 0.5,
           }}
         >
           <form onSubmit={formik.handleSubmit}>
@@ -122,7 +154,7 @@ const FormAssessmentPasien = () => {
                 onChange={formik.handleChange}
                 error={formik.touched.noWhatsapp && Boolean(formik.errors.noWhatsapp)}
                 helperText={formik.touched.noWhatsapp && formik.errors.noWhatsapp}
-                disabled={!isEditing}
+                disabled={!isEditingMode}
               />
             </div>
             <div className="mb-16">
@@ -135,7 +167,7 @@ const FormAssessmentPasien = () => {
                 onChange={formik.handleChange}
                 error={formik.touched.email && Boolean(formik.errors.email)}
                 helperText={formik.touched.email && formik.errors.email}
-                disabled={!isEditing}
+                disabled={!isEditingMode}
               />
             </div>
             <div className="mb-16">
@@ -143,10 +175,9 @@ const FormAssessmentPasien = () => {
                 id="diambil"
                 label="Tanggal Diambil"
                 handlerRef={formik}
-                disabled={!isEditing}
+                disabled={!isEditingMode}
               />
             </div>
-
           </form>
         </Paper>
       </Grid>
@@ -170,7 +201,7 @@ const FormAssessmentPasien = () => {
                 value={formik.values.statusAlergi}
                 onChange={formik.handleChange}
                 error={formik.touched.statusAlergi && Boolean(formik.errors.statusAlergi)}
-                helperText={formik.touched.statusAlergi && formik.errors.statusAlergi} disabled={!isEditing}
+                helperText={formik.touched.statusAlergi && formik.errors.statusAlergi} disabled={!isEditingMode}
 
               >
                 {statusAlergiOptions.map((option) => (
@@ -192,7 +223,7 @@ const FormAssessmentPasien = () => {
                 onChange={formik.handleChange}
                 error={formik.touched.statusKehamilan && Boolean(formik.errors.statusKehamilan)}
                 helperText={formik.touched.statusKehamilan && formik.errors.statusKehamilan}
-                disabled={!isEditing}
+                disabled={!isEditingMode}
               >
                 {statusKehamilanOptions.map((option) => (
                   <MenuItem key={option} value={option}>
@@ -200,12 +231,13 @@ const FormAssessmentPasien = () => {
                   </MenuItem>
                 ))}
               </TextField>
-            </div><div className="mb-16">
+            </div>
+            <div className="mb-16">
               <DateTimePickerComp
                 id="waktuPemeriksaan"
                 label="Waktu Pemeriksaan"
                 handlerRef={formik}
-                disabled={!isEditing}
+                disabled={!isEditingMode}
               />
             </div>
           </form>
@@ -220,7 +252,7 @@ const FormAssessmentPasien = () => {
               color="error"
               startIcon={<CancelIcon />}
               onClick={() => handleOpenDialog("cancel")}
-              disabled={!isEditing} // Disable BATAL button when not in editing mode
+              disabled={!isEditingMode} // Disable BATAL button when not in editing mode
             >
               BATAL
             </Button>
@@ -232,7 +264,7 @@ const FormAssessmentPasien = () => {
               startIcon={<SaveIcon />}
               loading={formik.isSubmitting}
               onClick={() => handleOpenDialog("save")}
-              disabled={!isEditing} // Disable SIMPAN button when not in editing mode
+              disabled={!isEditingMode} 
             >
               SIMPAN
             </LoadingButton>
@@ -253,6 +285,12 @@ const FormAssessmentPasien = () => {
           </DialogActions>
         </Dialog>
       </Grid>
+      <Snackbar
+        open={isSnackbarOpen}
+        autoHideDuration={3000} // Adjust the duration as needed
+        onClose={() => setIsSnackbarOpen(false)}
+        message={snackbarMessage}
+      />
     </Grid>
   );
 };
