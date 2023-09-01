@@ -11,6 +11,8 @@ import * as Yup from "yup";
 import LoadingButton from "@mui/lab/LoadingButton";
 import CancelIcon from "@material-ui/icons/Cancel";
 import SaveIcon from "@material-ui/icons/Save";
+import { stringSchema, dateSchema, phoneNumberSchema } from "utils/yupSchema";
+import InputPhoneNumber from "components/InputPhoneNumber";
 import EditIcon from "@material-ui/icons/Edit";
 import Switch from "@mui/material/Switch";
 import useClientPermission from "custom-hooks/useClientPermission";
