@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { getDetailPasien } from "api/pasien";
 import {
+  getDetailGroupingPemeriksaanRadiologi,
   getDetailPermintaanPemeriksaanRadiologi,
   showRadiologi,
 } from "api/radiologi";
@@ -56,13 +57,13 @@ const permintaanTableHead = [
     label: "Catatan Permintaan",
   },
 ];
-const dataPermintaanRadiologiFormatHandler = (payload) => {
+const dataPermintaanRadiologiFormatHandler = (payload, namaPemeriksaan, jenisPemeriksaan) => {
   const result = payload.map((e) => {
     return {
-      no_pemeriksaan: e.no_pemeriksaan || "null",
+      nomor_pemeriksaan: e.nomor_pemeriksaan || "null",
       waktu_permintaan_pemeriksaan: e.waktu_permintaan_pemeriksaan || "null",
-      nama_pemeriksaan: e.nama_pemeriksaan || "null",
-      jenis_pemeriksaan: e.jenis_pemeriksaan || "null",
+      nama_pemeriksaan: namaPemeriksaan || "null",
+      jenis_pemeriksaan: jenisPemeriksaan || "null",
       dokter_pengirim: e.dokter_pengirim || "null",
       unit_pengirim: e.unit_pengirim || "null",
       diagonsa_kerja: e.diagonsa_kerja || "null",
@@ -247,12 +248,20 @@ const DetailRadiologi = () => {
           setDataPasien(formattedDataPasien);
           setDetailDataPasien(dataPasien);
 
-          const responsePermintaan =
-            await getDetailPermintaanPemeriksaanRadiologi({
-              no_antrian: noAntrian,
-            });
+          const responsePermintaan = await getDetailPermintaanPemeriksaanRadiologi({ no_antrian: noAntrian });
           const dataPermintaan = responsePermintaan.data.data;
           setDataPermintaanRadiologi(dataPermintaan);
+          const groupingId = dataPermintaan[0].grouping_pemeriksaan_radiologi_id;
+          
+          const responseGrouping = await getDetailGroupingPemeriksaanRadiologi({ id: groupingId });
+          const dataGrouping = responseGrouping.data.data;
+          const namaPemeriksaan = dataGrouping.kategori_pemeriksaan;
+          const jenisPemeriksaan = dataGrouping.jenis_pemeriksaan;
+
+          const formattedDataPermintaanRadiologi = dataPermintaanRadiologiFormatHandler(dataPermintaan, namaPemeriksaan, jenisPemeriksaan);
+          
+          setDataPermintaanRadiologi(formattedDataPermintaanRadiologi);
+          
         } catch (error) {
           console.log(error);
         } finally {
@@ -271,11 +280,6 @@ const DetailRadiologi = () => {
           <PermintaanRadiologiTableLayout
             tableHead={permintaanTableHead}
             data={dataPermintaanRadiologi}
-            // data={detailDataRadiologi}
-            page={dataPermintaanRadiologiPerPage}
-            rowsPerPage={dataMetaPermintaanRadiologi.per_page}
-            totalRows={dataMetaPermintaanRadiologi.total}
-            onPageChange={(e, newPage) => {}}
           ></PermintaanRadiologiTableLayout>
         </>
       ),
