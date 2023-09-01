@@ -18,6 +18,14 @@ export function searchRadiologi(params) {
   });
 }
 
+export function showRadiologi(params) {
+  return request({
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/antrianradiologi/show`,
+    method: "GET",
+    params,
+  });
+}
+
 //BMHP Radiologi
 export function getListBMHPRadiologi(params) {
   return request({

@@ -38,14 +38,14 @@ const PermintaanRadiologiTableLayout = ({
           ))}
         </TableBody>
       </Table>
-      <TablePagination
+      {/* <TablePagination
         rowsPerPageOptions={[5, 10, 25]}
         component="div"
         count={totalRows}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={onPageChange}
-      />
+      /> */}
     </TableContainer>
   );
 };

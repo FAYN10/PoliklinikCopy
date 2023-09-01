@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { getDetailPasien } from "api/pasien";
 import {
   getDetailPermintaanPemeriksaanRadiologi,
-  getListPermintaanPemeriksaanRadiologi,
+  showRadiologi,
 } from "api/radiologi";
 import LoaderOnLayout from "components/LoaderOnLayout";
 import FormPasien from "components/modules/pasien/form";
@@ -24,7 +24,7 @@ import PermintaanRadiologiTableLayout from "components/modules/radiologi/permint
 
 const permintaanTableHead = [
   {
-    id: "no_pemeriksaan",
+    id: "nomor_pemeriksaan",
     label: "No. Pemeriksaan",
   },
   {
@@ -48,7 +48,7 @@ const permintaanTableHead = [
     label: "Unit Pengirim",
   },
   {
-    id: "diagnosis_kerja",
+    id: "diagonsa_kerja",
     label: "Diagnosis Kerja",
   },
   {
@@ -65,7 +65,7 @@ const dataPermintaanRadiologiFormatHandler = (payload) => {
       jenis_pemeriksaan: e.jenis_pemeriksaan || "null",
       dokter_pengirim: e.dokter_pengirim || "null",
       unit_pengirim: e.unit_pengirim || "null",
-      diagnosis_kerja: e.diagnosis_kerja || "null",
+      diagonsa_kerja: e.diagonsa_kerja || "null",
       catatan_permintaan: e.catatan_permintaan || "null",
       id: e.id,
     };
@@ -107,10 +107,17 @@ const DetailRadiologi = () => {
   const [dataPasien, setDataPasien] = useState({});
   const [detailDataPasien, setDetailDataPasien] = useState({});
   const [isLoadingDataPasien, setIsLoadingDataPasien] = useState(true);
-  
-  const [dataPermintaanRadiologiPerPage, setPermintaanRadiologiPerPage] = useState(8);
-  const [isLoadingDataPermintaanRadiologi, setIsLoadingDataPermintaanRadiologi] = useState(false);
-  const [isUpdatingDataPermintaanRadiologi, setIsUpdatingDataPermintaanRadiologi] = useState(false);
+
+  const [dataPermintaanRadiologiPerPage, setPermintaanRadiologiPerPage] =
+    useState(8);
+  const [
+    isLoadingDataPermintaanRadiologi,
+    setIsLoadingDataPermintaanRadiologi,
+  ] = useState(false);
+  const [
+    isUpdatingDataPermintaanRadiologi,
+    setIsUpdatingDataPermintaanRadiologi,
+  ] = useState(false);
 
   const [menuState, setMenuState] = useState(null);
   const { isActionPermitted } = useClientPermission();
@@ -129,21 +136,21 @@ const DetailRadiologi = () => {
       };
       const response = await getListPermintaanRadiologi(params);
       const result = dataPermintaanRadiologiFormatHandler(response.data.data);
-      setDataPermintaanRadiologi(result);
+      // setDataPermintaanRadiologi(result);
       setDataMetaPermintaanRadiologi(response.data.meta);
     } catch (error) {
       console.log(error);
     } finally {
       setIsLoadingDataPermintaanRadiologi(false);
     }
-  };  
+  };
 
   const updateDataRoleHandler = async (payload) => {
     try {
       setIsUpdatingDataPermintaanRadiologi(true);
       const response = await getListEmployee(payload);
       const result = dataPermintaanRadiologiFormatHandler(response.data.data);
-      setDataPermintaanRadiologi(result);
+      // setDataPermintaanRadiologi(result);
       setDataMetaPermintaanRadiologi(response.data.meta);
     } catch (error) {
       console.log(error);
@@ -163,7 +170,9 @@ const DetailRadiologi = () => {
   const [dataMetaPermintaanRadiologi, setDataMetaPermintaanRadiologi] =
     useState({});
   // const [dataRadiologi, setDataRadiologi] = useState({});
-  const [detailDataRadiologi, setDetailDataRadiologi] = useState({});
+  const [detailDataAntrianRadiologi, setDetailDataAntrianRadiologi] = useState(
+    {}
+  );
   // const [isLoadingDataRadiologi, setIsLoadingDataRadiologi] = useState(true);
 
   const dataFormatterPasien = (data) => {
@@ -220,12 +229,18 @@ const DetailRadiologi = () => {
   // };
 
   useEffect(() => {
-    initDataPermintaanRadiologi();
+    // initDataPermintaanRadiologi();
     if (router.isReady) {
       (async () => {
         try {
+          const responseAntriandetail = await showRadiologi({ id: slug[0] });
+          const dataAntriandetail = responseAntriandetail.data.data;
+          setDetailDataAntrianRadiologi(dataAntriandetail);
+          const noAntrian = dataAntriandetail[0].no_antrian;
+
           // initDataPermintaanRadiologi();
           // initDataPasien();
+
           const responsePasien = await getDetailPasien({ id: slug[0] });
           const dataPasien = responsePasien.data.data;
           const formattedDataPasien = dataFormatterPasien(dataPasien);
@@ -233,9 +248,11 @@ const DetailRadiologi = () => {
           setDetailDataPasien(dataPasien);
 
           const responsePermintaan =
-            await getDetailPermintaanPemeriksaanRadiologi({ id: slug[0] });
+            await getDetailPermintaanPemeriksaanRadiologi({
+              no_antrian: noAntrian,
+            });
           const dataPermintaan = responsePermintaan.data.data;
-          setDetailDataRadiologi(dataPermintaan);
+          setDataPermintaanRadiologi(dataPermintaan);
         } catch (error) {
           console.log(error);
         } finally {
@@ -249,11 +266,12 @@ const DetailRadiologi = () => {
   const menuItems = [
     {
       label: "Permintaan Radiologi",
-      content: (
+      component: (
         <>
           <PermintaanRadiologiTableLayout
             tableHead={permintaanTableHead}
             data={dataPermintaanRadiologi}
+            // data={detailDataRadiologi}
             page={dataPermintaanRadiologiPerPage}
             rowsPerPage={dataMetaPermintaanRadiologi.per_page}
             totalRows={dataMetaPermintaanRadiologi.total}
@@ -267,10 +285,10 @@ const DetailRadiologi = () => {
       component: (
         <Assessment
           namaPemeriksaan={
-            detailDataRadiologi.permintaan?.[0]?.nama_pemeriksaan
+            dataPermintaanRadiologi.permintaan?.[0]?.nama_pemeriksaan
           }
           jenisPemeriksaan={
-            detailDataRadiologi.permintaan?.[0]?.jenis_pemeriksaan
+            dataPermintaanRadiologi.permintaan?.[0]?.jenis_pemeriksaan
           }
         />
       ),
