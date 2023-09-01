@@ -50,26 +50,28 @@ const FormBMHPRadiologi = ({
     initialValues: BMHPRadiologiInitialValue,
     validationSchema: BMHPRadiologischema,
     enableReinitialize: true,
-    onSubmit: async (values, { resetForm, setFieldError }) => {
+    // onSubmit: async (values, { resetForm, setFieldError }) => {
+    onSubmit: async (values, { resetForm }) => {
       let messageContext = isEditType ? "diperbarui" : "ditambahkan";
-      let formattedData = {
+      let data = {
         nama_barang: values.nama_barang,
         jumlah_barang: values.jumlah_barang,
         waktu_pemakaian: formatIsoToGen(values.waktu_pemakaian),
       };
 
-      let validData = {};
-      for (let key in formattedData) {
-        if (formattedData[key]) {
-          validData[`${key}`] = formattedData[key];
-        }
-      }
+      // let validData = {};
+      // for (let key in formattedData) {
+      //   if (formattedData[key]) {
+      //     validData[`${key}`] = formattedData[key];
+      //   }
+      // }
+      
       try {
         if (!isEditType) {
-          await createBMHPRadiologi(validData);
+          await createBMHPRadiologi(data);
           resetForm();
         } else {
-          await updateBMHPRadiologi({ ...validData, id: detailPrePopulatedData.id });
+          await updateBMHPRadiologi({ ...data, id: detailPrePopulatedData.id });
           const response = await getDetailBMHPRadiologi({
             id: detailPrePopulatedData.id,
           });
@@ -78,7 +80,7 @@ const FormBMHPRadiologi = ({
         setSnackbar({
           state: true,
           type: "success",
-          message: `"${validData.nama_barang}" berhasil ${messageContext}!`,
+          message: `"${values.nama_barang}" berhasil ${messageContext}!`,
         });
       } catch (error) {
         if (Object.keys(error.errorValidationObj).length >= 1) {
@@ -89,7 +91,7 @@ const FormBMHPRadiologi = ({
         setSnackbar({
           state: true,
           type: "error",
-          message: `Terjadi kesalahan, "${validData.nama_barang}" gagal ${messageContext}!`,
+          message: `Terjadi kesalahan, "${values.nama_barang}" gagal ${messageContext}!`,
         });
       }
     },

@@ -17,7 +17,7 @@ const DetailBMHPRadiologi = () => {
     let tempData = {
       nama_barang: data.nama_barang || "",
       jumlah_barang: data.jumlah_barang || "",
-      waktu_pemakaian: data.waktu_pemakaian || "",
+      waktu_pemakaian: formatGenToIso(data.waktu_pemakaian),
     };
     return { ...tempData };
   };
