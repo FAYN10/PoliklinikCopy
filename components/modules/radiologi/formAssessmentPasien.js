@@ -20,7 +20,7 @@ const FormAssessmentPasien = ({  isEditType = false,
   prePopulatedDataForm = {},
   detailPrePopulatedData = {},
   updatePrePopulatedData = () => "update data",}) => {
-    const router = useRouter();
+  const router = useRouter();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
   const { isActionPermitted } = useClientPermission();
@@ -37,7 +37,7 @@ const FormAssessmentPasien = ({  isEditType = false,
         })
         .catch((error) => {
           // Handle submission error
-          setSnackbarMessage("Gagal menyimpan data. Coba lagi nanti.");
+          setSnackbarMessage("Gagal menyimpan data.");
           setIsSnackbarOpen(true);
         });
     } else if (confirmAction === "cancel") {
@@ -75,32 +75,24 @@ const FormAssessmentPasien = ({  isEditType = false,
     noWhatsapp: "",
     email: "",
     diambil: null,
-    statusAlergi: "",
-    statusKehamilan: "",
+    statusAlergi: { name: "", value: "" },
+    statusKehamilan:{ name: "", value: "" },
     waktuPemeriksaan: null,
   };
 
 
   const validationSchema = Yup.object({
     metodePenyampaianHasil: Yup.string().required("Metode wajib dipilih"),
-    noWhatsapp: Yup.string().when("metodePenyampaianHasil", {
-      is: "WhatsApp",
-      then: Yup.string()
-        .matches(/^[0-9]+$/, "Nomor WhatsApp hanya boleh mengandung angka")
-        .required("Nomor WhatsApp wajib diisi"),
+    noWhatsapp: phoneNumberSchema(),
+    email: Yup.string().email("Email tidak valid"),
+    diambil: dateSchema("Tanggal Pengambilan"),
+    statusAlergi: Yup.object({
+      value: stringSchema("Status alergi"),
     }),
-    email: Yup.string().when("metodePenyampaianHasil", {
-      is: "Email",
-      then: Yup.string()
-        .email("Email tidak valid")
-        .required("Email wajib diisi"),
-    }), diambil: Yup.string().when("metodePenyampaianHasil", {
-      is: "Tanggal Diambil",
-      then: Yup.date().required("Tanggal diambil wajib diisi"),
+    statusKehamilan: Yup.object({
+      value: stringSchema("Status kehamilan"),
     }),
-    statusAlergi: Yup.string().required("Status alergi wajib dipilih"),
-    statusKehamilan: Yup.string().required("Status kehamilan wajib dipilih"),
-    waktuPemeriksaan: Yup.date().required("Waktu pemeriksaan wajib diisi"),
+    waktuPemeriksaan: dateSchema("Waktu Pemeriksaan"),
   });
 
   const formik = useFormik({
