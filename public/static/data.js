@@ -3,6 +3,16 @@ export const gender = [
   { name: "Perempuan", value: "0" },
 ];
 
+export const status_alergi = [
+  {name: "Ya", value: "1"},
+  {name: "Tidak", value: "0"},
+];
+
+export const status_kehamilan = [
+  {name: "Ya", value: "1"},
+  {name: "Tidak", value: "0"},
+];
+
 export const maritalStatus = [
   { name: "Belum menikah", value: "Belum menikah" },
   { name: "Sudah menikah", value: "Sudah menikah" },

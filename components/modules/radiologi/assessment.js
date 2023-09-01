@@ -34,7 +34,7 @@ const Assessment = () => {
             onClick={() => handleFormClick('petugas')}
             selected={activeForm === 'petugas'}
           >
-            <ListItemText primary="Form Assessment Petugas" />
+            <ListItemText primary="Form Assessment Pemeriksaan" />
           </ListItem>
         </List>
         <div style={{ borderLeft: '1px solid #ccc', marginLeft: '20px', paddingLeft: '20px' }}>

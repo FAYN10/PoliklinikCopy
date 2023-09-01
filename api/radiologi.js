@@ -110,12 +110,60 @@ export function getListAsesmenPasienRadiologi(params) {
   });
 }
 
+export function getDetailAsesmenPasienRadiologi(params) {
+  return request({
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/asesmenpasienradiologi/show`,
+    method: "GET",
+    params,
+  });
+}
+
+export function createAsesmenPasienRadiologi(data) {
+  return request({
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/asesmenpasienradiologi`,
+    method: "POST",
+    data,
+  });
+}
+
+export function updateAsesmenPasienRadiologi(data) {
+  return request({
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/asesmenpasienradiologi`,
+    method: "PATCH",
+    data,
+  });
+}
+
 //Asesmen Pemeriksaan Radiologi
 export function getListAsesmenPemeriksaanRadiologi(params) {
   return request({
     url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/asesmenpemeriksaanradiologi`,
     method: "GET",
     params,
+  });
+}
+
+export function getDetailAsesmenPemeriksaanRadiologi(params) {
+  return request({
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/asesmenpemeriksaanradiologi/show`,
+    method: "GET",
+    params,
+  });
+}
+
+export function createAsesmenPemeriksaanRadiologi(data) {
+  return request({
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/asesmenpemeriksaanradiologi`,
+    method: "POST",
+    data,
+  });
+}
+
+export function updateAsesmenPemeriksaanRadiologi(data) {
+  return request({
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/asesmenpemeriksaanradiologi`,
+    method: "PATCH",
+    data,
   });
 }
 
