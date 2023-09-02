@@ -133,7 +133,7 @@ const TableLayoutV3 = ({
     const { order, orderBy, onRequestSort } = props;
     const createSortHandler = (property) => (event) => {
       onRequestSort(event, property);
-    };
+    };   
 
     return (
       <TableHead>
@@ -240,7 +240,7 @@ const TableLayoutV3 = ({
       ...e,
       values: {
         id: "",
-        prioritas: "",
+        name: "",
       },
     }));
     setDate(null);
@@ -336,7 +336,7 @@ const TableLayoutV3 = ({
       tempFilterDisplay.unshift({
         type: filter,
         label: tempOptions[0].label,
-        value: value.PRIORITAS,
+        value: value.prioritas,
       });
       setSelectedFilter(tempFilterDisplay);
       searchData(tempFilterDisplay);
@@ -416,7 +416,7 @@ const TableLayoutV3 = ({
       ) : null}
       {filter === "prioritas" ? (
         <SelectAsync
-          id="prioritas"
+          id="id"
           labelField="Prioritas"
           labelOptionRef="prioritas"
           valueOptionRef="id"
@@ -439,7 +439,15 @@ const TableLayoutV3 = ({
         </FormControl>
       ) : null}
     </>
-  );
+  ); 
+
+  const handleDeleteDisplayFilter = (data) => {
+    let tempData = [...selectedFilter];
+    tempData = tempData.filter((e) => e.type !== data.type);
+    setFilter(data.type);
+    setSelectedFilter(tempData);
+    searchData(tempData);
+  };
 
   return (
     <>
