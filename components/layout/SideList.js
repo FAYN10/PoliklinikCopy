@@ -35,10 +35,19 @@ let SideList = [
     permission: ["pasien:all", "rawatjalan:all", "rawatinap:all"],
     children: [
       {
-        // name: "Pasien",
         name: "Pendaftaran",
         permission: ["pasien:all", "rawatjalan:all", "rawatinap:all"],
         routePath: "/pasien",
+      },
+      {
+        name: "Radiologi",
+        permission: ["radiologi:all"],
+        routePath: "/radiologi",
+      },
+      {
+        name: "BMHP Radiologi",
+        permission: ["bmhpradiologi:all"],
+        routePath: "/bmhpradiologi",
       },
     ],
     childrenState: false,
