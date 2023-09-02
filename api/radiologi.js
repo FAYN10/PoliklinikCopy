@@ -4,7 +4,7 @@ import request from "utils/request";
 //Antrian Radiologi
 export function getListRadiologi(params) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/antrianradiologi`,
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/antrianradiologi`,
     method: "GET",
     params,
   });
@@ -12,7 +12,7 @@ export function getListRadiologi(params) {
 
 export function searchRadiologi(params) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/antrianradiologi/search`,
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/antrianradiologi/search`,
     method: "GET",
     params,
   });
@@ -20,7 +20,7 @@ export function searchRadiologi(params) {
 
 export function showRadiologi(params) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/antrianradiologi/show`,
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/antrianradiologi/show`,
     method: "GET",
     params,
   });
@@ -29,7 +29,7 @@ export function showRadiologi(params) {
 //BMHP Radiologi
 export function getListBMHPRadiologi(params) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/bmhpradiologi`,
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/bmhpradiologi`,
     method: "GET",
     params,
   });
@@ -37,7 +37,7 @@ export function getListBMHPRadiologi(params) {
 
 export function getDetailBMHPRadiologi(params) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/bmhpradiologi/show`,
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/bmhpradiologi/show`,
     method: "GET",
     params,
   });
@@ -45,7 +45,7 @@ export function getDetailBMHPRadiologi(params) {
 
 export function createBMHPRadiologi(data) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/bmhpradiologi`,
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/bmhpradiologi`,
     method: "POST",
     data,
   });
@@ -53,7 +53,7 @@ export function createBMHPRadiologi(data) {
 
 export function updateBMHPRadiologi(data) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/bmhpradiologi`,
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/bmhpradiologi`,
     method: "PATCH",
     data,
   });
@@ -61,7 +61,7 @@ export function updateBMHPRadiologi(data) {
 
 export function deleteBmhpRadiologi(data) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/bmhpradiologi`,
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/bmhpradiologi`,
     method: "DELETE",
     data,
   });
@@ -69,7 +69,7 @@ export function deleteBmhpRadiologi(data) {
 
 export function searchBmhpRadiologi(params) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/bmhpradiologi/search`,
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/bmhpradiologi/search`,
     method: "GET",
     params,
   });
@@ -78,7 +78,7 @@ export function searchBmhpRadiologi(params) {
 //Permintaan Pemeriksaan Radiologi
 export function getListPermintaanPemeriksaanRadiologi(params) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/permintaanpemeriksaanradiologi`,
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/permintaanpemeriksaanradiologi`,
     method: "GET",
     params,
   });
@@ -86,7 +86,7 @@ export function getListPermintaanPemeriksaanRadiologi(params) {
 
 export function getDetailPermintaanPemeriksaanRadiologi(params) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/permintaanpemeriksaanradiologi/show`,
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/permintaanpemeriksaanradiologi/show`,
     method: "GET",
     params,
   });
@@ -95,7 +95,7 @@ export function getDetailPermintaanPemeriksaanRadiologi(params) {
 //Hasil Pemeriksaan Radiologi
 export function getListHasilPemeriksaanRadiologi(params) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/hasilpemeriksaanradiologi`,
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/hasilpemeriksaanradiologi`,
     method: "GET",
     params,
   });
@@ -103,7 +103,7 @@ export function getListHasilPemeriksaanRadiologi(params) {
 
 export function getDetailHasilPemeriksaanRadiologi(params) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/hasilpemeriksaanradiologi/show`,
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/hasilpemeriksaanradiologi/show`,
     method: "GET",
     params,
   });
@@ -112,7 +112,7 @@ export function getDetailHasilPemeriksaanRadiologi(params) {
 //Asesmen Pasien Radiologi
 export function getListAsesmenPasienRadiologi(params) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/asesmenpasienradiologi`,
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/asesmenpasienradiologi`,
     method: "GET",
     params,
   });
@@ -120,7 +120,7 @@ export function getListAsesmenPasienRadiologi(params) {
 
 export function getDetailAsesmenPasienRadiologi(params) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/asesmenpasienradiologi/show`,
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/asesmenpasienradiologi/show`,
     method: "GET",
     params,
   });
@@ -128,7 +128,7 @@ export function getDetailAsesmenPasienRadiologi(params) {
 
 export function createAsesmenPasienRadiologi(data) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/asesmenpasienradiologi`,
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/asesmenpasienradiologi`,
     method: "POST",
     data,
   });
@@ -136,7 +136,7 @@ export function createAsesmenPasienRadiologi(data) {
 
 export function updateAsesmenPasienRadiologi(data) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/asesmenpasienradiologi`,
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/asesmenpasienradiologi`,
     method: "PATCH",
     data,
   });
@@ -145,7 +145,7 @@ export function updateAsesmenPasienRadiologi(data) {
 //Asesmen Pemeriksaan Radiologi
 export function getListAsesmenPemeriksaanRadiologi(params) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/asesmenpemeriksaanradiologi`,
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/asesmenpemeriksaanradiologi`,
     method: "GET",
     params,
   });
@@ -153,7 +153,7 @@ export function getListAsesmenPemeriksaanRadiologi(params) {
 
 export function getDetailAsesmenPemeriksaanRadiologi(params) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/asesmenpemeriksaanradiologi/show`,
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/asesmenpemeriksaanradiologi/show`,
     method: "GET",
     params,
   });
@@ -161,7 +161,7 @@ export function getDetailAsesmenPemeriksaanRadiologi(params) {
 
 export function createAsesmenPemeriksaanRadiologi(data) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/asesmenpemeriksaanradiologi`,
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/asesmenpemeriksaanradiologi`,
     method: "POST",
     data,
   });
@@ -169,7 +169,7 @@ export function createAsesmenPemeriksaanRadiologi(data) {
 
 export function updateAsesmenPemeriksaanRadiologi(data) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/asesmenpemeriksaanradiologi`,
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/asesmenpemeriksaanradiologi`,
     method: "PATCH",
     data,
   });
@@ -178,7 +178,7 @@ export function updateAsesmenPemeriksaanRadiologi(data) {
 //Prioritas Pemeriksaan Radiologi
 export function getListOptionPrioritas(params) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/prioritaspemeriksaanradiologi/list`,
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/prioritaspemeriksaanradiologi/list`,
     method: "GET",
     params,
   });
@@ -187,7 +187,7 @@ export function getListOptionPrioritas(params) {
 //Grouping Pemeriksaan Radiologi
 export function getDetailGroupingPemeriksaanRadiologi(params) {
   return request({
-    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/groupingpemeriksaanradiologi/show`,
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_BASE_URL}/rs-service/groupingpemeriksaanradiologi/show`,
     method: "GET",
     params,
   });
