@@ -308,7 +308,7 @@ const TableLayoutV3 = ({
       tempFilterDisplay.unshift({
         type: filter,
         label: tempOptions[0].label,
-        value: value.NAME,
+        value: value.name,
       });
       setSelectedFilter(tempFilterDisplay);
       searchData(tempFilterDisplay);
@@ -405,7 +405,7 @@ const TableLayoutV3 = ({
       ) : null}
       {filter === "asuransi" ? (
         <SelectAsync
-          id="asuransi"
+          id="id"
           labelField="Tipe Jaminan"
           labelOptionRef="name"
           valueOptionRef="id"
