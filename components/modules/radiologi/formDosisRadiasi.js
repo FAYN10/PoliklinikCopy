@@ -1,76 +1,49 @@
-import React, { useState } from 'react';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import TextField from '@mui/material/TextField';
+import React from "react";
+import TextField from "@mui/material/TextField";
 
-const FormDosisRadiasi = () => {
-  const [kv, setKv] = useState('');
-  const [ma, setMa] = useState('');
-  const [s, setS] = useState('');
-  const [ffd, setFfd] = useState('');
-
-  const handleKVChange = (event) => {
-    setKv(event.target.value);
-  };
-
-  const handleMAChange = (event) => {
-    setMa(event.target.value);
-  };
-
-  const handleSChange = (event) => {
-    setS(event.target.value);
-  };
-
-  const handleFFDChange = (event) => {
-    setFfd(event.target.value);
-  };
+const FormDosisRadiasi = ({ nama_pemeriksaan }) => {
+  // Check if the nama_pemeriksaan is "XRay"
+  const isXRay = nama_pemeriksaan === "X-Ray";
 
   return (
-    <Card>
-      <CardContent>
-        <h2>Form Dosis Radiasi</h2>
+    <div>
+      {isXRay && (
         <div>
           <TextField
+            fullWidth
+            id="KV"
+            name="KV"
             label="KV"
             variant="outlined"
-            fullWidth
-            value={kv}
-            onChange={handleKVChange}
-            margin="normal"
+            // Add other relevant props and handlers as needed
           />
-        </div>
-        <div>
           <TextField
+            fullWidth
+            id="MA"
+            name="MA"
             label="MA"
             variant="outlined"
-            fullWidth
-            value={ma}
-            onChange={handleMAChange}
-            margin="normal"
+            // Add other relevant props and handlers as needed
           />
-        </div>
-        <div>
           <TextField
+            fullWidth
+            id="S"
+            name="S"
             label="S"
             variant="outlined"
-            fullWidth
-            value={s}
-            onChange={handleSChange}
-            margin="normal"
+            // Add other relevant props and handlers as needed
           />
-        </div>
-        <div>
           <TextField
+            fullWidth
+            id="FFD"
+            name="FFD"
             label="FFD"
             variant="outlined"
-            fullWidth
-            value={ffd}
-            onChange={handleFFDChange}
-            margin="normal"
+            // Add other relevant props and handlers as needed
           />
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 };
 

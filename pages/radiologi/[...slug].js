@@ -248,11 +248,11 @@ const DetailRadiologi = () => {
           // initDataPermintaanRadiologi();
           // initDataPasien();
 
-          // const responsePasien = await getDetailPasien({ id: slug[0] });
-          // const dataPasien = responsePasien.data.data;
-          // const formattedDataPasien = dataFormatterPasien(dataPasien);
-          // setDataPasien(formattedDataPasien);
-          // setDetailDataPasien(dataPasien);
+          const responsePasien = await getDetailPasien({ id: slug[0] });
+          const dataPasien = responsePasien.data.data;
+          const formattedDataPasien = dataFormatterPasien(dataPasien);
+          setDataPasien(formattedDataPasien);
+          setDetailDataPasien(dataPasien);
 
           const responsePermintaan = await getDetailPermintaanPemeriksaanRadiologi({ no_antrian: noAntrian });
           const dataPermintaan = responsePermintaan.data.data;

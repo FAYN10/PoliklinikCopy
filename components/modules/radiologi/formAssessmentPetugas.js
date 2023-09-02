@@ -1,33 +1,15 @@
-import React from 'react';
-import { generateExaminationOptions } from 'api/radiologi.js'; // Import the function from your radiologi.js file
-import Checkbox from '@mui/material/Checkbox';
-import FormControlLabel from '@mui/material/FormControlLabel';
+import React from "react";
+import FormPersiapanPemeriksaan from "./formPersiapanPemeriksaan"; // Sesuaikan dengan lokasi komponen Anda
+import FormDosisRadiasi from "./formDosisRadiasi"; // Sesuaikan dengan lokasi komponen Anda
 
-const FormAssessmentPetugas = ({ selectedNamaPemeriksaan, selectedJenisPemeriksaan }) => {
-  const examinationOptions = generateExaminationOptions();
-  const selectedOption = examinationOptions.find(
-    (option) => option.label === `${selectedNamaPemeriksaan} - ${selectedJenisPemeriksaan}`
-  );
-
-  if (!selectedOption) {
-    return <p>No preparation steps found for the selected examination.</p>;
-  }
-
-  const selectedPemeriksaan = selectedOption.value;
-
+const FormAssessmentPetugas = ({ nama_pemeriksaan }) => {
   return (
     <div>
-      <h2>Persiapan Pemeriksaan</h2>
-      <ul>
-        {selectedPemeriksaan.persiapanPemeriksaan.map((step, index) => (
-          <li key={index}>
-            <FormControlLabel
-              control={<Checkbox />}
-              label={step}
-            />
-          </li>
-        ))}
-      </ul>
+      {/* Komponen FormAssessmentPemeriksaan dengan prop nama_pemeriksaan */}
+      <FormPersiapanPemeriksaan nama_pemeriksaan={nama_pemeriksaan} />
+      
+      {/* Komponen FormDosisRadiasi dengan prop nama_pemeriksaan */}
+      <FormDosisRadiasi nama_pemeriksaan={nama_pemeriksaan} />
     </div>
   );
 };

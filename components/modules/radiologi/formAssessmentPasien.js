@@ -17,8 +17,16 @@ import EditIcon from "@material-ui/icons/Edit";
 import Switch from "@mui/material/Switch";
 import useClientPermission from "custom-hooks/useClientPermission";
 import Snackbar from "components/SnackbarMui";
+import {getListAsesmenPasienRadiologi, createAsesmenPasienRadiologi, updateAsesmenPasienRadiologi, getDetailAsesmenPasienRadiologi} from "api/radiologi";
+import { formatIsoToGen } from "utils/formatTime";
+import { statusAlergi, statusKehamilan } from "public/static/data";
 
-const FormAssessmentPasien = ({  isEditType = false,
+import SelectStatic from "components/SelectStatic";
+
+
+const FormAssessmentPasien = ({  
+  data,
+  isEditType = false,
   prePopulatedDataForm = {},
   detailPrePopulatedData = {},
   updatePrePopulatedData = () => "update data",}) => {
@@ -29,24 +37,86 @@ const FormAssessmentPasien = ({  isEditType = false,
   const [isEditingMode, setIsEditingMode] = useState(false);
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const handleConfirm = () => {
-    if (confirmAction === "save") {
-      formik.handleSubmit()
-        .then(() => {
-          // Submission was successful
-          setSnackbarMessage("Data berhasil disimpan.");
-          setIsSnackbarOpen(true);
-        })
-        .catch((error) => {
-          // Handle submission error
-          setSnackbarMessage("Gagal menyimpan data.");
-          setIsSnackbarOpen(true);
-        });
-    } else if (confirmAction === "cancel") {
-      console.log("Canceling action...");
+  const [snackbar, setSnackbar] = useState({
+    state: false,
+    type: null,
+    message: "",
+  });
+  const [dataAssessmentPasienRadiologiPerPage, setAssessmentPasienRadiologiPerPage] = useState(8);
+  const [
+    isLoadingDataAssessmentPasienRadiologi,
+    setIsLoadingDataAssessmentPasienRadiologi,
+  ] = useState(false);
+  const [
+    isUpdatingDataAssessmentPasienRadiologi,
+    setIsUpdatingDataAssessmentPasienRadiologi,
+  ] = useState(false);
+  const [sortedData, setSortedData] = useState([]);
+  const initDataAssessmentPasienRadiologi = async () => {
+    try {
+      setIsLoadingDataAssessmentPasienRadiologi(true);
+      const params = {
+        per_page: dataAssessmentPasienRadiologiPerPage,
+      };
+      const response = await getListAsesmenPasienRadiologi(params);
+      const result = dataAssessmentPasienRadiologiFormatHandler(response.data.data);
+      // setDataPermintaanRadiologi(result);
+      setDataMetaAssessmentPasienRadiologi(response.data.meta);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoadingDataAssessmentPasienRadiologi(false);
     }
-    handleCloseDialog();
   };
+
+  const updateDataAssessmentPasienRadiologiHandler = async (payload) => {
+    try {
+      setIsUpdatingDataAssessmentPasienRadiologi(true);
+      const response = await getListAsesmenPasienRadiologi(payload);
+      const result = dataAssessmentPasienRadiologiFormatHandler(response.data.data);
+      // setDataPermintaanRadiologi(result);
+      setDataMetaAssessmentPasienRadiologi(response.data.meta);
+    } catch (error) {
+      console.log(error);
+      setSnackbarState({
+        state: true,
+        type: "error",
+        message: error.message,
+      });
+    } finally {
+      setIsUpdatingDataAssessmentPasienRadiologi(false);
+    }
+  };
+
+  // ASSESSMENT PASIEN 
+  const [dataAssessmentPasienRadiologi, setDataAssessmentPasienRadiologi] = useState({});
+  const [dataMetaAssessmentPasienRadiologi, setDataMetaAssessmentPasienRadiologi] = useState({});
+  const [detailDatAssessmentPasienRadiologi, setDetailDataAssessmentPasienRadiologi] = useState(
+    {}
+  );
+
+
+
+
+
+  // const handleConfirm = () => {
+  //   if (confirmAction === "save") {
+  //     AssessmentPasienValidation.handleSubmit()
+  //       .then(() => {
+  //         // Submission was successful
+  //         setSnackbarMessage("Data berhasil disimpan.");
+  //         setIsSnackbarOpen(true);
+  //       })
+  //       .catch((error) => {
+  //         // Handle submission error
+  //         setSnackbarMessage("Gagal menyimpan data.");
+  //         setIsSnackbarOpen(true);
+  //       });
+  //   } else if (confirmAction === "cancel") {
+  //     console.log("Canceling action...");
+  //   }
+  //   handleCloseDialog();
+  // };
   const handleIsEditingMode = (e) => {
     setIsEditingMode(e.target.checked);
   };
@@ -60,56 +130,89 @@ const FormAssessmentPasien = ({  isEditType = false,
     setConfirmAction(null);
   };
 
-  // const handleConfirm = () => {
-  //   if (confirmAction === "save") {
+  const handleConfirm = () => {
+    if (confirmAction === "save") {
 
-  //     console.log("Saving data...");
-  //     formik.handleSubmit();
-  //   } else if (confirmAction === "cancel") {
+      console.log("Saving data...");
+      AssessmentPasienValidation.handleSubmit();
+    } else if (confirmAction === "cancel") {
 
-  //     console.log("Canceling action...");
-  //   }
-  //   handleCloseDialog();
-  // };
-
-  const initialValues = {
-    metodePenyampaianHasil: "",
-    noWhatsapp: "",
-    email: "",
-    diambil: null,
-    statusAlergi: { name: "", value: "" },
-    statusKehamilan:{ name: "", value: "" },
-    waktuPemeriksaan: null,
+      console.log("Canceling action...");
+    }
+    handleCloseDialog();
   };
 
+  const AssessmentPasienInitialValues = !isEditType
+  ?  {
+    no_wa: "",
+    email: "",
+    diambil: null,
+    status_alergi: { name: "", value: "" },
+    status_kehamilan:{ name: "", value: "" },
+    waktu_pemeriksaan: null,
+  }: prePopulatedDataForm;
 
-  const validationSchema = Yup.object({
-    metodePenyampaianHasil: Yup.string().required("Metode wajib dipilih"),
-    noWhatsapp: phoneNumberSchema(),
+  const AssessmentPasienSchema = Yup.object({
+    no_wa: phoneNumberSchema(),
     email: Yup.string().email("Email tidak valid"),
     diambil: dateSchema("Tanggal Pengambilan"),
-    statusAlergi: Yup.object({
-      value: stringSchema("Status alergi"),
+    status_alergi: Yup.object({
+      value: stringSchema("Status alergi", true),
     }),
-    statusKehamilan: Yup.object({
-      value: stringSchema("Status kehamilan"),
+    status_kehamilan: Yup.object({
+      value: stringSchema("Status kehamilan", true),
     }),
-    waktuPemeriksaan: dateSchema("Waktu Pemeriksaan"),
+    waktu_pemeriksaan: dateSchema("Waktu Pemeriksaan"),
   });
 
-  const formik = useFormik({
-    initialValues,
-    validationSchema,
-    onSubmit: async (values) => {
-
-      console.log(values);
+  const AssessmentPasienValidation = useFormik({
+    initialValues: AssessmentPasienInitialValues,
+    validationSchema: AssessmentPasienSchema,
+    enableReinitialize: true,
+    onSubmit: async (values, { resetForm }) => {
+      let messageContext = isEditType ? "diperbarui" : "ditambahkan";
+      let data = {
+        no_wa: values.no_wa,
+        email: values.email,
+        diambil: formatIsoToGen(values.diambil),
+        status_alergi: values.status_alergi,
+        status_kehamilan: values.status_kehamilan,
+        waktu_pemeriksaan: formatIsoToGen(values.waktu_pemeriksaan),
+      };
+      try {
+        if (!isEditType) {
+          await createAsesmenPasienRadiologi(data);
+          resetForm();
+        } else {
+          await updateAsesmenPasienRadiologi({ ...data, id: detailPrePopulatedData.id });
+          const response = await getDetailAsesmenPasienRadiologi({
+            id: detailPrePopulatedData.id,
+          });
+          updatePrePopulatedData({ ...response.data.data });
+        }
+        setSnackbar({
+          state: true,
+          type: "success",
+          message: `"Assessment Pasien berhasil ${messageContext}!`,
+        });
+      } catch (error) {
+        if (Object.keys(error.errorValidationObj).length >= 1) {
+          for (let key in error.errorValidationObj) {
+            setFieldError(key, error.errorValidationObj[key][0]);
+          }
+        }
+        setSnackbar({
+          state: true,
+          type: "error",
+          message: `Terjadi kesalahan, Assessment Pasien gagal ${messageContext}!`,
+        });
+      }
     },
   });
 
-  const metodePenyampaianHasilOptions = ["WhatsApp", "Email", "Diambil"];
-  const statusAlergiOptions = ["Ada", "Tidak Ada"];
-  const statusKehamilanOptions = ["Ada", "Tidak Ada"];
 
+
+  
   return (
     <Grid container spacing={2}>
       <Grid container justifyContent="flex-end" spacing={2} sx={{ marginTop: "12px", marginRight: "12px" }}>
@@ -137,17 +240,17 @@ const FormAssessmentPasien = ({  isEditType = false,
             opacity: isEditingMode ? 1 : 0.5,
           }}
         >
-          <form onSubmit={formik.handleSubmit}>
+          <form onSubmit={AssessmentPasienValidation.handleSubmit}>
             <div className="mb-16">
               <TextField
                 fullWidth
-                id="noWhatsapp"
-                name="noWhatsapp"
+                id="no_wa"
+                name="no_wa"
                 label="No. WhatsApp"
-                value={formik.values.noWhatsapp}
-                onChange={formik.handleChange}
-                error={formik.touched.noWhatsapp && Boolean(formik.errors.noWhatsapp)}
-                helperText={formik.touched.noWhatsapp && formik.errors.noWhatsapp}
+                value={AssessmentPasienValidation.values.noWhatsapp}
+                onChange={AssessmentPasienValidation.handleChange}
+                error={AssessmentPasienValidation.touched.noWhatsapp && Boolean(AssessmentPasienValidation.errors.noWhatsapp)}
+                helperText={AssessmentPasienValidation.touched.noWhatsapp && AssessmentPasienValidation.errors.noWhatsapp}
                 disabled={!isEditingMode}
               />
             </div>
@@ -157,10 +260,10 @@ const FormAssessmentPasien = ({  isEditType = false,
                 id="email"
                 name="email"
                 label="Email"
-                value={formik.values.email}
-                onChange={formik.handleChange}
-                error={formik.touched.email && Boolean(formik.errors.email)}
-                helperText={formik.touched.email && formik.errors.email}
+                value={AssessmentPasienValidation.values.email}
+                onChange={AssessmentPasienValidation.handleChange}
+                error={AssessmentPasienValidation.touched.email && Boolean(AssessmentPasienValidation.errors.email)}
+                helperText={AssessmentPasienValidation.touched.email && AssessmentPasienValidation.errors.email}
                 disabled={!isEditingMode}
               />
             </div>
@@ -168,7 +271,7 @@ const FormAssessmentPasien = ({  isEditType = false,
               <DateTimePickerComp
                 id="diambil"
                 label="Tanggal Diambil"
-                handlerRef={formik}
+                handlerRef={AssessmentPasienValidation}
                 disabled={!isEditingMode}
               />
             </div>
@@ -184,53 +287,30 @@ const FormAssessmentPasien = ({  isEditType = false,
             mt: "16px", // Add margin-top for spacing
           }}
         >
-          <form onSubmit={formik.handleSubmit}>
+          <form onSubmit={AssessmentPasienValidation.handleSubmit}>
             <div className="mb-16">
-              <TextField
-                fullWidth
-                select
-                id="statusAlergi"
-                name="statusAlergi"
-                label="Status Alergi"
-                value={formik.values.statusAlergi}
-                onChange={formik.handleChange}
-                error={formik.touched.statusAlergi && Boolean(formik.errors.statusAlergi)}
-                helperText={formik.touched.statusAlergi && formik.errors.statusAlergi} disabled={!isEditingMode}
-
-              >
-                {statusAlergiOptions.map((option) => (
-                  <MenuItem key={option} value={option}>
-                    {option}
-
-                  </MenuItem>
-                ))}
-              </TextField>
+            <SelectStatic
+                  id="status_alergi"
+                  handlerRef={AssessmentPasienValidation}
+                  label="Status Alergi"
+                  options={statusAlergi}
+                  disabled={!isEditingMode}
+                />
             </div>
             <div className="mb-16">
-              <TextField
-                fullWidth
-                select
-                id="statusKehamilan"
-                name="statusKehamilan"
-                label="Status Kehamilan"
-                value={formik.values.statusKehamilan}
-                onChange={formik.handleChange}
-                error={formik.touched.statusKehamilan && Boolean(formik.errors.statusKehamilan)}
-                helperText={formik.touched.statusKehamilan && formik.errors.statusKehamilan}
-                disabled={!isEditingMode}
-              >
-                {statusKehamilanOptions.map((option) => (
-                  <MenuItem key={option} value={option}>
-                    {option}
-                  </MenuItem>
-                ))}
-              </TextField>
+            <SelectStatic
+                  id="status_kehamilan"
+                  handlerRef={AssessmentPasienValidation}
+                  label="Status Kehamilan"
+                  options={statusKehamilan}
+                  disabled={!isEditingMode}
+                />
             </div>
             <div className="mb-16">
               <DateTimePickerComp
-                id="waktuPemeriksaan"
+                id="waktu_pemeriksaan"
                 label="Waktu Pemeriksaan"
-                handlerRef={formik}
+                handlerRef={AssessmentPasienValidation}
                 disabled={!isEditingMode}
               />
             </div>
@@ -246,7 +326,7 @@ const FormAssessmentPasien = ({  isEditType = false,
               color="error"
               startIcon={<CancelIcon />}
               onClick={() => handleOpenDialog("cancel")}
-              disabled={!isEditingMode} // Disable BATAL button when not in editing mode
+              disabled={!isEditingMode} 
             >
               BATAL
             </Button>
@@ -256,9 +336,9 @@ const FormAssessmentPasien = ({  isEditType = false,
               type="button"
               variant="contained"
               startIcon={<SaveIcon />}
-              loading={formik.isSubmitting}
+              loading={AssessmentPasienValidation.isSubmitting}
               onClick={() => handleOpenDialog("save")}
-              disabled={!isEditingMode} 
+              disabled={!isEditingMode || !isActionPermitted("asesmenpasienradiologi:store")}
             >
               SIMPAN
             </LoadingButton>
@@ -280,10 +360,11 @@ const FormAssessmentPasien = ({  isEditType = false,
         </Dialog>
       </Grid>
       <Snackbar
-        open={isSnackbarOpen}
-        autoHideDuration={3000} // Adjust the duration as needed
-        onClose={() => setIsSnackbarOpen(false)}
-        message={snackbarMessage}
+        state={snackbar.state}
+        setState={setSnackbar}
+        message={snackbar.message}
+        isSuccessType={snackbar.type === "success"}
+        isErrorType={snackbar.type === "error"}
       />
     </Grid>
   );
