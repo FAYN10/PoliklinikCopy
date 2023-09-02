@@ -101,6 +101,14 @@ export function getListHasilPemeriksaanRadiologi(params) {
   });
 }
 
+export function getDetailHasilPemeriksaanRadiologi(params) {
+  return request({
+    url: `${process.env.NEXT_PUBLIC_GATEWAY_WORK_BASE_URL}/rs-service/hasilpemeriksaanradiologi/show`,
+    method: "GET",
+    params,
+  });
+}
+
 //Asesmen Pasien Radiologi
 export function getListAsesmenPasienRadiologi(params) {
   return request({

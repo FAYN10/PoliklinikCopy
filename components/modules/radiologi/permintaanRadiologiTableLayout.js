@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -9,9 +9,9 @@ import {
   Paper,
   Typography,
   Box,
-} from '@mui/material';
+} from "@mui/material";
 
-const PermintaanRadiologiTableLayout = ({ tableHead, data }) => {  
+const PermintaanRadiologiTableLayout = ({ tableHead, data }) => {
   // Mengecek apakah data adalah array dan tidak kosong
   const isDataValid = Array.isArray(data) && data.length > 0;
 
@@ -27,7 +27,7 @@ const PermintaanRadiologiTableLayout = ({ tableHead, data }) => {
         const nomorB = String(b.nomor_pemeriksaan || ""); // Mengonversi ke string, jika bukan string
         return nomorA.localeCompare(nomorB);
       });
-      
+
       setSortedData(sorted);
     } else {
       setSortedData([]); // Jika data tidak valid, set sortedData menjadi array kosong
@@ -35,33 +35,41 @@ const PermintaanRadiologiTableLayout = ({ tableHead, data }) => {
   }, [data]); // Bergantung pada perubahan data
 
   return (
-    <TableContainer component={Paper}>
-      {/* Mengecek apakah data valid */}
-      {isDataValid ? (
-        <Table>
-          <TableHead>
-            <TableRow>
-              {tableHead.map((column) => (
-                <TableCell key={column.id}>{column.label}</TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {sortedData.map((item) => (
-              <TableRow key={item.id}>
+    <Box p={2}>
+      {" "}
+      {/* Menambahkan jarak menggunakan Box */}
+      <TableContainer component={Paper}>
+        {/* Mengecek apakah data valid */}
+        {isDataValid ? (
+          <Table>
+            <TableHead>
+              <TableRow>
                 {tableHead.map((column) => (
-                  <TableCell key={column.id}>{item[column.id]}</TableCell>
+                  <TableCell key={column.id}>{column.label}</TableCell>
                 ))}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      ) : (
-        <Box p={2}> {/* Menambahkan jarak pada pesan jika data tidak tersedia */}
-          <Typography variant="subtitle1">Tidak ada data yang tersedia.</Typography>
-        </Box>
-      )}
-    </TableContainer>
+            </TableHead>
+            <TableBody>
+              {sortedData.map((item) => (
+                <TableRow key={item.id}>
+                  {tableHead.map((column) => (
+                    <TableCell key={column.id}>{item[column.id]}</TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <Box p={2}>
+            {" "}
+            {/* Menambahkan jarak pada pesan jika data tidak tersedia */}
+            <Typography variant="subtitle1">
+              Tidak ada data yang tersedia.
+            </Typography>
+          </Box>
+        )}
+      </TableContainer>
+    </Box>
   );
 };
 

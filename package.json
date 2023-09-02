@@ -24,10 +24,10 @@
     "formik": "^2.2.9",
     "lodash": "^4.17.21",
     "material-ui-phone-number": "^3.0.0",
-    "next": "12.1.4",
+    "next": "^12.1.4",
     "pusher-js": "^7.0.6",
-    "react": "18.0.0",
-    "react-dom": "18.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
     "react-to-print": "^2.14.7",
     "sass": "^1.49.11",
     "yup": "^0.32.11"

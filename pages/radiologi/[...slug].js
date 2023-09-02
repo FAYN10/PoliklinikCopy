@@ -59,7 +59,11 @@ const permintaanTableHead = [
     label: "Catatan Permintaan",
   },
 ];
-const dataPermintaanRadiologiFormatHandler = (payload, namaPemeriksaan, jenisPemeriksaan) => {
+const dataPermintaanRadiologiFormatHandler = (
+  payload,
+  namaPemeriksaan,
+  jenisPemeriksaan
+) => {
   const result = payload.map((e) => {
     return {
       nomor_pemeriksaan: e.nomor_pemeriksaan || "null",
@@ -181,7 +185,6 @@ const DetailRadiologi = () => {
   const [detailAssPas, setDataAssPas] = useState({});
   const [detailAssPem, setDataAssPem] = useState({});
 
-
   const dataFormatterPasien = (data) => {
     let tempData = {
       nama_pasien: data.nama_pasien || "",
@@ -244,40 +247,54 @@ const DetailRadiologi = () => {
           const dataAntriandetail = responseAntriandetail.data.data;
           setDetailDataAntrianRadiologi(dataAntriandetail);
           const noAntrian = dataAntriandetail[0].no_antrian;
+          const idPasien = dataAntriandetail[0].pasien_id;
 
           // initDataPermintaanRadiologi();
           // initDataPasien();
 
-          const responsePasien = await getDetailPasien({ id: slug[0] });
+          const responsePasien = await getDetailPasien({ id: idPasien });
           const dataPasien = responsePasien.data.data;
           const formattedDataPasien = dataFormatterPasien(dataPasien);
           setDataPasien(formattedDataPasien);
           setDetailDataPasien(dataPasien);
 
-          const responsePermintaan = await getDetailPermintaanPemeriksaanRadiologi({ no_antrian: noAntrian });
+          const responsePermintaan =
+            await getDetailPermintaanPemeriksaanRadiologi({
+              no_antrian: noAntrian,
+            });
           const dataPermintaan = responsePermintaan.data.data;
           setDataPermintaanRadiologi(dataPermintaan);
-          const groupingId = dataPermintaan[0].grouping_pemeriksaan_radiologi_id;
+          const groupingId =
+            dataPermintaan[0].grouping_pemeriksaan_radiologi_id;
           const permintaanId = dataPermintaan[0].id;
-          
-          const responseGrouping = await getDetailGroupingPemeriksaanRadiologi({ id: groupingId });
+
+          const responseGrouping = await getDetailGroupingPemeriksaanRadiologi({
+            id: groupingId,
+          });
           const dataGrouping = responseGrouping.data.data;
           const namaPemeriksaan = dataGrouping.kategori_pemeriksaan;
           const jenisPemeriksaan = dataGrouping.jenis_pemeriksaan;
 
-          const formattedDataPermintaanRadiologi = dataPermintaanRadiologiFormatHandler(dataPermintaan, namaPemeriksaan, jenisPemeriksaan);
-          
+          const formattedDataPermintaanRadiologi =
+            dataPermintaanRadiologiFormatHandler(
+              dataPermintaan,
+              namaPemeriksaan,
+              jenisPemeriksaan
+            );
+
           setDataPermintaanRadiologi(formattedDataPermintaanRadiologi);
-          
-          const responseAsesmenPasienRadiologi = await getDetailAsesmenPasienRadiologi({ no_antrian: noAntrian });
+
+          const responseAsesmenPasienRadiologi =
+            await getDetailAsesmenPasienRadiologi({ no_antrian: noAntrian });
           const dataAssPas = responseAsesmenPasienRadiologi.data.data;
           setDataAssPas(dataAssPas);
 
-          const responseAsesmenPemeriksaanRadiologi = await getDetailAsesmenPemeriksaanRadiologi({ permintaanId: permintaanId });
+          const responseAsesmenPemeriksaanRadiologi =
+            await getDetailAsesmenPemeriksaanRadiologi({
+              permintaanId: permintaanId,
+            });
           const dataAssPem = responseAsesmenPemeriksaanRadiologi.data.data;
           setDataAssPem(dataAssPem);
-
-
         } catch (error) {
           console.log(error);
         } finally {
