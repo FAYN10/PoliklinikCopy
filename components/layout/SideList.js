@@ -3,6 +3,7 @@ import People from "@material-ui/icons/PeopleAltOutlined";
 import Hospital from "@material-ui/icons/LocalHospitalOutlined";
 import UserAuth from "@mui/icons-material/AdminPanelSettingsOutlined";
 import SettingsIcon from "@mui/icons-material/Settings";
+import InventoryIcon from '@mui/icons-material/Inventory';
 
 let SideList = [
   {
@@ -89,6 +90,35 @@ let SideList = [
         routePath: "/pekerjaan",
       },
       { name: "Suku", permission: ["suku:all"], routePath: "/suku" },
+    ],
+    childrenState: false,
+    routePath: null,
+  },
+  {
+    name: "Gudang",
+    icon: < InventoryIcon />,
+    permission: [],
+    children: [
+      {
+        name: "Purchase Order",
+        permission: [],
+        routePath: "/gudang/purchase-order",
+      },
+      {
+        name: "Pembelian",
+        permission: [],
+        routePath: "/gudang/pembelian",
+      },
+      {
+        name: "Mutasi",
+        permission: [],
+        routePath: "/gudang/mutasi",
+      },
+      {
+        name: "Retur",
+        permission: [],
+        routePath: "/gudang/retur",
+      },
     ],
     childrenState: false,
     routePath: null,
