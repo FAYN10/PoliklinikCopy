@@ -7,48 +7,105 @@ import {formatGenToIso} from 'utils/formatTime';
 import getStaticData from 'utils/getStaticData';
 import {getDetailPembelian} from 'api/gudang/pembelian';
 import TableLayout from 'pages/pasien/TableLayout';
-import { formatReadable } from "utils/formatTime";
+import {formatReadable} from 'utils/formatTime';
 import BackIcon from '@material-ui/icons/ArrowBack';
-import {
-  Grid,
-  Card,
-  Avatar,
-  Typography,
-  Divider,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Button,
-} from '@mui/material';
+import {Grid, Card, Avatar, Typography, Divider, Button} from '@mui/material';
 import ReactToPrint from 'react-to-print';
 import {Paper} from '@material-ui/core';
+import TableLayoutDetail from 'components/TableLayoutDetailGudang';
+import DialogEditItem from 'components/modules/gudang/dialogEditItem';
 
 const Detail = () => {
   const router = useRouter();
   const {slug} = router.query;
   // const [dataPembelian, setDataPembelian] = useState({});
-  const [detailDataPembelian, setDetailDataPembelian] = useState({});
-  const [isLoadingDataPembelian, setIsLoadingDataPembelian] =
-    useState(true);
-  const [rows, setRows] = useState(
-    detailDataPembelian?.receive_detail || []
-  );
+  const [detailDataPembelian, setDetailDataPembelian] = useState([]);
+  const [dataPembelian, setDataPembelian] = useState({});
+  const [isLoadingDataPembelian, setIsLoadingDataPembelian] = useState(true);
   const generalConsentPrintRef = useRef();
 
-  // const dataFormatter = (data) => {
-  //   let tempData = {
-  //     nomor_po: data.nomor_po || "null",
-  //     tanggal_po: data.tanggal_po || "null",
-  //     nama_supplier: data.supplier.name || "null",
-  //     telepon_supplier: data.supplier.telp || "null",
-  //     alamat_supplier: data.supplier.address || "null",
-  //     po_type: data.po_type.name || "null",
-  //   };
-  //   return { ...tempData };
-  // };
+  const [isEditingMode, setIsEditingMode] = useState(false);
+  const [dataDetail, setDataDetail] = useState([]);
+  const [isDialogItem, setIsDialogItem] = useState(false);
+
+  const handleIsEditingMode = (e) => {
+    setIsEditingMode(e.target.checked);
+  };
+
+  const deleteDetailDataHandler = (payload) => {
+    let tempData = dataDetail.filter((data) => data.id == payload);
+    // const result = dataDetailFormatHandler(createPurchaseOrderValidation.values.purchase_order_detail);
+    // createPurchaseOrderValidation.setFieldValue("purchase_order_detail", ...tempData);
+    // console.log(result);
+    setDataDetail(tempData);
+  };
+
+  const detailPembelianTableHead = [
+    {
+      id: 'kode_item',
+      label: 'Kode Item',
+    },
+    {
+      id: 'nama_item',
+      label: 'Nama Item',
+    },
+    {
+      id: 'nomor_batch',
+      label: 'Nomor Batch',
+    },
+    {
+      id: 'jumlah',
+      label: 'Jumlah',
+    },
+    {
+      id: 'sediaan',
+      label: 'Sediaan',
+    },
+    {
+      id: 'harga_beli_satuan',
+      label: 'Harga Beli',
+    },
+    {
+      id: 'harga_jual_satuan',
+      label: 'Harga Jual',
+    },
+    {
+      id: 'diskon',
+      label: 'Diskon',
+    },
+    {
+      id: 'margin',
+      label: 'Margin',
+    },
+    {
+      id: 'total',
+      label: 'Total',
+    },
+    {
+      id: 'tanggal_ed',
+      label: 'Expired Date',
+    },
+  ];
+
+  const dataDetailFormatHandler = (payload) => {
+    const result = payload.map((e) => {
+      return {
+        kode_item: e.item.kode || 'null',
+        nama_item: e.item.name || 'null',
+        nomor_batch: e.nomor_batch || 'null',
+        jumlah: e.stok || 'null',
+        sediaan: e.item.sediaan.name || 'null',
+        harga_beli_satuan: e.harga_beli_satuan || 'null',
+        harga_jual_satuan: e.harga_jual_satuan || 'null',
+        diskon: e.diskon || 'null',
+        margin: e.margin || 'null',
+        total: e.total_pembelian || 'null',
+        tanggal_ed: e.tanggal_ed || 'null',
+        id: e,
+      };
+    });
+    return result;
+  };
 
   useEffect(() => {
     if (router.isReady) {
@@ -56,13 +113,14 @@ const Detail = () => {
         try {
           const response = await getDetailPembelian({id: slug[0]});
           const data = response.data.data;
-          // const formattedData = dataFormatter(data); // format data untuk error handling
-          // setDataPembelian(formattedData); // setDataPO pakai data yang diformat di atas
+          setDataPembelian(data);
+          const formattedData = dataDetailFormatHandler(data.gudang); // format data untuk error handling
+          setDetailDataPembelian(formattedData); // setDataPO pakai data yang diformat di atas
           console.log('Fetched Data:', data);
-          setDetailDataPembelian(data); // setDetailPO pakai data dari resnpose API
-          const PembelianDetails = data.receive_detail || []; // ambil data detail PO jika nggak ada maka array kosong
-          console.log('Pembelian Details:', PembelianDetails);
-          setRows(PembelianDetails);
+          // setDetailDataPembelian(data); // setDetailPO pakai data dari resnpose API
+          // const PembelianDetails = data.receive_detail || []; // ambil data detail PO jika nggak ada maka array kosong
+          // console.log('Pembelian Details:', PembelianDetails);
+          // setRows(PembelianDetails);
         } catch (error) {
           console.log('Error fetching data:', error);
         } finally {
@@ -97,7 +155,7 @@ const Detail = () => {
                       <Grid item md={7} sm={12}>
                         <div>
                           {' : '}
-                          {detailDataPembelian?.nomor_faktur}
+                          {dataPembelian?.nomor_faktur}
                         </div>
                       </Grid>
                       <Grid item xs={3}>
@@ -108,7 +166,7 @@ const Detail = () => {
                       <Grid item md={7} sm={12}>
                         <div>
                           {' : '}
-                          {detailDataPembelian?.nomor_po}
+                          {dataPembelian?.purchase_order.nomor_po}
                         </div>
                       </Grid>
                       <Grid item xs={3}>
@@ -119,18 +177,18 @@ const Detail = () => {
                       <Grid item md={7} sm={12}>
                         <div>
                           {' : '}
-                          {formatReadable(detailDataPembelian?.tanggal_pembelian)}
+                          {formatReadable(dataPembelian?.tanggal_pembelian)}
                         </div>
                       </Grid>
                       <Grid item xs={3}>
                         <Typography variant='h1 font-w-700'>
-                          Tanggal Jatuh Tempo
+                          Jatuh Tempo Pembayaran
                         </Typography>
                       </Grid>
                       <Grid item md={7} sm={12}>
                         <div>
                           {' : '}
-                          {formatReadable(detailDataPembelian?.tanggal_jatuh_tempo)}
+                          {formatReadable(dataPembelian?.tanggal_jatuh_tempo)}
                         </div>
                       </Grid>
                       <Grid item xs={3}>
@@ -141,7 +199,7 @@ const Detail = () => {
                       <Grid item md={7} sm={12}>
                         <div>
                           {' : '}
-                          {detailDataPembelian?.supplier.name}
+                          {dataPembelian?.purchase_order.supplier.name}
                         </div>
                       </Grid>
                       <Grid item xs={3}>
@@ -150,7 +208,7 @@ const Detail = () => {
                       <Grid item md={7} sm={12}>
                         <div>
                           {' : '}
-                          {detailDataPembelian?.supplier.telp}
+                          {dataPembelian?.purchase_order.supplier.telp}
                         </div>
                       </Grid>
                       <Grid item xs={3}>
@@ -159,7 +217,7 @@ const Detail = () => {
                       <Grid item md={7} sm={12}>
                         <div>
                           {' : '}
-                          {detailDataPembelian?.supplier.address}
+                          {dataPembelian?.purchase_order.supplier.address}
                         </div>
                       </Grid>
                       <Grid item xs={3}>
@@ -168,7 +226,8 @@ const Detail = () => {
                       <Grid item md={7} sm={12}>
                         <div>
                           {' : '}
-                          {detailDataPembelian?.ppn}
+                          {dataPembelian?.ppn}
+                          {'%'}
                         </div>
                       </Grid>
                     </Grid>
@@ -176,48 +235,24 @@ const Detail = () => {
                 </div>
               </div>
               <Divider sx={{borderWidth: '1px', marginTop: 2}} />
-              <div className='mt-32 p-16'>
-                <TableContainer component={Paper}>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell sx={{fontWeight: 'bold'}}>No</TableCell>
-                        <TableCell sx={{fontWeight: 'bold'}}>
-                          Kode Item
-                        </TableCell>
-                        <TableCell sx={{fontWeight: 'bold'}}>
-                          Nama Item
-                        </TableCell>
-                        <TableCell sx={{fontWeight: 'bold'}}>Nomor Batch</TableCell>
-                        <TableCell sx={{fontWeight: 'bold'}}>Stok</TableCell>
-                        <TableCell sx={{fontWeight: 'bold'}}>Harga Beli</TableCell>
-                        <TableCell sx={{fontWeight: 'bold'}}>Harga Jual</TableCell>
-                        <TableCell sx={{fontWeight: 'bold'}}>Diskon</TableCell>
-                        <TableCell sx={{fontWeight: 'bold'}}>Margin</TableCell>
-                        <TableCell sx={{fontWeight: 'bold'}}>Total</TableCell>
-                        <TableCell sx={{fontWeight: 'bold'}}>Expired Date</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {rows.map((row, index) => (
-                        <TableRow key={index}>
-                          <TableCell>{index+1}</TableCell>
-                          <TableCell>{row.item.kode}</TableCell>
-                          <TableCell>{row.item.name}</TableCell>
-                          <TableCell>{row.nomor_batch}</TableCell>
-                          <TableCell>{row.stok}</TableCell>
-                          <TableCell>{row.harga_beli_satuan}</TableCell>
-                          <TableCell>{row.harga_jual_satuan}</TableCell>
-                          <TableCell>{row.diskon}</TableCell>
-                          <TableCell>{row.margin}</TableCell>
-                          <TableCell>{row.total_pembelian}</TableCell>
-                          <TableCell>{row.tanggal_ed}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </div>
+
+              <TableLayoutDetail
+                baseRoutePath={`${router.asPath}`}
+                title='Item'
+                tableHead={detailPembelianTableHead}
+                data={detailDataPembelian}
+                btnEditHandler={setIsDialogItem}
+                // isUpdatingData={isUpdatingDataRawatJalan}
+                // deleteData={deleteDetailDataHandler}
+                // createData={createDetailDataHandler}
+              />
+
+              <DialogEditItem
+                state={isDialogItem}
+                setState={setIsDialogItem}
+                // createData={createDetailDataHandler}
+              />
+
               <div className='flex justify-end'>
                 <Button
                   type='button'

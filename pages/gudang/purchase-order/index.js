@@ -1,46 +1,46 @@
-import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import { getPurchaseOrder } from "api/gudang/purchase-order";
-import TableLayoutGudang from "components/TableLayoutGudang";
-import LoaderOnLayout from "components/LoaderOnLayout";
-import Snackbar from "components/SnackbarMui";
-import { formatReadable } from "utils/formatTime";
+import {useEffect, useState} from 'react';
+import {useRouter} from 'next/router';
+import {getPurchaseOrder, deletePurchaseOrder} from 'api/gudang/purchase-order';
+import TableLayoutGudang from 'components/TableLayoutGudang';
+import LoaderOnLayout from 'components/LoaderOnLayout';
+import Snackbar from 'components/SnackbarMui';
+import {formatReadable} from 'utils/formatTime';
 
-const purchaseOrderTableHead = [
+const PurchaseOrderTableHead = [
   {
-    id: "nomor_po",
-    label: "Nomor PO",
+    id: 'nomor_po',
+    label: 'Nomor PO',
   },
   {
-    id: "tanggal_po",
-    label: "Tanggal PO",
+    id: 'tanggal_po',
+    label: 'Tanggal PO',
   },
   {
-    id: "po_type",
-    label: "Jenis Surat",
+    id: 'po_type',
+    label: 'Jenis Surat',
   },
   {
-    id: "supplier",
-    label: "Supplier",
+    id: 'supplier',
+    label: 'Supplier',
   },
   {
-    id: "gudang",
-    label: "Gudang",
+    id: 'gudang',
+    label: 'Gudang',
   },
   {
-    id: "action",
-    label: "",
+    id: 'action',
+    label: '',
   },
 ];
 
 const dataPurchaseOrderFormatHandler = (payload) => {
   const result = payload.map((e) => {
     return {
-      nomor_po: e.nomor_po || "null",
-      tanggal_po: formatReadable(e.tanggal_po) || "null",
-      po_type: e.po_type.name || "null",
-      supplier: e.supplier.name || "null",
-      gudang: e.gudang || "null",
+      nomor_po: e.nomor_po || 'null',
+      tanggal_po: formatReadable(e.tanggal_po) || 'null',
+      potype: e.potype || 'null',
+      supplier: e.supplier || 'null',
+      gudang: e.gudang || 'null',
       id: e.id,
     };
   });
@@ -52,15 +52,17 @@ const PurchaseOrder = () => {
   const [snackbarState, setSnackbarState] = useState({
     state: false,
     type: null,
-    message: "",
+    message: '',
   });
 
   // PurchaseOrder --general state
   const [dataPurchaseOrder, setDataPurchaseOrder] = useState([]);
   const [dataMetaPurchaseOrder, setDataMetaPurchaseOrder] = useState({});
   const [dataPurchaseOrderPerPage, setDataPerPage] = useState(8);
-  const [isLoadingDataPurchaseOrder, setIsLoadingDataPurchaseOrder] = useState(false);
-  const [isUpdatingDataPurchaseOrder, setIsUpdatingDataPurchaseOrder] = useState(false);
+  const [isLoadingDataPurchaseOrder, setIsLoadingDataPurchaseOrder] =
+    useState(false);
+  const [isUpdatingDataPurchaseOrder, setIsUpdatingDataPurchaseOrder] =
+    useState(false);
 
   // PurchaseOrder --general handler
   const initDataPurchaseOrder = async () => {
@@ -91,7 +93,7 @@ const PurchaseOrder = () => {
       console.log(error);
       setSnackbarState({
         state: true,
-        type: "error",
+        type: 'error',
         message: error.message,
       });
     } finally {
@@ -102,30 +104,34 @@ const PurchaseOrder = () => {
   const deleteDataPurchaseOrderHandler = async (payload) => {
     try {
       setIsUpdatingDataPurchaseOrder(true);
-      const response = await deletePurchaseOrder({ id: payload });
+      const response = await deletePurchaseOrder({id: payload});
       setSnackbarState({
         state: true,
-        type: "success",
+        type: 'success',
         message: response.data.message,
       });
-      updateDataPurchaseOrderHandler({ per_page: dataPurchaseOrderPerPage });
+      updateDataPurchaseOrderHandler({per_page: dataPurchaseOrderPerPage});
     } catch (error) {
       setSnackbarState({
         state: true,
-        type: "error",
+        type: 'error',
         message: error.message,
       });
     } finally {
       setIsUpdatingDataPurchaseOrder(false);
     }
   };
-  
+
   const searchDataPurchaseOrderHandler = async (payload) => {
+    const searchParams = payload.reduce((obj, e) => {
+      obj[e.type] = e.value;
+      return obj;
+    }, {});
+
     try {
       setIsUpdatingDataPurchaseOrder(true);
-      const response = await searchPurchaseOrder({
-        search_text: payload.map((e) => e.value),
-        search_column: payload.map((e) => e.type),
+      const response = await getPurchaseOrder({
+        search: searchParams,
         per_page: dataPurchaseOrderPerPage,
       });
       if (response.data.data.length !== 0) {
@@ -135,7 +141,7 @@ const PurchaseOrder = () => {
       } else {
         setSnackbarState({
           state: true,
-          type: "warning",
+          type: 'warning',
           message: `${payload} tidak ditemukan`,
         });
         const response = await getPurchaseOrder({
@@ -148,7 +154,7 @@ const PurchaseOrder = () => {
     } catch (error) {
       setSnackbarState({
         state: true,
-        type: "error",
+        type: 'error',
         message: error.message,
       });
     } finally {
@@ -167,43 +173,50 @@ const PurchaseOrder = () => {
         <LoaderOnLayout />
       ) : (
         <>
-            <TableLayoutGudang
-              baseRoutePath={`${router.asPath}`}
-              title="Purchase Order"
-              isBtnAdd={true}
-              isTerima={true}
-              tableHead={purchaseOrderTableHead}
-              data={dataPurchaseOrder}
-              meta={dataMetaPurchaseOrder}
-              dataPerPage={dataPurchaseOrderPerPage}
-              isUpdatingData={isUpdatingDataPurchaseOrder}
-              filterOptions={[
-                { label: "Gudang", value: "gudang" },
-                { label: "Jenis Surat", value: "jenis_surat" },
-                { label: "Nomor PO", value: "nomor_po" },
-                { label: "Supplier", value: "supplier" },
-                { label: "Tanggal PO", value: "date" },
-              ]}
-              updateDataPerPage={(e, filter) => {
-                setDataPerPage(e.target.value);
-                updateDataPurchaseOrderHandler({
-                  per_page: e.target.value,
-                  search_text: filter.map((e) => e.value),
-                  search_column: filter.map((e) => e.type),
-                });
-              }}
-              updateDataNavigate={(payload) =>
-                updateDataPurchaseOrderHandler({
-                  per_page: dataPurchaseOrderPerPage,
-                  cursor: payload,
-                })
-              }
-              refreshData={() =>
-                updateDataPurchaseOrderHandler({ per_page: dataPurchaseOrderPerPage })
-              }
-              deleteData={deleteDataPurchaseOrderHandler}
-              searchData={searchDataPurchaseOrderHandler}
-            />
+          <TableLayoutGudang
+            baseRoutePath={`${router.asPath}`}
+            title='Purchase Order'
+            isBtnAdd={true}
+            isTerima={true}
+            isDelete={true}
+            tableHead={PurchaseOrderTableHead}
+            data={dataPurchaseOrder}
+            meta={dataMetaPurchaseOrder}
+            dataPerPage={dataPurchaseOrderPerPage}
+            isUpdatingData={isUpdatingDataPurchaseOrder}
+            filterOptions={[
+              {label: 'Gudang', value: 'gudang'},
+              {label: 'Jenis Surat', value: 'potype'},
+              {label: 'Nomor PO', value: 'nomor_po'},
+              {label: 'Supplier', value: 'supplier'},
+              {label: 'Tanggal PO', value: 'date'},
+            ]}
+            updateDataPerPage={(e, filter) => {
+              const searchParams = filter.reduce((obj, e) => {
+                obj[e.type] = e.value;
+                return obj;
+              }, {});
+
+              setDataPerPage(e.target.value);
+              updateDataPurchaseOrderHandler({
+                per_page: e.target.value,
+                search: searchParams,
+              });
+            }}
+            updateDataNavigate={(payload) =>
+              updateDataPurchaseOrderHandler({
+                per_page: dataPurchaseOrderPerPage,
+                cursor: payload,
+              })
+            }
+            refreshData={() =>
+              updateDataPurchaseOrderHandler({
+                per_page: dataPurchaseOrderPerPage,
+              })
+            }
+            deleteData={deleteDataPurchaseOrderHandler}
+            searchData={searchDataPurchaseOrderHandler}
+          />
         </>
       )}
       <Snackbar
@@ -212,13 +225,13 @@ const PurchaseOrder = () => {
           setSnackbarState({
             state: payload,
             type: null,
-            message: "",
+            message: '',
           })
         }
         message={snackbarState.message}
-        isSuccessType={snackbarState.type === "success"}
-        isErrorType={snackbarState.type === "error"}
-        isWarningType={snackbarState.type === "warning"}
+        isSuccessType={snackbarState.type === 'success'}
+        isErrorType={snackbarState.type === 'error'}
+        isWarningType={snackbarState.type === 'warning'}
       />
     </>
   );

@@ -40,8 +40,9 @@ import useClientPermission from 'custom-hooks/useClientPermission';
 import {filterFalsyValue, convertDataDetail} from 'utils/helper';
 import {Divider, Typography, Button, Paper} from '@mui/material';
 import {Add as AddIcon, Delete as DeleteIcon} from '@mui/icons-material';
-import DialogAddItem from './dialogAddItemPurchaseOrder';
+import DialogAddItem from './dialogAddItemMutasi';
 import TableLayoutDetail from 'components/TableLayoutDetailGudang';
+import {getUnit} from 'api/unit';
 
 const LabelToPrint = forwardRef(function LabelToPrint({data}, ref) {
   return (
@@ -110,7 +111,7 @@ const CheckupToPrint = forwardRef(function CheckupToPrint({data}, ref) {
   );
 });
 
-const FormPurchaseOrder = ({
+const FormMutasi = ({
   isEditType = false,
   prePopulatedDataForm = {},
   detailPrePopulatedData = {},
@@ -130,7 +131,7 @@ const FormPurchaseOrder = ({
   const [dataDetail, setDataDetail] = useState([]);
   const [isDialogItem, setIsDialogItem] = useState(false);
 
-  const detailPoTableHead = [
+  const detailMutasiTableHead = [
     {
       id: 'kode_item',
       label: 'Kode Item',
@@ -140,8 +141,16 @@ const FormPurchaseOrder = ({
       label: 'Nama Item',
     },
     {
+      id: 'nomor_batch',
+      label: 'Nomor Batch',
+    },
+    {
       id: 'jumlah',
-      label: 'Jumlah',
+      label: 'Jumlah Permintaan',
+    },
+    {
+      id: 'jumlah_pengadaan',
+      label: 'Jumlah Pengadaan',
     },
     {
       id: 'sediaan',
@@ -154,7 +163,9 @@ const FormPurchaseOrder = ({
       return {
         kode_item: e.item.kode || 'null',
         nama_item: e.item.name,
+        nomor_batch: e.nomor_batch || 'null',
         jumlah: e.jumlah || 'null',
+        jumlah_pengadaan: e.jumlah_pengadaan || 'null',
         sediaan: e.sediaan.name || 'null',
         id: e,
       };
@@ -166,24 +177,17 @@ const FormPurchaseOrder = ({
     setIsEditingMode(e.target.checked);
   };
 
-  const purchaseOrderInitialValues = !isEditType
+  const mutasiInitialValues = !isEditType
     ? {
-        potype: {kode: '', name: ''},
-        nomor_po: '',
-        tanggal_po: null,
-        supplier: {id: '', name: ''},
-        gudang: {id: '', name: ''},
-        keterangan: '',
-        purchase_order_detail: [],
+        tanggal_permintaan: null,
+        tanggal_mutasi: null,
+        unit: {id: '', name: ''},
+        mutation_detail: [],
       }
     : prePopulatedDataForm;
 
-  const createPurchaseOrderSchema = Yup.object({
-    potype: Yup.object({
-      kode: stringSchema('Jenis Surat', true),
-    }),
-    nomor_po: Yup.string(),
-    tanggal_po: Yup.date()
+  const createMutasiSchema = Yup.object({
+    tanggal_permintaan: Yup.date()
       .transform(function (value, originalValue) {
         if (this.isType(value)) {
           return value;
@@ -191,48 +195,43 @@ const FormPurchaseOrder = ({
         const result = parse(originalValue, 'dd/MM/yyyy', new Date());
         return result;
       })
-      .typeError('Tanggal PO tidak valid')
-      .min('2023-01-01', 'Tanggal PO tidak valid')
-      .required('Tanggal PO wajib diisi'),
-    supplier: Yup.object({
-      id: stringSchema('Supplier', true),
+      .typeError('Tanggal permintaan tidak valid')
+      .min('2023-01-01', 'Tanggal permintaan tidak valid')
+      .required('Tanggal permintaan wajib diisi'),
+    unit: Yup.object({
+      id: stringSchema('Unit', true),
     }),
-    gudang: Yup.object({
-      id: stringSchema('Gudang', true),
-    }),
-    // keterangan: Yup.string(),
-    purchase_order_detail: Yup.array(),
+    mutation_detail: Yup.array(),
   });
 
-  const createPurchaseOrderValidation = useFormik({
-    initialValues: purchaseOrderInitialValues,
-    validationSchema: createPurchaseOrderSchema,
+  const createMutasiValidation = useFormik({
+    initialValues: mutasiInitialValues,
+    validationSchema: createMutasiSchema,
     enableReinitialize: true,
     onSubmit: async (values, {resetForm, setFieldError}) => {
       let messageContext = isEditType ? 'diperbarui' : 'ditambahkan';
       let data = {...values};
-      data.purchase_order_detail = convertDataDetail(
-        data.purchase_order_detail
-      );
+      data.mutation_detail = convertDataDetail(data.mutation_detail);
       data = {
         ...data,
-        potype: data.potype.kode,
-        tanggal_po: formatIsoToGen(data.tanggal_po),
-        supplier: data.supplier.id,
-        gudang: data.gudang.name,
+        tanggal_permintaan: formatIsoToGen(data.tanggal_permintaan),
+        tanggal_mutasi: formatIsoToGen(data.tanggal_mutasi),
+        unit: data.unit.id,
       };
       console.log(data);
       try {
         let response;
         if (!isEditType) {
           const formattedData = filterFalsyValue({...data});
-          response = await createPurchaseOrder(formattedData);
+          response = await createMutasi(formattedData);
+          resetForm();
+          router.push('/gudang/mutasi');
         } else {
-          await updatePurchaseOrder({
+          await updateMutasi({
             ...formattedData,
             id: detailPrePopulatedData.id,
           });
-          response = await getDetailPurchaseOrder({
+          response = await getDetailMutasi({
             id: detailPrePopulatedData.id,
           });
           updatePrePopulatedData({...response.data.data});
@@ -240,11 +239,8 @@ const FormPurchaseOrder = ({
         setSnackbar({
           state: true,
           type: 'success',
-          message: `"Pesanan ${data.potype.name}" berhasil ${messageContext}!`,
+          message: `"${data.nomor_po}" berhasil ${messageContext}!`,
         });
-
-        resetForm();
-        router.push('/gudang/purchase-order');
       } catch (error) {
         if (Object.keys(error.errorValidationObj).length >= 1) {
           for (let key in error.errorValidationObj) {
@@ -254,16 +250,14 @@ const FormPurchaseOrder = ({
         setSnackbar({
           state: true,
           type: 'error',
-          message: `Terjadi kesalahan, "Pesanan ${data.potype.name}" gagal ${messageContext}!`,
+          message: `Terjadi kesalahan, "${data.unit.name}" gagal ${messageContext}!`,
         });
       }
     },
   });
 
   const createDetailDataHandler = (payload) => {
-    let tempData = [
-      ...createPurchaseOrderValidation.values.purchase_order_detail,
-    ];
+    let tempData = [...createMutasiValidation.values.mutation_detail];
     const isAvailable = tempData.findIndex(
       (data) =>
         data.item.id === payload.item.id &&
@@ -274,49 +268,18 @@ const FormPurchaseOrder = ({
     } else {
       tempData.push(payload);
     }
-    createPurchaseOrderValidation.setFieldValue(
-      'purchase_order_detail',
-      tempData
-    );
+    createMutasiValidation.setFieldValue('mutation_detail', tempData);
     setDataDetail(dataDetailFormatHandler(tempData));
   };
 
   const deleteDetailDataHandler = (index) => {
-    let tempData = [
-      ...createPurchaseOrderValidation.values.purchase_order_detail,
-    ];
+    let tempData = [...createMutasiValidation.values.mutation_detail];
     if (index >= 0 && index < tempData.length) {
       tempData.splice(index, 1);
-      createPurchaseOrderValidation.setFieldValue(
-        'purchase_order_detail',
-        tempData
-      );
+      createMutasiValidation.setFieldValue('mutation_detail', tempData);
       setDataDetail(dataDetailFormatHandler(tempData));
     }
   };
-
-  useEffect(() => {
-    if (!isEditType) {
-      const nomor_po = '';
-      if (
-        createPurchaseOrderValidation.values.potype.kode != '' &&
-        createPurchaseOrderValidation.values.tanggal_po != null
-      ) {
-        const year = formatIsoToGen(
-          createPurchaseOrderValidation.values.tanggal_po
-        ).substring(0, 4);
-        const potype = createPurchaseOrderValidation.values.potype;
-        nomor_po = `${potype.kode}${year}${String(
-          potype.state_number + 1
-        ).padStart(6, '0')}`;
-      }
-      createPurchaseOrderValidation.setFieldValue('nomor_po', nomor_po);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    createPurchaseOrderValidation.values.potype,
-    createPurchaseOrderValidation.values.tanggal_po,
-  ]);
 
   return (
     <>
@@ -336,70 +299,38 @@ const FormPurchaseOrder = ({
             />
           </div>
         ) : null}
-        <form onSubmit={createPurchaseOrderValidation.handleSubmit}>
-          <FocusError formik={createPurchaseOrderValidation} />
+        <form onSubmit={createMutasiValidation.handleSubmit}>
+          <FocusError formik={createMutasiValidation} />
           <div className='p-16'>
             <Grid container spacing={0}>
               <Grid item xs={12} md={6}>
                 <Grid container spacing={1}>
                   <Grid item xs={3}>
-                    <Typography variant='h1 font-w-600'>Jenis Surat</Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <div className='mb-16'>
-                      <SelectAsync
-                        id='potype'
-                        labelField='Jenis Surat'
-                        labelOptionRef='name'
-                        valueOptionRef='kode'
-                        handlerRef={createPurchaseOrderValidation}
-                        handlerFetchData={getPoType}
-                        handlerOnChange={(value) => {
-                          if (value) {
-                            createPurchaseOrderValidation.setFieldValue(
-                              'potype',
-                              value
-                            );
-                          } else {
-                            createPurchaseOrderValidation.setFieldValue(
-                              'potype',
-                              {
-                                kode: '',
-                                name: '',
-                              }
-                            );
-                          }
-                        }}
-                        isDisabled={isEditType && !isEditingMode}
-                      />
-                    </div>
-                  </Grid>
-                </Grid>
-                <Grid container spacing={1}>
-                  <Grid item xs={3}>
-                    <Typography variant='h1 font-w-600'>Tanggal PO</Typography>
+                    <Typography variant='h1 font-w-600'>
+                      Tanggal Permintaan
+                    </Typography>
                   </Grid>
                   <Grid item xs={6}>
                     <div className='mb-16'>
                       <FormControl fullWidth>
                         <LocalizationProvider dateAdapter={AdapterDateFns}>
                           <DatePicker
-                            id='tanggal_po'
-                            name='tanggal_po'
-                            label='Tanggal PO'
+                            id='tanggal_permintaan'
+                            name='tanggal_permintaan'
+                            label='Tanggal Permintaan'
                             inputFormat='dd-MM-yyyy'
                             mask='__-__-____'
                             value={
-                              createPurchaseOrderValidation.values.tanggal_po
+                              createMutasiValidation.values.tanggal_permintaan
                                 ? formatGenToIso(
-                                    createPurchaseOrderValidation.values
-                                      .tanggal_po
+                                    createMutasiValidation.values
+                                      .tanggal_permintaan
                                   )
                                 : null
                             }
                             onChange={(newValue) => {
-                              createPurchaseOrderValidation.setFieldValue(
-                                'tanggal_po',
+                              createMutasiValidation.setFieldValue(
+                                'tanggal_permintaan',
                                 newValue
                               );
                             }}
@@ -407,18 +338,18 @@ const FormPurchaseOrder = ({
                               <TextField
                                 {...params}
                                 error={
-                                  createPurchaseOrderValidation.touched
-                                    .tanggal_po &&
+                                  createMutasiValidation.touched
+                                    .tanggal_permintaan &&
                                   Boolean(
-                                    createPurchaseOrderValidation.errors
-                                      .tanggal_po
+                                    createMutasiValidation.errors
+                                      .tanggal_permintaan
                                   )
                                 }
                                 helperText={
-                                  createPurchaseOrderValidation.touched
-                                    .tanggal_po &&
-                                  createPurchaseOrderValidation.errors
-                                    .tanggal_po
+                                  createMutasiValidation.touched
+                                    .tanggal_permintaan &&
+                                  createMutasiValidation.errors
+                                    .tanggal_permintaan
                                 }
                               />
                             )}
@@ -431,126 +362,81 @@ const FormPurchaseOrder = ({
                 </Grid>
                 <Grid container spacing={1}>
                   <Grid item xs={3}>
-                    <Typography variant='h1 font-w-600'>Nomor PO</Typography>
+                    <Typography variant='h1 font-w-600'>
+                      Tanggal Mutasi
+                    </Typography>
                   </Grid>
                   <Grid item xs={6}>
                     <div className='mb-16'>
-                      <TextField
-                        fullWidth
-                        id='nomor_po'
-                        name='nomor_po'
-                        label='Nomor PO'
-                        value={createPurchaseOrderValidation.values.nomor_po}
-                        onChange={createPurchaseOrderValidation.handleChange}
-                        error={
-                          createPurchaseOrderValidation.touched.nomor_po &&
-                          Boolean(createPurchaseOrderValidation.errors.nomor_po)
-                        }
-                        helperText={
-                          createPurchaseOrderValidation.touched.nomor_po &&
-                          createPurchaseOrderValidation.errors.nomor_po
-                        }
-                        disabled
-                      />
+                      <FormControl fullWidth>
+                        <LocalizationProvider dateAdapter={AdapterDateFns}>
+                          <DatePicker
+                            id='tanggal_mutasi'
+                            name='tanggal_mutasi'
+                            label='Tanggal Mutasi'
+                            inputFormat='dd-MM-yyyy'
+                            mask='__-__-____'
+                            value={
+                              createMutasiValidation.values.tanggal_mutasi
+                                ? formatGenToIso(
+                                    createMutasiValidation.values.tanggal_mutasi
+                                  )
+                                : null
+                            }
+                            onChange={(newValue) => {
+                              createMutasiValidation.setFieldValue(
+                                'tanggal_mutasi',
+                                newValue
+                              );
+                            }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                error={
+                                  createMutasiValidation.touched
+                                    .tanggal_mutasi &&
+                                  Boolean(
+                                    createMutasiValidation.errors.tanggal_mutasi
+                                  )
+                                }
+                                helperText={
+                                  createMutasiValidation.touched
+                                    .tanggal_mutasi &&
+                                  createMutasiValidation.errors.tanggal_mutasi
+                                }
+                              />
+                            )}
+                            disabled
+                          />
+                        </LocalizationProvider>
+                      </FormControl>
                     </div>
                   </Grid>
                 </Grid>
-              </Grid>
-              <Grid item xs={12} md={6}>
                 <Grid container spacing={1}>
                   <Grid item xs={3}>
-                    <Typography variant='h1 font-w-600'>Supplier</Typography>
+                    <Typography variant='h1 font-w-600'>Unit</Typography>
                   </Grid>
-                  <Grid item xs={8}>
+                  <Grid item xs={6}>
                     <div className='mb-16'>
                       <SelectAsync
-                        id='supplier'
-                        labelField='Supplier'
+                        id='unit'
+                        labelField='Unit'
                         labelOptionRef='name'
                         valueOptionRef='id'
-                        handlerRef={createPurchaseOrderValidation}
-                        handlerFetchData={getSupplier}
+                        handlerRef={createMutasiValidation}
+                        handlerFetchData={getUnit}
                         handlerOnChange={(value) => {
                           if (value) {
-                            createPurchaseOrderValidation.setFieldValue(
-                              'supplier',
-                              value
-                            );
+                            createMutasiValidation.setFieldValue('unit', value);
                           } else {
-                            createPurchaseOrderValidation.setFieldValue(
-                              'supplier',
-                              {
-                                id: '',
-                                name: '',
-                              }
-                            );
+                            createMutasiValidation.setFieldValue('unit', {
+                              id: '',
+                              name: '',
+                            });
                           }
                         }}
                         isDisabled={isEditType && !isEditingMode}
-                      />
-                    </div>
-                  </Grid>
-                </Grid>
-                <Grid container spacing={1}>
-                  <Grid item xs={3}>
-                    <Typography variant='h1 font-w-600'>Gudang</Typography>
-                  </Grid>
-                  <Grid item xs={8}>
-                    <div className='mb-16'>
-                      <SelectAsync
-                        id='gudang'
-                        labelField='Gudang'
-                        labelOptionRef='name'
-                        valueOptionRef='id'
-                        handlerRef={createPurchaseOrderValidation}
-                        handlerFetchData={jenisGudang}
-                        handlerOnChange={(value) => {
-                          if (value) {
-                            createPurchaseOrderValidation.setFieldValue(
-                              'gudang',
-                              value
-                            );
-                          } else {
-                            createPurchaseOrderValidation.setFieldValue(
-                              'gudang',
-                              {
-                                id: '',
-                                name: '',
-                              }
-                            );
-                          }
-                        }}
-                        isDisabled={isEditType && !isEditingMode}
-                      />
-                    </div>
-                  </Grid>
-                </Grid>
-                <Grid container spacing={1}>
-                  <Grid item xs={3}>
-                    <Typography variant='h1 font-w-600'>Keterangan</Typography>
-                  </Grid>
-                  <Grid item xs={8}>
-                    <div className='mb-16'>
-                      <TextField
-                        fullWidth
-                        id='keterangan'
-                        name='keterangan'
-                        label='Keterangan'
-                        multiline
-                        rows={3}
-                        value={createPurchaseOrderValidation.values.keterangan}
-                        onChange={createPurchaseOrderValidation.handleChange}
-                        error={
-                          createPurchaseOrderValidation.touched.keterangan &&
-                          Boolean(
-                            createPurchaseOrderValidation.errors.keterangan
-                          )
-                        }
-                        helperText={
-                          createPurchaseOrderValidation.touched.keterangan &&
-                          createPurchaseOrderValidation.errors.keterangan
-                        }
-                        disabled={isEditType && !isEditingMode}
                       />
                     </div>
                   </Grid>
@@ -568,7 +454,7 @@ const FormPurchaseOrder = ({
               isBtnAdd
               isDelete
               btnAddHandler={setIsDialogItem}
-              tableHead={detailPoTableHead}
+              tableHead={detailMutasiTableHead}
               data={dataDetail}
               // isUpdatingData={isUpdatingDataRawatJalan}
               deleteData={deleteDetailDataHandler}
@@ -643,7 +529,7 @@ const FormPurchaseOrder = ({
                 variant='outlined'
                 startIcon={<BackIcon />}
                 sx={{marginRight: 2}}
-                onClick={() => router.push('/gudang/purchase-order')}
+                onClick={() => router.push('/gudang/mutasi')}
               >
                 Kembali
               </Button>
@@ -653,16 +539,14 @@ const FormPurchaseOrder = ({
                   variant='contained'
                   sx={{marginBottom: 1, marginRight: 2}}
                   disabled={
-                    JSON.stringify(
-                      createPurchaseOrderValidation.initialValues
-                    ) ===
-                      JSON.stringify(createPurchaseOrderValidation.values) ||
-                    !isActionPermitted('purchaseOrder:update') ||
+                    JSON.stringify(createMutasiValidation.initialValues) ===
+                      JSON.stringify(createMutasiValidation.values) ||
+                    !isActionPermitted('mutation:update') ||
                     (isEditType && !isEditingMode)
                   }
                   startIcon={<SaveIcon />}
                   loadingPosition='start'
-                  loading={createPurchaseOrderValidation.isSubmitting}
+                  loading={createMutasiValidation.isSubmitting}
                 >
                   Simpan perubahan
                 </LoadingButton>
@@ -670,12 +554,12 @@ const FormPurchaseOrder = ({
                 <LoadingButton
                   type='submit'
                   variant='contained'
-                  disabled={!isActionPermitted('purchaseOrder:store')}
+                  disabled={!isActionPermitted('mutation:store')}
                   startIcon={<DoneIcon />}
                   loadingPosition='start'
-                  loading={createPurchaseOrderValidation.isSubmitting}
+                  loading={createMutasiValidation.isSubmitting}
                 >
-                  Simpan Purchase Order
+                  Simpan Mutasi
                 </LoadingButton>
               )}
             </div>
@@ -693,4 +577,4 @@ const FormPurchaseOrder = ({
   );
 };
 
-export default FormPurchaseOrder;
+export default FormMutasi;

@@ -1,0 +1,8 @@
+.container .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.container .header h2 {
+  margin: 0;
+}/*# sourceMappingURL=Table.module.css.map */

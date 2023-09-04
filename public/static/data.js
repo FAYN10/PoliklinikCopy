@@ -69,14 +69,6 @@ export const jenisGudang = () => {
   });
 };
 
-export const jenisMutasi = () => {
-  return Promise.resolve({
-    "data" : {
-      "data" : [{ id: 1, name: 'Permintaan Mutasi' },{ id: 2, name: 'Riwayat Mutasi' },]
-    }
-  });
-};
-
 // whole country
 // export const countries = [
 //   { code: "AD", label: "Andorra", phone: "376" },

@@ -1,42 +1,42 @@
-import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import { getPembelian } from "api/gudang/pembelian";
-import TableLayoutGudang from "components/TableLayoutGudang";
-import LoaderOnLayout from "components/LoaderOnLayout";
-import Snackbar from "components/SnackbarMui";
-import { formatReadable } from "utils/formatTime";
+import {useEffect, useState} from 'react';
+import {useRouter} from 'next/router';
+import {getPembelian} from 'api/gudang/pembelian';
+import TableLayoutGudang from 'components/TableLayoutGudang';
+import LoaderOnLayout from 'components/LoaderOnLayout';
+import Snackbar from 'components/SnackbarMui';
+import {formatReadable} from 'utils/formatTime';
 
 const PembelianTableHead = [
   {
-    id: "nomor_po",
-    label: "Nomor PO",
+    id: 'nomor_faktur',
+    label: 'Nomor Faktur',
   },
   {
-    id: "tanggal_pembelian",
-    label: "Tanggal Pembelian",
+    id: 'nomor_po',
+    label: 'Nomor PO',
   },
   {
-    id: "tanggal_jatuh_tempo",
-    label: "Tanggal Jatuh Tempo",
+    id: 'tanggal_pembelian',
+    label: 'Tanggal Pembelian',
   },
   {
-    id: "nomor_faktur",
-    label: "Nomor Faktur",
+    id: 'tanggal_jatuh_tempo',
+    label: 'Jatuh Tempo Pembayaran',
   },
   {
-    id: "supplier",
-    label: "Supplier",
+    id: 'supplier',
+    label: 'Supplier',
   },
 ];
 
 const dataPembelianFormatHandler = (payload) => {
   const result = payload.map((e) => {
     return {
-      nomor_po: e.nomor_po || "null",
-      tanggal_pembelian: formatReadable(e.tanggal_pembelian) || "null",
-      tanggal_jatuh_tempo: formatReadable(e.tanggal_jatuh_tempo) || "null",
-      nomor_faktur: e.nomor_faktur || "null",
-      supplier: e.supplier.name || "null",
+      nomor_faktur: e.nomor_faktur || 'null',
+      nomor_po: e.nomor_po || 'null',
+      tanggal_pembelian: formatReadable(e.tanggal_pembelian) || 'null',
+      tanggal_jatuh_tempo: formatReadable(e.tanggal_jatuh_tempo) || 'null',
+      supplier: e.supplier || 'null',
       id: e.id,
     };
   });
@@ -48,7 +48,7 @@ const Pembelian = () => {
   const [snackbarState, setSnackbarState] = useState({
     state: false,
     type: null,
-    message: "",
+    message: '',
   });
 
   // Pembelian --general state
@@ -87,7 +87,7 @@ const Pembelian = () => {
       console.log(error);
       setSnackbarState({
         state: true,
-        type: "error",
+        type: 'error',
         message: error.message,
       });
     } finally {
@@ -98,30 +98,34 @@ const Pembelian = () => {
   const deleteDataPembelianHandler = async (payload) => {
     try {
       setIsUpdatingDataPembelian(true);
-      const response = await deletePembelian({ id: payload });
+      const response = await deletePembelian({id: payload});
       setSnackbarState({
         state: true,
-        type: "success",
+        type: 'success',
         message: response.data.message,
       });
-      updateDataPembelianHandler({ per_page: dataPembelianPerPage });
+      updateDataPembelianHandler({per_page: dataPembelianPerPage});
     } catch (error) {
       setSnackbarState({
         state: true,
-        type: "error",
+        type: 'error',
         message: error.message,
       });
     } finally {
       setIsUpdatingDataPembelian(false);
     }
   };
-  
+
   const searchDataPembelianHandler = async (payload) => {
+    const searchParams = payload.reduce((obj, e) => {
+      obj[e.type] = e.value;
+      return obj;
+    }, {});
+
     try {
       setIsUpdatingDataPembelian(true);
-      const response = await searchPembelian({
-        search_text: payload.map((e) => e.value),
-        search_column: payload.map((e) => e.type),
+      const response = await getPembelian({
+        search: searchParams,
         per_page: dataPembelianPerPage,
       });
       if (response.data.data.length !== 0) {
@@ -131,7 +135,7 @@ const Pembelian = () => {
       } else {
         setSnackbarState({
           state: true,
-          type: "warning",
+          type: 'warning',
           message: `${payload} tidak ditemukan`,
         });
         const response = await getPembelian({
@@ -144,7 +148,7 @@ const Pembelian = () => {
     } catch (error) {
       setSnackbarState({
         state: true,
-        type: "error",
+        type: 'error',
         message: error.message,
       });
     } finally {
@@ -163,41 +167,47 @@ const Pembelian = () => {
         <LoaderOnLayout />
       ) : (
         <>
-            <TableLayoutGudang
-              baseRoutePath={`${router.asPath}`}
-              title="Pembelian"
-              isBtnAdd={false}
-              tableHead={PembelianTableHead}
-              data={dataPembelian}
-              meta={dataMetaPembelian}
-              dataPerPage={dataPembelianPerPage}
-              isUpdatingData={isUpdatingDataPembelian}
-              filterOptions={[
-                { label: "Gudang", value: "gudang" },
-                { label: "Nomor PO", value: "nomor_po" },
-                { label: "Supplier", value: "supplier" },
-                { label: "Tanggal PO", value: "date" },
-              ]}
-              updateDataPerPage={(e, filter) => {
-                setDataPerPage(e.target.value);
-                updateDataPembelianHandler({
-                  per_page: e.target.value,
-                  search_text: filter.map((e) => e.value),
-                  search_column: filter.map((e) => e.type),
-                });
-              }}
-              updateDataNavigate={(payload) =>
-                updateDataPembelianHandler({
-                  per_page: dataPembelianPerPage,
-                  cursor: payload,
-                })
-              }
-              refreshData={() =>
-                updateDataPembelianHandler({ per_page: dataPembelianPerPage })
-              }
-              deleteData={deleteDataPembelianHandler}
-              searchData={searchDataPembelianHandler}
-            />
+          <TableLayoutGudang
+            baseRoutePath={`${router.asPath}`}
+            title='Pembelian'
+            isBtnAdd={true}
+            tableHead={PembelianTableHead}
+            data={dataPembelian}
+            meta={dataMetaPembelian}
+            dataPerPage={dataPembelianPerPage}
+            isUpdatingData={isUpdatingDataPembelian}
+            filterOptions={[
+              // { label: "Gudang", value: "gudang" },
+              {label: 'Nomor Faktur', value: 'nomor_faktur'},
+              {label: 'Supplier', value: 'supplier'},
+              {label: 'Tanggal Pembelian', value: 'date'},
+            ]}
+            updateDataPerPage={(e, filter) => {
+              const searchParams = filter.reduce((obj, e) => {
+                obj[e.type] = e.value;
+                return obj;
+              }, {});
+
+              setDataPerPage(e.target.value);
+              updateDataPembelianHandler({
+                per_page: e.target.value,
+                search: searchParams,
+              });
+            }}
+            updateDataNavigate={(payload) =>
+              updateDataPembelianHandler({
+                per_page: dataPembelianPerPage,
+                cursor: payload,
+              })
+            }
+            refreshData={() =>
+              updateDataPembelianHandler({
+                per_page: dataPembelianPerPage,
+              })
+            }
+            deleteData={deleteDataPembelianHandler}
+            searchData={searchDataPembelianHandler}
+          />
         </>
       )}
       <Snackbar
@@ -206,13 +216,13 @@ const Pembelian = () => {
           setSnackbarState({
             state: payload,
             type: null,
-            message: "",
+            message: '',
           })
         }
         message={snackbarState.message}
-        isSuccessType={snackbarState.type === "success"}
-        isErrorType={snackbarState.type === "error"}
-        isWarningType={snackbarState.type === "warning"}
+        isSuccessType={snackbarState.type === 'success'}
+        isErrorType={snackbarState.type === 'error'}
+        isWarningType={snackbarState.type === 'warning'}
       />
     </>
   );
