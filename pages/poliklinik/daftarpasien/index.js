@@ -15,7 +15,7 @@ const tableHead = [
     label: "Nomor RM",
   },
   {
-    id: "name",
+    id: "nama",
     label: "Nama",
   },
   {
@@ -27,7 +27,7 @@ const tableHead = [
     label: "Asuransi",
   },
   {
-    id: "tglmasuk",
+    id: "tgl_masuk",
     label: "Tanggal Masuk",
   },
   {
@@ -39,7 +39,12 @@ const tableHead = [
 const dataFormatHandler = (payload) => {
   const result = payload.map((e) => {
     return {
-      name: e.name,
+      no_rm: e.no_rm || "null",
+      nama: e.nama || "-",
+      alamat: e.alamat || "-",
+      asuransi: e.asuransi || "-",
+      tgl_masuk: e.tgl_masuk || "-",
+      dokter: e.dokter || "-",
       id: e.id,
     };
   });
