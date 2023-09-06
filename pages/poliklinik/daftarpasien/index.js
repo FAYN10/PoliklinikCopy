@@ -11,8 +11,28 @@ import Snackbar from "components/SnackbarMui";
 
 const tableHead = [
   {
+    id: "no_rm",
+    label: "Nomor RM",
+  },
+  {
     id: "name",
     label: "Nama",
+  },
+  {
+    id: "alamat",
+    label: "Alamat",
+  },
+  {
+    id: "asuransi",
+    label: "Asuransi",
+  },
+  {
+    id: "tglmasuk",
+    label: "Tanggal Masuk",
+  },
+  {
+    id: "dokter",
+    label: "Dokter",
   },
 ];
 
