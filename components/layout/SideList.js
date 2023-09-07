@@ -57,24 +57,24 @@ let SideList = [
         children: [
           {
             name: "Data Pasien",
-            permission: [],
+            permission: ["perawat:all", "dokter:all"],
             routePath: "/poliklinik/pasien",
           },
           {
             name: "Poliklinik Perawat",
-            permission: [],
+            permission: ["perawat:all"],
             routePath: "/poliklinik/poli-perawat",
           },
           {
             name: "Poliklinik Dokter",
-            permission: [],
+            permission: ["dokter:all"],
             routePath: "/poliklinik/poli-dokter",
       },
     ],
   },
 ],
     childrenState: false,
-    
+
     routePath: null,
   },
   {
