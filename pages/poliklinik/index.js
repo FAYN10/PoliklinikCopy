@@ -11,15 +11,40 @@ import Snackbar from "components/SnackbarMui";
 
 const tableHead = [
   {
-    id: "name",
+    id: "no_rm",
+    label: "Nomor RM",
+  },
+  {
+    id: "nama",
     label: "Nama",
+  },
+  {
+    id: "alamat",
+    label: "Alamat",
+  },
+  {
+    id: "asuransi",
+    label: "Asuransi",
+  },
+  {
+    id: "tgl_masuk",
+    label: "Tanggal Masuk",
+  },
+  {
+    id: "dokter",
+    label: "Dokter",
   },
 ];
 
 const dataFormatHandler = (payload) => {
   const result = payload.map((e) => {
     return {
-      name: e.name,
+      no_rm: e.no_rm || "null",
+      nama: e.nama || "-",
+      alamat: e.alamat || "-",
+      asuransi: e.asuransi || "-",
+      tgl_masuk: e.tgl_masuk || "-",
+      dokter: e.dokter || "-",
       id: e.id,
     };
   });
